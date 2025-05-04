@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0 maximum-scale=1.0"
+    />
+    <meta name="description" content="EggOn nOg Legal Chatbot" />
+    <meta property="og:title" content="nOg" />
+    <meta
+      property="og:image"
+      content="https://openai.com/content/images/2022/11/ChatGPT.jpg"
+    />
+    <meta property="og:description" content="EggOn nOg Legal Chatbot" />
+    <meta property="og:url" content="https://chat.acy.dev" />
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/img/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/img/nog_logo_no_text.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/img/nog_logo_no_text.png"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="manifest" href="/assets/img/site.webmanifest" />
+    <script src="/assets/js/icons.js"></script>
+    <script src="/assets/js/links.js" defer></script>
+    <script src="/assets/js/chat.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@latest/dist/markdown-it.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/base16/dracula.min.css"
+    />
+    <script>
+      const like_img = `<img src="/assets/img/convertation-icons/like.png" alt="Like">`;
+      const user_image = `<img class="user" src="/assets/img/user-icon.webp" alt="User Avatar">`;
+      const gpt_image = `<img class="user" src="/assets/img/gpt_egg.png" alt="GPT Avatar">`;
+      const imanage_image = `<img class="user" src="/assets/img/imanage_egg.png" alt="iManage Avatar">`;
+      const video_image = `<img class="user" src="/assets/img/imanage_egg.png" alt="Video Icon">`;
+      const nog_image = `<img id="nog_image" class="user" src="/assets/img/nog_logo_no_text.png" alt="nOg logo">`; // egg
+      const loading_video = `<img style="width: 40px; height: 40px; opacity:1; content: url(/assets/img/nog_logo_no_text.png); background-position: center; background-repeat: no-repeat; background-size: cover;" id="nog_video" class="conversation_video">`;
+      const shape = `<img class="assistant-image" id="shape" style="width: 40px; height: 40px;position:absolute; content: url(/assets/img/gpt_egg.png); background-position: center; background-repeat: no-repeat; background-size: cover;">`;
+    </script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const back_scrolly = params.get("scrollPos", -1); // scroll level in the chat if back from links
+    </script>
+    <style>
+      .hljs {
+        color: #e9e9f4;
+        background: #28293629;
+        border-radius: var(--border-radius-1);
+        border: 1px solid var(--blur-border);
+        font-size: 15px;
+      }
+
+      #message-input {
+        margin-right: 30px;
+        height: 80px;
+      }
+
+      #message-input::-webkit-scrollbar {
+        width: 5px;
+      }
+
+      /* Track */
+      #message-input::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      /* Handle */
+      #message-input::-webkit-scrollbar-thumb {
+        background: #c7a2ff;
+      }
+
+      /* Handle on hover */
+      #message-input::-webkit-scrollbar-thumb:hover {
+        background: #8b3dff;
+      }
+
+      .conversation_video {
+        transition: 0.5s;
+      }
+    </style>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <script src="/assets/js/highlight.min.js"></script>
+    <script src="/assets/js/highlightjs-copy.min.js"></script>
+    <script>
+      window.conversation_id = `{{chat_id}}`;
+    </script>
+    <title>nOg</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <div class="gradient"></div>
+    <div class="row">
+      <div class="conversations shadow" id="conversations" style="height: 92vh">
+        <div>
+          <div style="text-align: center" class="subtitles">
+            <a onclick="openLibrary()" id="onboardingButton" class="media-title"
+              >Media</a
+            >
+            <div class="separator"></div>
+          </div>
+          <div class="top">
+            <button class="new_convo soft-shadow" onclick="new_conversation()">
+              <i class="fa-regular fa-plus"></i>
+              <div style="color: #2f2f2e">Nouvelle conversation</div>
+            </button>
+            <div class="spinner"></div>
+          </div>
+          <div>
+            <button
+              onclick="delete_conversations()"
+              class="new_convo soft-shadow"
+            >
+              <i class="fa-regular fa-trash"></i>
+              <span>Supprimer les conversations</span>
+            </button>
+            <!--<div class="info">
+                            <i class="fa-regular fa-circle-info"></i>
+                            <span class="convo-title">Par: EggOn<br>
+                                Version: 1.6<br>
+                            </span>
+                        </div>-->
+          </div>
+        </div>
+        <div>
+          <div class="subtitles">
+            <div class="separator"></div>
+            <div>
+              <a>Documentation</a>
+            </div>
+            <a>FAQ</a>
+          </div>
+          <img class="center logo" src="/assets/img/nog_logo.png" alt="logo" />
+        </div>
+      </div>
+
+      <div class="conversation disable-scrollbars">
+        <div class="top-navigation-container"></div>
+
+        <div class="stop_generating stop_generating-hidden">
+          <button id="cancelButton">
+            <span>Arrêter la génération</span>
+            <i class="fa-regular fa-stop"></i>
+          </button>
+        </div>
+
+        <div>
+          <div id="messages" style="overflow-y: scroll"></div>
+        </div>
+
+        <div>
+          <div class="user-input-container">
+            <div class="user-input shadow">
+              <div id="box-input" class="box input-box">
+                <textarea
+                  id="message-input"
+                  placeholder="Posez votre question à nOg"
+                  cols="30"
+                  rows="10"
+                  style="white-space: pre-wrap; max-height: 40px"
+                  oninput="resizeTextarea(this)"
+                ></textarea>
+                <div id="send-button">
+                  <i class="fa-regular fa-paper-plane-top"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="warning" class="usage-warning">
+            nOg peut faire des erreurs, envisagez de vérifier les informations
+            importantes.
+          </div>
+          <select hidden name="model" id="model">
+            <option value="Eggon-V1">Eggon-V1.6</option>
+          </select>
+        </div>
+      </div>
+      <div class="mobile-sidebar">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+      <div id="librarySideNav" class="sidenav">
+        <div class="library-side-nav-content"></div>
+      </div>
+      <div id="LinksSideNav" class="sidenav">
+        <div class="links-side-nav-content"></div>
+      </div>
+    </div>
+  </body>
+</html>
