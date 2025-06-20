@@ -1,0 +1,40 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "api/index.py",
+            "use": "@vercel/python"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/backend-api/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/assets/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/onboarding",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/links/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/chat/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/",
+            "dest": "/api/index.py"
+        }
+    ],
+    "functions": {
+        "api/index.py": {
+            "maxDuration": 30
+        }
+    }
+}
