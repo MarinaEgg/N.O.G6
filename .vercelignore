@@ -1,0 +1,14 @@
+server/
+run.py
+config.json
+requirements.txt
+README.md
+.DS_Store
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
