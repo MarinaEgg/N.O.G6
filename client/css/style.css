@@ -571,6 +571,14 @@ div.message:last-child {
   align-items: center;
 }
 
+.dynamic-warning {
+  font-size: 11px;
+  color: #888;
+  font-style: italic;
+  margin-left: 10px;
+  font-weight: 400;
+}
+
 .copy-icon:hover,
 .like-icon:hover,
 .dislike-icon:hover {
@@ -582,14 +590,6 @@ div.message:last-child {
 .dislike-icon {
   padding: 4px;
   border-radius: 32px;
-}
-
-.dynamic-warning {
-  font-size: 11px;
-  color: #888;
-  font-style: italic;
-  margin-left: 10px;
-  font-weight: 400;
 }
 
 .new_convo {
@@ -1350,8 +1350,9 @@ a:-webkit-any-link {
   border-radius: 25px;
   padding: 10px 15px;
   box-sizing: border-box;
-  overflow: hidden;
+  overflow: visible;
   min-height: 60px;
+  transition: all 0.2s ease;
 }
 
 #message-input {
@@ -1360,7 +1361,7 @@ a:-webkit-any-link {
   outline: none;
   resize: none;
   overflow-y: auto;
-  max-height: 200px;
+  max-height: 300px;
   min-height: 40px;
   width: calc(100% - 50px);
   padding: 10px;
@@ -1371,6 +1372,8 @@ a:-webkit-any-link {
   line-height: 1.4;
   scrollbar-width: thin;
   scrollbar-color: #c1c1c1 transparent;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 #message-input::-webkit-scrollbar {

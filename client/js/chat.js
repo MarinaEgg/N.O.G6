@@ -46,21 +46,31 @@ document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
 
 // Fonction pour redimensionner dynamiquement le textarea
 function resizeTextarea(textarea) {
+  // Sauvegarder la position de scroll
+  const scrollTop = textarea.scrollTop;
+  
   // Reset height to auto to get the correct scrollHeight
   textarea.style.height = "auto";
   
-  // Calculate new height based on content
-  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 200);
+  // Calculate new height based on content (minimum 40px, maximum 300px)
+  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 300);
   textarea.style.height = newHeight + "px";
   
   // Adjust the input box height accordingly
   const inputBox = textarea.closest('.input-box');
   if (inputBox) {
-    inputBox.style.minHeight = (newHeight + 20) + "px";
+    const boxHeight = Math.max(newHeight + 20, 60);
+    inputBox.style.minHeight = boxHeight + "px";
+    inputBox.style.height = boxHeight + "px";
   }
   
-  // Ensure text is visible by scrolling to bottom
-  textarea.scrollTop = textarea.scrollHeight;
+  // Restaurer la position de scroll pour garder le curseur visible
+  textarea.scrollTop = scrollTop;
+  
+  // Si le contenu dépasse la hauteur max, s'assurer que le curseur reste visible
+  if (textarea.scrollHeight > 300) {
+    textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
+  }
 }
 
 function openLibrary() {
@@ -767,14 +777,19 @@ window.onload = async () => {
       evt.preventDefault();
       await handle_ask();
     } else {
-      // Auto-resize on input
+      // Auto-resize on input with slight delay to ensure proper calculation
       setTimeout(() => resizeTextarea(message_input), 0);
     }
   });
 
-  // Auto-resize on input event
+  // Auto-resize on input event for real-time resizing
   message_input.addEventListener(`input`, () => {
     resizeTextarea(message_input);
+  });
+
+  // Auto-resize on paste event
+  message_input.addEventListener(`paste`, () => {
+    setTimeout(() => resizeTextarea(message_input), 0);
   });
 
   send_button.addEventListener(`click`, async () => {
