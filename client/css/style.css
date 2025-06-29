@@ -38,7 +38,7 @@ html,
 body {
   scroll-behavior: smooth;
   overflow: hidden;
-  height: 100%;
+  height: 100vh;
   margin: 0;
   padding: 0;
 }
@@ -47,7 +47,8 @@ body {
   padding: 25px 8px 0px 8px;
   background: var(--colour-1);
   color: var(--colour-3);
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
 h1 {
@@ -207,9 +208,8 @@ li {
 .row {
   display: flex;
   gap: var(--section-gap);
-  overflow-y: auto;
-  /* CORRECTION CRITIQUE: Hauteur exacte pour alignement */
   height: calc(100vh - 50px);
+  overflow: hidden;
 }
 
 .column {
@@ -246,15 +246,13 @@ li {
   background-color: var(--light-gray);
   border-radius: 8px;
 
-  overflow: auto;
+  overflow-y: auto;
+  height: 100%;
 
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
-
-  /* CORRECTION CRITIQUE: Hauteur exacte pour alignement */
-  height: calc(100vh - 50px);
 
   @media screen and (max-width: 990px) {
     display: none;
@@ -307,19 +305,15 @@ h3 {
 .logo {
   width: 120px;
   margin-top: auto;
+  display: none; /* SUPPRESSION DU LOGO */
 }
 
 .conversation {
   width: 100%;
-  min-height: 50%;
-  /* CORRECTION CRITIQUE: Hauteur exacte alignée avec le menu */
-  height: calc(100vh - 50px);
-  overflow-y: auto;
-  overflow-x: hidden;
-
+  height: 100%;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
 }
 
 .conversation #messages {
@@ -329,19 +323,10 @@ h3 {
   overflow-wrap: break-word;
   overflow-y: auto;
   overflow-x: hidden;
-
-  /* CORRECTION CRITIQUE: Hauteur ajustée pour éviter la coupure du texte */
-  height: calc(100vh - 200px);
-  
-  /* CORRECTION CRITIQUE: Centrage du contenu comme avant */
-  display: flex;
-  align-items: center;
-  
-  /* CORRECTION CRITIQUE: Padding pour éviter que le texte touche les bords */
+  flex: 1;
   padding: 20px 0;
-  
-  /* CORRECTION CRITIQUE: Scroll smooth et position correcte */
   scroll-behavior: smooth;
+  align-items: center;
 }
 
 .conversation .user-input {
@@ -442,8 +427,6 @@ h3 {
   width: 100%;
   overflow-wrap: break-word;
   display: flex;
-
-  /* CORRECTION CRITIQUE: Padding ajusté pour éviter la coupure */
   padding-top: var(--section-gap);
   padding-bottom: 0;
   max-width: 840px;
@@ -451,7 +434,6 @@ h3 {
 
 .message:last-child {
   animation: 0.6s show_message;
-  /* CORRECTION CRITIQUE: Marge bottom pour éviter la coupure en bas */
   margin-bottom: 20px;
 }
 
@@ -931,11 +913,29 @@ ul {
 }
 
 @media screen and (max-width: 990px) {
+  body {
+    padding: 15px 5px 0px 5px;
+  }
+  
+  .row {
+    height: calc(100vh - 30px);
+  }
+  
   .conversations {
     display: none;
     width: 100%;
     max-width: none;
+    height: calc(100vh - 30px);
   }
+  
+  .conversation {
+    height: calc(100vh - 30px);
+  }
+  
+  .conversation #messages {
+    height: calc(100vh - 150px);
+  }
+  
   .buttons {
     flex-wrap: wrap;
     gap: 5px;
@@ -952,19 +952,26 @@ ul {
     display: flex !important;
   }
   
-  /* CORRECTION MOBILE: Ajustement des hauteurs pour mobile */
-  .conversation {
-    height: calc(100vh - 60px);
+  .user-input {
+    width: calc(100vw - 30px);
   }
   
-  .conversation #messages {
-    height: calc(100vh - 180px);
+  .stop_generating {
+    bottom: 120px;
   }
 }
 
 @media screen and (max-height: 640px) {
   body {
-    height: 87vh;
+    height: 100vh;
+  }
+  
+  .row {
+    height: calc(100vh - 40px);
+  }
+  
+  .conversation #messages {
+    height: calc(100vh - 180px);
   }
 }
 
@@ -1304,8 +1311,6 @@ a:-webkit-any-link {
   align-items: center;
   padding: 0 10px 10px 10px;
   box-sizing: border-box;
-  
-  /* CORRECTION CRITIQUE: Position fixe en bas pour éviter les problèmes de scroll */
   position: sticky;
   bottom: 0;
   background: var(--colour-1);
@@ -1341,7 +1346,7 @@ a:-webkit-any-link {
 #send-button {
   width: 40px;
   height: 40px;
-  background: white;
+  background: #2f2f2e;
   border: none;
   border-radius: 50%;
   display: flex;
@@ -1349,24 +1354,33 @@ a:-webkit-any-link {
   justify-content: center;
   cursor: pointer;
   margin-left: 10px;
-  transition: transform 0.2s;
+  transition: all 0.2s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   flex-shrink: 0;
+  color: white;
 }
 
 #send-button i {
   display: block;
   margin: auto;
+  font-size: 16px;
+  color: white;
 }
 
 #send-button:hover {
   transform: scale(1.1);
+  background: #1a1a1a;
+}
+
+#send-button:active {
+  transform: scale(0.95);
 }
 
 @media (max-width: 600px) {
   .user-input-container {
     align-items: unset;
+    padding: 0 5px 5px 5px;
   }
   .input-box {
     padding: 5px 10px;
@@ -1382,11 +1396,10 @@ a:-webkit-any-link {
   }
 
   .stop_generating {
-    bottom: 130px;
+    bottom: 100px;
   }
 }
 
-/* CORRECTION CRITIQUE: Scrollbar personnalisée pour une meilleure visibilité */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -1404,17 +1417,6 @@ a:-webkit-any-link {
   background: #a8a8a8;
 }
 
-/* CORRECTION CRITIQUE: Réactivation des scrollbars pour la zone de messages */
-.conversation #messages {
-  -ms-overflow-style: auto;
-  scrollbar-width: auto;
-}
-
-.conversation #messages::-webkit-scrollbar {
-  display: block;
-  width: 8px;
-}
-
 font {
   font-family: "Inter" !important;
 }
@@ -1427,4 +1429,13 @@ font {
   50% {
     transform: translateY(-10px);
   }
+}
+
+/* SUPPRESSION DES ÉLÉMENTS DU MENU */
+.conversations .bottom-section {
+  display: none;
+}
+
+.conversations .subtitles:last-child {
+  display: none;
 }

@@ -113,7 +113,7 @@
   <body>
     <div class="gradient"></div>
     <div class="row">
-      <div class="conversations shadow" id="conversations" style="height: 92vh">
+      <div class="conversations shadow" id="conversations">
         <div>
           <div style="text-align: center" class="subtitles">
             <a onclick="openLibrary()" id="onboardingButton" class="media-title"
@@ -136,24 +136,9 @@
               <i class="fa-regular fa-trash"></i>
               <span>Supprimer les conversations</span>
             </button>
-            <!--<div class="info">
-                            <i class="fa-regular fa-circle-info"></i>
-                            <span class="convo-title">Par: EggOn<br>
-                                Version: 1.6<br>
-                            </span>
-                        </div>-->
           </div>
         </div>
-        <div>
-          <div class="subtitles">
-            <div class="separator"></div>
-            <div>
-              <a>Documentation</a>
-            </div>
-            <a>FAQ</a>
-          </div>
-          <img class="center logo" src="/assets/img/nog_logo.png" alt="logo" />
-        </div>
+        <!-- SUPPRESSION DU LOGO ET DES LIENS FAQ/DOCUMENTATION -->
       </div>
 
       <div class="conversation disable-scrollbars">
@@ -167,7 +152,7 @@
         </div>
 
         <div>
-          <div id="messages" style="overflow-y: scroll"></div>
+          <div id="messages"></div>
         </div>
 
         <div>
@@ -183,7 +168,7 @@
                   oninput="resizeTextarea(this)"
                 ></textarea>
                 <div id="send-button">
-                  <i class="fa-regular fa-paper-plane-top"></i>
+                  <i class="fa-solid fa-arrow-up"></i>
                 </div>
               </div>
             </div>
