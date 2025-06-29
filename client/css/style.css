@@ -208,7 +208,7 @@ li {
   display: flex;
   gap: var(--section-gap);
   overflow-y: auto;
-  height: 100%;
+  height: calc(100vh - 50px); /* Ajustement pour la hauteur totale */
 }
 
 .column {
@@ -251,6 +251,9 @@ li {
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
+
+  /* CORRECTION CRITIQUE: Hauteur exacte pour alignement */
+  height: calc(100vh - 50px);
 
   @media screen and (max-width: 990px) {
     display: none;
@@ -308,7 +311,8 @@ h3 {
 .conversation {
   width: 100%;
   min-height: 50%;
-  height: calc(100vh - 30px);
+  /* CORRECTION CRITIQUE: Hauteur exacte alignée avec le menu */
+  height: calc(100vh - 50px);
   overflow-y: auto;
   overflow-x: hidden;
 
@@ -322,12 +326,17 @@ h3 {
   display: flex;
   flex-direction: column;
   overflow-wrap: break-word;
-  overflow-y: inherit;
+  overflow-y: auto;
   overflow-x: hidden;
 
-  display: flex;
-  align-items: center;
-  height: calc(100vh - 230px);
+  /* CORRECTION CRITIQUE: Hauteur ajustée pour éviter la coupure du texte */
+  height: calc(100vh - 200px);
+  
+  /* CORRECTION CRITIQUE: Padding pour éviter que le texte touche les bords */
+  padding: 20px 0;
+  
+  /* CORRECTION CRITIQUE: Scroll smooth et position correcte */
+  scroll-behavior: smooth;
 }
 
 .conversation .user-input {
@@ -429,13 +438,19 @@ h3 {
   overflow-wrap: break-word;
   display: flex;
 
+  /* CORRECTION CRITIQUE: Padding ajusté pour éviter la coupure */
   padding-top: var(--section-gap);
   padding-bottom: 0;
   max-width: 840px;
+  
+  /* CORRECTION CRITIQUE: Marge pour éviter que le texte touche les bords */
+  margin: 0 10px;
 }
 
 .message:last-child {
   animation: 0.6s show_message;
+  /* CORRECTION CRITIQUE: Marge bottom pour éviter la coupure en bas */
+  margin-bottom: 20px;
 }
 
 @keyframes show_message {
@@ -934,6 +949,15 @@ ul {
   .mobile-sidebar {
     display: flex !important;
   }
+  
+  /* CORRECTION MOBILE: Ajustement des hauteurs pour mobile */
+  .conversation {
+    height: calc(100vh - 60px);
+  }
+  
+  .conversation #messages {
+    height: calc(100vh - 180px);
+  }
 }
 
 @media screen and (max-height: 640px) {
@@ -1278,6 +1302,12 @@ a:-webkit-any-link {
   align-items: center;
   padding: 0 10px 10px 10px;
   box-sizing: border-box;
+  
+  /* CORRECTION CRITIQUE: Position fixe en bas pour éviter les problèmes de scroll */
+  position: sticky;
+  bottom: 0;
+  background: var(--colour-1);
+  z-index: 10;
 }
 
 .input-box {
@@ -1354,6 +1384,7 @@ a:-webkit-any-link {
   }
 }
 
+/* CORRECTION CRITIQUE: Scrollbar personnalisée pour une meilleure visibilité */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -1371,15 +1402,17 @@ a:-webkit-any-link {
   background: #a8a8a8;
 }
 
-.disable-scrollbars {
+/* CORRECTION CRITIQUE: Réactivation des scrollbars pour la zone de messages */
+.conversation #messages {
   -ms-overflow-style: auto;
   scrollbar-width: auto;
 }
 
-.disable-scrollbars::-webkit-scrollbar {
+.conversation #messages::-webkit-scrollbar {
   display: block;
   width: 8px;
 }
+
 font {
   font-family: "Inter" !important;
 }
