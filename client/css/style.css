@@ -1325,14 +1325,15 @@ a:-webkit-any-link {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  padding: 10px 10px 8px 10px;
+  padding: 10px;
   box-sizing: border-box;
   position: fixed;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   background: var(--colour-1);
   z-index: 1000;
+  max-width: calc(100vw - 300px);
 }
 
 /* Masquer la barre de chat dans les pages media/library */
@@ -1369,6 +1370,25 @@ a:-webkit-any-link {
   margin-right: 10px;
   background: transparent;
   line-height: 1.4;
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 transparent;
+}
+
+#message-input::-webkit-scrollbar {
+  width: 6px;
+}
+
+#message-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+#message-input::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 3px;
+}
+
+#message-input::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 #send-button {
@@ -1411,9 +1431,11 @@ a:-webkit-any-link {
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
-@media (max-width: 600px) {
+@media (max-width: 990px) {
   .user-input-container {
-    align-items: flex-end;
+    max-width: calc(100vw - 20px);
+    left: 50%;
+    transform: translateX(-50%);
     padding: 8px 5px 5px 5px;
   }
   

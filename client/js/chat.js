@@ -58,6 +58,9 @@ function resizeTextarea(textarea) {
   if (inputBox) {
     inputBox.style.minHeight = (newHeight + 20) + "px";
   }
+  
+  // Ensure text is visible by scrolling to bottom
+  textarea.scrollTop = textarea.scrollHeight;
 }
 
 function openLibrary() {
