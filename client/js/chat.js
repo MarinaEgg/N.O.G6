@@ -58,48 +58,45 @@ function resizeTextarea(textarea) {
   const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
   textarea.style.height = newHeight + 'px';
   
-  // Adjust the input box height accordingly - expansion vers le haut
+  // Adjust the input box height accordingly
   const inputBox = textarea.closest('.input-box');
   if (inputBox) {
-    const boxHeight = Math.max(newHeight + 60, 60); // +60 pour les contrôles
+    const boxHeight = Math.max(newHeight + 20, 60);
     inputBox.style.height = boxHeight + 'px';
     
-    // Ajuster la position du textarea pour qu'il reste ancré en bas
-    const controlsHeight = 50; // Hauteur des contrôles
-    textarea.style.bottom = controlsHeight + 'px';
-    
-    // Ajuster le padding-bottom des messages pour éviter le chevauchement
-    const messagesContainer = document.getElementById('messages');
-    if (messagesContainer) {
+    // Ajuster la position du conteneur pour qu'il s'étende vers le haut
+    const userInputContainer = inputBox.closest('.user-input-container');
+    if (userInputContainer) {
+      // Calculer le décalage vers le haut basé sur la différence de hauteur
       const heightDifference = boxHeight - 60; // 60 est la hauteur minimale
-      messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
+      userInputContainer.style.transform = `translateY(-${heightDifference}px)`;
+      
+      // Ajuster aussi la zone de messages pour éviter le chevauchement
+      const messagesContainer = document.getElementById('messages');
+      if (messagesContainer) {
+        messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
+      }
     }
   }
   
-  // Maintenir le scroll en bas du textarea pour voir le curseur
+  // If content exceeds max height, ensure scroll is at bottom to show cursor
   if (scrollHeight > maxHeight) {
-    // Forcer le scroll à rester en bas
-    setTimeout(() => {
-      textarea.scrollTop = textarea.scrollHeight;
-    }, 0);
-  } else {
-    // Si pas de scroll nécessaire, s'assurer que le curseur est visible
-    textarea.scrollTop = 0;
+    textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
   }
 }
 
 // Fonction pour réinitialiser la hauteur de la barre de chat
 function resetChatBarHeight() {
   const inputBox = document.querySelector('.input-box');
+  const userInputContainer = document.querySelector('.user-input-container');
   const messagesContainer = document.getElementById('messages');
-  const textarea = document.getElementById('message-input');
   
   if (inputBox) {
     inputBox.style.height = '60px';
   }
   
-  if (textarea) {
-    textarea.style.bottom = '50px'; // Position par défaut
+  if (userInputContainer) {
+    userInputContainer.style.transform = 'translateY(0px)';
   }
   
   if (messagesContainer) {
