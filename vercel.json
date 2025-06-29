@@ -16,5 +16,6 @@
         "api/index.py": {
             "runtime": "python3.9"
         }
-    }
+    },
+    "outputDirectory": "dist"
 }

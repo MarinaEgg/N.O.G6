@@ -23,7 +23,7 @@ def home():
                 with open(path, 'r', encoding='utf-8') as f:
                     return f.read()
         
-        # Si aucun fichier trouvé, retourner une page simple v
+        # Si aucun fichier trouvé, retourner une page simple
         return """
         <!DOCTYPE html>
         <html>
@@ -251,12 +251,6 @@ def img_files(filename):
     except Exception as e:
         return f"Error serving image: {str(e)}", 500
 
-# CORRECTION CRITIQUE : Point d'entrée pour Vercel
-# Vercel attend une fonction nommée 'app' ou 'handler'
-def handler(event, context):
-    """Handler pour Vercel"""
-    return app(event, context)
-
-# Alternative : exporter directement l'app
-# C'est ce que Vercel utilisera
-app = app
+# Point d'entrée pour Vercel - CORRECTION CRITIQUE
+# Vercel attend une variable nommée 'app' au niveau du module
+# Pas besoin de fonction handler
