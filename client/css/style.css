@@ -331,7 +331,6 @@ h3 {
   align-items: center;
   height: calc(100vh - 136px);
   padding-bottom: 120px;
-  transition: padding-bottom 0.2s ease;
 }
 
 .conversation .user-input {
@@ -1334,6 +1333,7 @@ a:-webkit-any-link {
   background: var(--colour-1);
   z-index: 1000;
   max-width: calc(100vw - 310px);
+  transition: all 0.2s ease;
 }
 
 /* Masquer la barre de chat dans les pages media/library */
@@ -1354,8 +1354,8 @@ a:-webkit-any-link {
   overflow: visible;
   min-height: 60px;
   transition: all 0.2s ease;
-  flex-direction: column;
-  position: relative;
+  /* Permettre l'expansion vers le haut */
+  transform-origin: bottom;
 }
 
 #message-input {
@@ -1366,10 +1366,11 @@ a:-webkit-any-link {
   overflow-y: auto;
   max-height: 400px;
   min-height: 40px;
-  width: 100%;
+  width: calc(100% - 50px);
   padding: 10px;
   border-radius: 25px;
   font-family: "Inter";
+  margin-right: 10px;
   background: transparent;
   line-height: 1.4;
   scrollbar-width: thin;
@@ -1377,26 +1378,8 @@ a:-webkit-any-link {
   word-wrap: break-word;
   white-space: pre-wrap;
   height: auto;
+  /* Transition fluide pour le redimensionnement */
   transition: height 0.1s ease;
-  
-  /* Forcer l'expansion vers le haut */
-  position: absolute;
-  bottom: 50px; /* Position fixe par rapport au bas de la boîte */
-  left: 10px;
-  right: 10px;
-  
-  /* Alignement du texte vers le bas */
-  display: flex;
-  align-items: flex-end;
-  vertical-align: bottom;
-  
-  /* Assurer que le scroll reste en bas */
-  scroll-behavior: smooth;
-}
-
-/* Forcer le scroll à rester en bas lors de l'expansion */
-#message-input:focus {
-  scroll-behavior: auto;
 }
 
 #message-input::-webkit-scrollbar {
@@ -1416,16 +1399,6 @@ a:-webkit-any-link {
   background: #a8a8a8;
 }
 
-.input-controls {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  width: 100%;
-  margin-top: 5px;
-  position: relative;
-  z-index: 10;
-}
-
 #send-button {
   width: 40px;
   height: 40px;
@@ -1438,11 +1411,13 @@ a:-webkit-any-link {
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  margin-left: 10px;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   flex-shrink: 0;
   color: #2f2f2e;
+  /* Maintenir la position du bouton */
   align-self: flex-end;
   margin-bottom: 5px;
 }
@@ -1499,6 +1474,7 @@ a:-webkit-any-link {
   }
   
   #message-input {
+    margin-right: 5px;
     font-size: 14px;
   }
   
