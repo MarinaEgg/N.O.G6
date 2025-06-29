@@ -251,14 +251,12 @@ def img_files(filename):
     except Exception as e:
         return f"Error serving image: {str(e)}", 500
 
-# Point d'entrée pour Vercel
-# Cette fonction est appelée par Vercel pour chaque requête
-def app_handler(request):
-    return app
+# CORRECTION CRITIQUE : Point d'entrée pour Vercel
+# Vercel attend une fonction nommée 'app' ou 'handler'
+def handler(event, context):
+    """Handler pour Vercel"""
+    return app(event, context)
 
-# Export pour Vercel (TRÈS IMPORTANT)
-application = app
-
-# Pour le développement local
-if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+# Alternative : exporter directement l'app
+# C'est ce que Vercel utilisera
+app = app
