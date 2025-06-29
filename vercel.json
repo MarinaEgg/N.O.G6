@@ -11,6 +11,14 @@
     ],
     "routes": [
         {
+            "src": "/test",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/debug",
+            "dest": "/api/index.py"
+        },
+        {
             "src": "/backend-api/(.*)",
             "dest": "/api/index.py"
         },
@@ -19,7 +27,7 @@
             "dest": "/api/index.py"
         },
         {
-            "src": "/onboarding",
+            "src": "/onboarding/?",
             "dest": "/api/index.py"
         },
         {
@@ -27,11 +35,11 @@
             "dest": "/api/index.py"
         },
         {
-            "src": "/chat/(.*)",
+            "src": "/chat/?.*",
             "dest": "/api/index.py"
         },
         {
-            "src": "/",
+            "src": "/(.*)",
             "dest": "/api/index.py"
         }
     ]
