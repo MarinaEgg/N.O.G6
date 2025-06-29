@@ -24,6 +24,12 @@
 
   --menu-percentage: 80%;
   --font-1: "Inter";
+  
+  /* Variables pour les fenêtres de code */
+  --progress-gradient-start: #2f2f2e;
+  --progress-gradient-end: #fce96b;
+  --progress-complete-color: #2f2f2e;
+  --bar-width: 4px;
 }
 
 * {
@@ -116,13 +122,222 @@ code {
   font-weight: inherit;
 }
 
+/* Fenêtres de code pliables avec effet frosted glass */
+.code-window {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  margin: 20px 0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s ease;
+  opacity: 0;
+  animation: fadeInWindow 0.5s ease forwards;
+  
+  /* Effet frosted glass sur fond blanc */
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.08),
+    0 2px 8px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+@keyframes fadeInWindow {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.code-window.collapsed {
+  height: 50px !important;
+  cursor: pointer;
+}
+
+.code-window.expanding {
+  animation: expandWindow 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes expandWindow {
+  from {
+    height: 50px;
+  }
+  to {
+    height: auto;
+    min-height: 200px;
+  }
+}
+
+.code-window-header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.code-window-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 1px;
+  background: var(--blur-border);
+  transition: opacity 0.3s ease;
+}
+
+.code-window.collapsed .code-window-header {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+}
+
+.code-window.collapsed .code-window-header::after {
+  opacity: 0;
+}
+
+.code-window:not(.collapsed) .code-window-header {
+  cursor: default;
+}
+
+.code-window.collapsed .code-window-header:hover {
+  background: rgba(255, 255, 255, 0.8);
+  transform: translateY(-1px);
+}
+
+.code-window-title {
+  font-family: var(--font-1);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--colour-2);
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.code-window-title::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  background: var(--yellow);
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(252, 233, 107, 0.3);
+}
+
+.code-close-btn {
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid var(--blur-border);
+  font-size: 16px;
+  cursor: pointer;
+  color: var(--colour-2);
+  padding: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.code-close-btn:hover {
+  background: var(--light-gray-hover);
+  border-color: var(--blur-border);
+  color: var(--colour-2);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.code-side-bar {
+  position: absolute;
+  top: 50px;
+  bottom: 15px;
+  width: var(--bar-width);
+  background: var(--light-gray);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--blur-border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+}
+
+.code-window.collapsed .code-side-bar {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.code-side-bar.left {
+  left: 15px;
+}
+
+.code-side-bar.right {
+  right: 15px;
+}
+
+.code-bar-progress {
+  width: 100%;
+  height: 0%;
+  background: linear-gradient(to bottom, 
+    var(--progress-gradient-start), 
+    var(--yellow));
+  border-radius: 6px;
+  transition: height 0.3s ease, background 0.3s ease;
+  position: absolute;
+  bottom: 0;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.code-content {
+  position: relative;
+  top: 0;
+  left: 35px;
+  right: 35px;
+  bottom: 15px;
+  padding: 20px 0;
+  transition: opacity 0.3s ease, transform 0.4s ease;
+  overflow: hidden;
+}
+
+.code-window.collapsed .code-content {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-20px);
+}
+
 /* Code dans les blocs pre uniquement */
 pre code {
   font-family: "Inter Mono", monospace;
   font-size: 14px;
   background: transparent;
   color: #2f2f2e;
-  padding: 20px;
+  padding: 0;
   border-radius: 0;
   border: none;
   display: block;
@@ -135,44 +350,26 @@ pre code {
 }
 
 pre {
-  margin: 16px 0;
-  border-radius: 12px;
-  overflow: hidden;
+  margin: 0;
+  border-radius: 0;
+  overflow: visible;
   position: relative;
-  /* Effet frosted glass sur fond blanc */
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
 }
 
 pre::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 /* Styles pour highlight.js avec thème personnalisé */
 .hljs {
   background: transparent !important;
   color: #2f2f2e !important;
-  padding: 20px !important;
+  padding: 0 !important;
   border-radius: 0 !important;
   font-size: 14px !important;
   line-height: 1.6 !important;
@@ -258,14 +455,14 @@ li {
 table {
   width: 100%;
   border-collapse: collapse;
-  margin: 16px 0;
+  margin: 0;
   font-family: "Inter", sans-serif;
   font-size: 15px;
-  background: #ffffff;
-  border-radius: 8px;
+  background: transparent;
+  border-radius: 0;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e1e5e9;
+  box-shadow: none;
+  border: none;
 }
 
 thead {
@@ -1342,35 +1539,17 @@ a:-webkit-any-link {
 .hljs-copy-wrapper {
   position: relative;
   overflow: hidden;
-  border-radius: 12px;
-  /* Effet frosted glass sur fond blanc */
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  margin: 16px 0;
+  border-radius: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+  margin: 0;
 }
 
 .hljs-copy-wrapper::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: 0;
+  display: none;
 }
 
 .hljs-copy-wrapper:hover .hljs-copy-button,
