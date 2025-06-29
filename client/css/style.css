@@ -860,7 +860,7 @@ div.message:last-child {
 
 .stop_generating {
   position: fixed;
-  bottom: 90px;
+  bottom: 80px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 1001;
@@ -1208,7 +1208,7 @@ ul {
   }
   
   .stop_generating {
-    bottom: 100px;
+    bottom: 90px;
   }
 }
 
@@ -1231,7 +1231,7 @@ ul {
   }
   
   .stop_generating {
-    bottom: 80px;
+    bottom: 70px;
   }
 }
 
@@ -1833,7 +1833,7 @@ a:-webkit-any-link {
   }
 
   .stop_generating {
-    bottom: 110px;
+    bottom: 100px;
   }
   
   #message-input {
