@@ -1325,7 +1325,7 @@ a:-webkit-any-link {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 15px 10px 15px 10px;
+  padding: 15px 10px 8px 10px;
   box-sizing: border-box;
   position: sticky;
   bottom: 0;
@@ -1408,7 +1408,7 @@ a:-webkit-any-link {
 @media (max-width: 600px) {
   .user-input-container {
     align-items: unset;
-    padding: 10px 5px 10px 5px;
+    padding: 10px 5px 5px 5px;
   }
   
   .conversations {
