@@ -44,7 +44,7 @@ hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
   onBoardingContent();
 
-// Fonction pour redimensionner dynamiquement le textarea
+// Fonction pour redimensionner dynamiquement le textarea et la barre de chat
 function resizeTextarea(textarea) {
   // Reset height to calculate scrollHeight properly
   textarea.style.height = 'auto';
@@ -63,11 +63,44 @@ function resizeTextarea(textarea) {
   if (inputBox) {
     const boxHeight = Math.max(newHeight + 20, 60);
     inputBox.style.height = boxHeight + 'px';
+    
+    // Ajuster la position du conteneur pour qu'il s'étende vers le haut
+    const userInputContainer = inputBox.closest('.user-input-container');
+    if (userInputContainer) {
+      // Calculer le décalage vers le haut basé sur la différence de hauteur
+      const heightDifference = boxHeight - 60; // 60 est la hauteur minimale
+      userInputContainer.style.transform = `translateY(-${heightDifference}px)`;
+      
+      // Ajuster aussi la zone de messages pour éviter le chevauchement
+      const messagesContainer = document.getElementById('messages');
+      if (messagesContainer) {
+        messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
+      }
+    }
   }
   
   // If content exceeds max height, ensure scroll is at bottom to show cursor
   if (scrollHeight > maxHeight) {
     textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
+  }
+}
+
+// Fonction pour réinitialiser la hauteur de la barre de chat
+function resetChatBarHeight() {
+  const inputBox = document.querySelector('.input-box');
+  const userInputContainer = document.querySelector('.user-input-container');
+  const messagesContainer = document.getElementById('messages');
+  
+  if (inputBox) {
+    inputBox.style.height = '60px';
+  }
+  
+  if (userInputContainer) {
+    userInputContainer.style.transform = 'translateY(0px)';
+  }
+  
+  if (messagesContainer) {
+    messagesContainer.style.paddingBottom = '120px';
   }
 }
 
@@ -132,7 +165,9 @@ const delete_conversations = async () => {
 };
 
 const handle_ask = async () => {
+  // Réinitialiser la hauteur de la barre de chat
   message_input.style.height = `40px`;
+  resetChatBarHeight();
   message_input.focus();
 
   window.scrollTo(0, 0);

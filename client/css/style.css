@@ -1333,6 +1333,7 @@ a:-webkit-any-link {
   background: var(--colour-1);
   z-index: 1000;
   max-width: calc(100vw - 310px);
+  transition: all 0.2s ease;
 }
 
 /* Masquer la barre de chat dans les pages media/library */
@@ -1353,6 +1354,8 @@ a:-webkit-any-link {
   overflow: visible;
   min-height: 60px;
   transition: all 0.2s ease;
+  /* Permettre l'expansion vers le haut */
+  transform-origin: bottom;
 }
 
 #message-input {
@@ -1375,6 +1378,8 @@ a:-webkit-any-link {
   word-wrap: break-word;
   white-space: pre-wrap;
   height: auto;
+  /* Transition fluide pour le redimensionnement */
+  transition: height 0.1s ease;
 }
 
 #message-input::-webkit-scrollbar {
@@ -1412,6 +1417,9 @@ a:-webkit-any-link {
   overflow: hidden;
   flex-shrink: 0;
   color: #2f2f2e;
+  /* Maintenir la position du bouton */
+  align-self: flex-end;
+  margin-bottom: 5px;
 }
 
 #send-button i {
@@ -1454,6 +1462,7 @@ a:-webkit-any-link {
   #send-button {
     width: 35px;
     height: 35px;
+    margin-bottom: 3px;
   }
 
   #send-button i {
