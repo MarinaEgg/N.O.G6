@@ -44,231 +44,6 @@ hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
   onBoardingContent();
 
-// Variables globales pour les fenêtres de code
-let codeWindowCounter = 0;
-let activeCodeWindows = new Map();
-
-// Fonction pour créer une fenêtre de code pliable
-function createCodeWindow(content, title = "Code", type = "code") {
-  const windowId = `code-window-${++codeWindowCounter}`;
-  
-  const windowHTML = `
-    <div class="code-window" id="${windowId}" data-type="${type}">
-      <div class="code-window-header" onclick="toggleCodeWindow('${windowId}')">
-        <h3 class="code-window-title">${title}</h3>
-        <button class="code-close-btn" onclick="closeCodeWindow('${windowId}')" title="Fermer">×</button>
-      </div>
-      
-      <div class="code-side-bar left">
-        <div class="code-bar-progress" id="${windowId}-left-progress"></div>
-      </div>
-      
-      <div class="code-content" id="${windowId}-content">
-        ${content}
-      </div>
-      
-      <div class="code-side-bar right">
-        <div class="code-bar-progress" id="${windowId}-right-progress"></div>
-      </div>
-    </div>
-  `;
-  
-  return { windowHTML, windowId };
-}
-
-// Fonction pour animer l'expansion d'une fenêtre
-function expandCodeWindow(windowId, content, autoClose = true) {
-  const window = document.getElementById(windowId);
-  if (!window) return;
-  
-  // Commencer l'expansion
-  window.classList.remove('collapsed');
-  window.classList.add('expanding');
-  
-  const leftProgress = document.getElementById(`${windowId}-left-progress`);
-  const rightProgress = document.getElementById(`${windowId}-right-progress`);
-  
-  // Simuler l'écriture progressive
-  let progress = 0;
-  const totalLength = content.length;
-  
-  const animateProgress = () => {
-    if (progress < 100) {
-      progress += Math.random() * 5 + 2; // Vitesse variable
-      progress = Math.min(progress, 100);
-      
-      leftProgress.style.height = progress + '%';
-      rightProgress.style.height = progress + '%';
-      
-      // Changer la couleur quand c'est terminé
-      if (progress >= 100) {
-        leftProgress.style.background = 'var(--progress-complete-color)';
-        rightProgress.style.background = 'var(--progress-complete-color)';
-        
-        // Auto-fermeture seulement pour les blocs de code, pas les tableaux
-        if (autoClose && window.dataset.type === 'code') {
-          setTimeout(() => {
-            if (!window.classList.contains('collapsed')) {
-              closeCodeWindow(windowId);
-            }
-          }, 4000); // Augmenté à 4 secondes
-        }
-      } else {
-        requestAnimationFrame(animateProgress);
-      }
-    }
-  };
-  
-  // Démarrer l'animation après un court délai
-  setTimeout(animateProgress, 500);
-}
-
-// Fonction pour basculer l'état d'une fenêtre
-function toggleCodeWindow(windowId) {
-  const window = document.getElementById(windowId);
-  if (!window) return;
-  
-  if (window.classList.contains('collapsed')) {
-    window.classList.remove('collapsed');
-    window.style.height = 'auto';
-    window.style.minHeight = '200px';
-  } else {
-    closeCodeWindow(windowId);
-  }
-}
-
-// Fonction pour fermer une fenêtre
-function closeCodeWindow(windowId) {
-  const window = document.getElementById(windowId);
-  if (!window) return;
-  
-  window.classList.add('collapsed');
-  window.style.height = '50px';
-  
-  // Réinitialiser les barres de progression
-  const leftProgress = document.getElementById(`${windowId}-left-progress`);
-  const rightProgress = document.getElementById(`${windowId}-right-progress`);
-  
-  if (leftProgress) {
-    leftProgress.style.height = '0%';
-    leftProgress.style.background = 'linear-gradient(to bottom, var(--progress-gradient-start), var(--yellow))';
-  }
-  if (rightProgress) {
-    rightProgress.style.height = '0%';
-    rightProgress.style.background = 'linear-gradient(to bottom, var(--progress-gradient-start), var(--yellow))';
-  }
-}
-
-// Fonction pour détecter et encapsuler les blocs de code
-function wrapCodeBlocks(html) {
-  // Détecter les blocs <pre><code>
-  const codeBlockRegex = /<pre><code[^>]*>([\s\S]*?)<\/code><\/pre>/g;
-  
-  return html.replace(codeBlockRegex, (match, codeContent) => {
-    // Extraire le langage si présent
-    const langMatch = match.match(/class="[^"]*language-([^"\s]+)/);
-    const language = langMatch ? langMatch[1] : 'code';
-    
-    // Déterminer le titre basé sur le langage
-    let title = 'Code';
-    switch (language.toLowerCase()) {
-      case 'html':
-        title = 'Code HTML';
-        break;
-      case 'css':
-        title = 'Styles CSS';
-        break;
-      case 'javascript':
-      case 'js':
-        title = 'Script JavaScript';
-        break;
-      case 'python':
-        title = 'Script Python';
-        break;
-      case 'sql':
-        title = 'Requête SQL';
-        break;
-      case 'json':
-        title = 'Données JSON';
-        break;
-      case 'xml':
-        title = 'Document XML';
-        break;
-      case 'bash':
-      case 'shell':
-        title = 'Commandes Shell';
-        break;
-      default:
-        title = `Code ${language.toUpperCase()}`;
-    }
-    
-    const { windowHTML, windowId } = createCodeWindow(match, title, 'code');
-    
-    // Programmer l'expansion après l'insertion
-    setTimeout(() => {
-      expandCodeWindow(windowId, codeContent, true); // Auto-fermeture activée pour le code
-    }, 100);
-    
-    return windowHTML;
-  });
-}
-
-// Fonction améliorée pour détecter et encapsuler les tableaux
-function wrapTables(html) {
-  // Regex plus flexible pour détecter les tableaux
-  const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
-  
-  return html.replace(tableRegex, (match) => {
-    console.log('Tableau détecté:', match.substring(0, 100) + '...');
-    
-    // Extraire le titre du tableau s'il y a un caption ou utiliser un titre par défaut
-    const captionMatch = match.match(/<caption[^>]*>(.*?)<\/caption>/i);
-    let title = 'Tableau de données';
-    
-    if (captionMatch) {
-      title = captionMatch[1].replace(/<[^>]*>/g, '').trim();
-    } else {
-      // Essayer d'extraire le premier en-tête comme titre
-      const firstThMatch = match.match(/<th[^>]*>(.*?)<\/th>/i);
-      if (firstThMatch) {
-        const headerText = firstThMatch[1].replace(/<[^>]*>/g, '').trim();
-        if (headerText.length > 0 && headerText.length < 50) {
-          title = `Tableau - ${headerText}`;
-        }
-      }
-    }
-    
-    const { windowHTML, windowId } = createCodeWindow(match, title, 'table');
-    
-    // Programmer l'expansion après l'insertion - PAS d'auto-fermeture pour les tableaux
-    setTimeout(() => {
-      console.log('Expansion du tableau:', windowId);
-      expandCodeWindow(windowId, match, false); // Auto-fermeture désactivée pour les tableaux
-    }, 100);
-    
-    return windowHTML;
-  });
-}
-
-// Fonction pour traiter le contenu et encapsuler les éléments
-function processContent(text) {
-  console.log('Traitement du contenu:', text.substring(0, 100) + '...');
-  
-  // D'abord convertir le markdown en HTML
-  let processedText = marked.parse(text);
-  console.log('Après markdown:', processedText.substring(0, 100) + '...');
-  
-  // Ensuite encapsuler les tableaux (avant les blocs de code pour éviter les conflits)
-  processedText = wrapTables(processedText);
-  console.log('Après wrapTables:', processedText.substring(0, 100) + '...');
-  
-  // Enfin encapsuler les blocs de code
-  processedText = wrapCodeBlocks(processedText);
-  console.log('Après wrapCodeBlocks:', processedText.substring(0, 100) + '...');
-  
-  return processedText;
-}
-
 // Fonction pour redimensionner dynamiquement le textarea et la barre de chat
 function resizeTextarea(textarea) {
   // Reset height to calculate scrollHeight properly
@@ -516,11 +291,8 @@ const ask_gpt = async (message) => {
 
         for (const char of chars) {
           text += char;
-          
-          // Utiliser la nouvelle fonction de traitement
-          const processedContent = processContent(text);
-          
-          document.getElementById(`imanage_${window.token}`).innerHTML = processedContent;
+          document.getElementById(`imanage_${window.token}`).innerHTML =
+            marked.parse(text);
           document.getElementById(
             `imanage_${window.token}`
           ).lastElementChild.innerHTML += loadingStream;
@@ -649,6 +421,30 @@ function changeEggImageToGPTImage() {
   }
 }
 
+async function writeNoRAGConversation(text, message, links) {
+  document.getElementById(`imanage_${window.token}`).innerHTML =
+    marked.parse(text) + actionsButtons;
+  const loadingStreamElement =
+    document.getElementsByClassName("loading-stream")[0];
+
+  if (loadingStreamElement) {
+    loadingStreamElement.parentNode.removeChild(loadingStreamElement);
+  }
+
+  message_box.scrollTop = message_box.scrollHeight;
+  await remove_cancel_button();
+  prompt_lock = false;
+  await load_conversations(20, 0);
+  window.scrollTo(0, 0);
+
+  add_message(window.conversation_id, "user", user_image, message);
+  if (links.length === 0) {
+    add_message(window.conversation_id, "assistant", gpt_image, text);
+  } else {
+    add_message(window.conversation_id, "assistant", imanage_image, text);
+  }
+}
+
 // Fonction pour créer une bulle vidéo YouTube qui redirige vers la page de liens
 function createVideoSourceBubble(url, title, index, allVideoIds, allTitles) {
   const bubble = document.createElement('div');
@@ -675,33 +471,6 @@ function createVideoSourceBubble(url, title, index, allVideoIds, allTitles) {
   });
 
   return bubble;
-}
-
-async function writeNoRAGConversation(text, message, links) {
-  // Utiliser la nouvelle fonction de traitement
-  const processedText = processContent(text);
-  
-  document.getElementById(`imanage_${window.token}`).innerHTML =
-    processedText + actionsButtons;
-  const loadingStreamElement =
-    document.getElementsByClassName("loading-stream")[0];
-
-  if (loadingStreamElement) {
-    loadingStreamElement.parentNode.removeChild(loadingStreamElement);
-  }
-
-  message_box.scrollTop = message_box.scrollHeight;
-  await remove_cancel_button();
-  prompt_lock = false;
-  await load_conversations(20, 0);
-  window.scrollTo(0, 0);
-
-  add_message(window.conversation_id, "user", user_image, message);
-  if (links.length === 0) {
-    add_message(window.conversation_id, "assistant", gpt_image, text);
-  } else {
-    add_message(window.conversation_id, "assistant", imanage_image, text);
-  }
 }
 
 async function writeRAGConversation(links, text, language) {
@@ -904,19 +673,17 @@ const load_conversation = async (conversation_id) => {
       item.role === "user" ? "message-user" : "message-assistant";
     const img = item.image;
     if (item.role === "user" || item.role === "assistant") {
-      let processedContent = item.content;
-      
-      if (item.role === "assistant") {
-        // Traiter le contenu pour encapsuler les blocs de code et tableaux
-        processedContent = processContent(item.content);
-        processedContent = `<div class="assistant-content" style="word-wrap: break-word; max-width: 100%; overflow-x: auto;">${processedContent}</div>`;
-      }
-      
       message_box.innerHTML += `
           <div class="message ${messageAlignmentClass}">
             ${img}
             <div class="content">
-              ${processedContent}
+              ${
+                item.role === "assistant"
+                  ? `<div class="assistant-content" style="word-wrap: break-word; max-width: 100%; overflow-x: auto;">${markdown.render(
+                      item.content
+                    )}</div>`
+                  : item.content
+              }
               ${item.role === "assistant" ? actionsButtons : ""}
             </div>
           </div>
@@ -1083,10 +850,6 @@ const message_id = () => {
 
   return BigInt(`0b${unix}${random_bytes}`).toString();
 };
-
-// Exposer les fonctions globalement pour les événements onclick
-window.toggleCodeWindow = toggleCodeWindow;
-window.closeCodeWindow = closeCodeWindow;
 
 window.onload = async () => {
   load_settings_localstorage();
