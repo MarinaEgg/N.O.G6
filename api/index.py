@@ -23,7 +23,7 @@ def home():
                 with open(path, 'r', encoding='utf-8') as f:
                     return f.read()
         
-        # Si aucun fichier trouvé, retourner une page simple
+        # Si aucun fichier trouvé, retourner une page simple v
         return """
         <!DOCTYPE html>
         <html>
