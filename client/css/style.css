@@ -1331,7 +1331,7 @@ a:-webkit-any-link {
   padding: 0 10px 0 10px;
   box-sizing: border-box;
   position: fixed;
-  bottom: 20px; /* Abaissé de 32px à 20px */
+  bottom: 32px;
   left: 0;
   right: 0;
   background: var(--colour-1);
@@ -1414,7 +1414,7 @@ a:-webkit-any-link {
 @media (max-width: 600px) {
   .user-input-container {
     padding: 0 5px 0 5px;
-    bottom: 16px; /* Abaissé aussi pour mobile */
+    bottom: 28px;
   }
   
   .usage-warning {
@@ -1465,7 +1465,7 @@ a:-webkit-any-link {
   }
   
   .user-input-container {
-    bottom: 15px; /* Abaissé pour très petits écrans */
+    bottom: 25px;
   }
 }
 
