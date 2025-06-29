@@ -6,7 +6,7 @@ from json import loads
 import os
 
 # Create Flask app - fix template path for Vercel
-app = Flask(__name__, template_folder='../client/html')
+app = Flask(__name__, template_folder='client/html')
 
 # Add debug route to check template loading
 @app.route('/debug')
@@ -85,7 +85,7 @@ class Website:
 
     def _assets(self, folder: str, file: str):
         try:
-            return send_file(f"../client/{folder}/{file}", as_attachment=False)
+            return send_file(f"client/{folder}/{file}", as_attachment=False)
         except:
             return "File not found", 404
 
