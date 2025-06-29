@@ -19,7 +19,31 @@
             "dest": "/api/index.py"
         },
         {
+            "src": "/onboarding/?",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/links/?.*",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/chat/?.*",
+            "dest": "/api/index.py"
+        },
+        {
             "src": "/backend-api/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/css/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/js/(.*)",
+            "dest": "/api/index.py"
+        },
+        {
+            "src": "/img/(.*)",
             "dest": "/api/index.py"
         },
         {
@@ -27,15 +51,7 @@
             "dest": "/api/index.py"
         },
         {
-            "src": "/onboarding/?",
-            "dest": "/api/index.py"
-        },
-        {
-            "src": "/links/(.*)",
-            "dest": "/api/index.py"
-        },
-        {
-            "src": "/chat/?.*",
+            "src": "/",
             "dest": "/api/index.py"
         },
         {
