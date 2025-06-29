@@ -1,6 +1,8 @@
-from flask import Flask, render_template, send_from_directory, jsonify, request
+from flask import Flask, render_template, send_from_directory, jsonify, request, Response, stream_with_context
 import os
 import sys
+import requests
+from json import loads
 
 # Configuration Flask optimisée pour Vercel
 app = Flask(__name__)
@@ -181,22 +183,125 @@ def links(subpath=None):
 
 @app.route('/chat')
 @app.route('/chat/')
-@app.route('/chat/<path:subpath>')
-def chat(subpath=None):
-    return f"""
-    <h1>Chat Page</h1>
-    <p>Chat functionality coming soon!</p>
-    <p>Subpath: {subpath if subpath else 'None'}</p>
-    <p><a href="/">← Back to Home</a></p>
-    """
+@app.route('/chat/<conversation_id>')
+def chat(conversation_id=None):
+    try:
+        # Essayer de lire le fichier index.html pour le chat
+        possible_paths = [
+            'client/html/index.html',
+            '../client/html/index.html',
+            './client/html/index.html'
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    # Remplacer le placeholder chat_id si nécessaire
+                    if conversation_id:
+                        content = content.replace('{{chat_id}}', conversation_id)
+                    else:
+                        # Générer un ID de conversation aléatoire
+                        import time
+                        from os import urandom
+                        chat_id = f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time.time() * 1000))[2:]}'
+                        content = content.replace('{{chat_id}}', chat_id)
+                    return content
+        
+        return f"""
+        <h1>Chat Page</h1>
+        <p>Chat template not found, but route is working!</p>
+        <p>Conversation ID: {conversation_id if conversation_id else 'None'}</p>
+        <p><a href="/">← Back to Home</a></p>
+        """
+    except Exception as e:
+        return f"Error loading chat: {str(e)}"
+
+# ROUTE CRITIQUE: API Backend pour le chatbot
+@app.route('/backend-api/v2/conversation', methods=['POST'])
+def conversation():
+    try:
+        # Extraire la question de la requête
+        data = request.get_json()
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+            
+        # Extraire le contenu de la question
+        prompt = data.get('meta', {}).get('content', {}).get('parts', [{}])[0]
+        question_text = prompt.get('content', '') if isinstance(prompt, dict) else str(prompt)
+        
+        if not question_text:
+            return jsonify({"error": "No question provided"}), 400
+        
+        # Préparer le payload pour l'API externe
+        payload = {
+            "question": question_text.replace("?", "").replace("\n", "")
+        }
+
+        # URL de l'API externe
+        api_url = "https://legal-chatbot.eastus.cloudapp.azure.com:443/v1/assist/stream/"
+        api_headers = {
+            "Content-Type": "application/json", 
+            'cache-control': 'no-cache', 
+            'Connection': 'keep-alive'
+        }
+
+        def generate():
+            try:
+                with requests.post(api_url, headers=api_headers, json=payload, stream=True, timeout=30) as r:
+                    if r.status_code >= 400:
+                        yield f"data: {{\"error\": \"API returned status code {r.status_code}\"}}\n\n"
+                        yield f"data: [DONE]\n\n"
+                        return
+                    
+                    for line in r.iter_lines():
+                        if line:
+                            decoded_line = line.decode('utf-8')
+                            yield f"{decoded_line}\n\n"
+                            
+            except requests.exceptions.Timeout:
+                yield f"data: {{\"error\": \"Request timeout\"}}\n\n"
+                yield f"data: [DONE]\n\n"
+            except requests.exceptions.ConnectionError:
+                yield f"data: {{\"error\": \"Connection error to external API\"}}\n\n"
+                yield f"data: [DONE]\n\n"
+            except Exception as e:
+                yield f"data: {{\"error\": \"Unexpected error: {str(e)}\"}}\n\n"
+                yield f"data: [DONE]\n\n"
+
+        return Response(
+            stream_with_context(generate()),
+            mimetype="text/event-stream",
+            headers={
+                'Cache-Control': 'no-cache',
+                'X-Accel-Buffering': 'no',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            }
+        )
+
+    except Exception as e:
+        print(f"Error in conversation endpoint: {e}")
+        return jsonify({"error": f"Server error: {str(e)}"}), 500
+
+# Route pour gérer les requêtes OPTIONS (CORS preflight)
+@app.route('/backend-api/v2/conversation', methods=['OPTIONS'])
+def conversation_options():
+    return '', 200, {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    }
 
 @app.route('/backend-api/<path:endpoint>')
-def backend_api(endpoint):
+def backend_api_fallback(endpoint):
     return jsonify({
         "message": f"API endpoint: {endpoint}",
         "status": "working",
         "method": request.method,
-        "timestamp": "2025-06-29"
+        "timestamp": "2025-06-29",
+        "note": "This is a fallback endpoint. Main chat API is at /backend-api/v2/conversation"
     })
 
 # CORRECTION CRITIQUE: Routes pour les fichiers statiques avec gestion d'erreurs améliorée
