@@ -46,29 +46,27 @@ document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
 
 // Fonction pour redimensionner dynamiquement le textarea
 function resizeTextarea(textarea) {
-  // Sauvegarder la position de scroll
-  const scrollTop = textarea.scrollTop;
+  // Reset height to calculate scrollHeight properly
+  textarea.style.height = 'auto';
   
-  // Reset height to auto to get the correct scrollHeight
-  textarea.style.height = "auto";
+  // Calculate the new height based on content
+  const scrollHeight = textarea.scrollHeight;
+  const minHeight = 40;
+  const maxHeight = 400;
   
-  // Calculate new height based on content (minimum 40px, maximum 300px)
-  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 300);
-  textarea.style.height = newHeight + "px";
+  // Set the new height within bounds
+  const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+  textarea.style.height = newHeight + 'px';
   
   // Adjust the input box height accordingly
   const inputBox = textarea.closest('.input-box');
   if (inputBox) {
     const boxHeight = Math.max(newHeight + 20, 60);
-    inputBox.style.minHeight = boxHeight + "px";
-    inputBox.style.height = boxHeight + "px";
+    inputBox.style.height = boxHeight + 'px';
   }
   
-  // Restaurer la position de scroll pour garder le curseur visible
-  textarea.scrollTop = scrollTop;
-  
-  // Si le contenu dépasse la hauteur max, s'assurer que le curseur reste visible
-  if (textarea.scrollHeight > 300) {
+  // If content exceeds max height, ensure scroll is at bottom to show cursor
+  if (scrollHeight > maxHeight) {
     textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
   }
 }
@@ -777,7 +775,7 @@ window.onload = async () => {
       evt.preventDefault();
       await handle_ask();
     } else {
-      // Auto-resize on input with slight delay to ensure proper calculation
+      // Auto-resize on keydown with slight delay to ensure proper calculation
       setTimeout(() => resizeTextarea(message_input), 0);
     }
   });
