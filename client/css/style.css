@@ -1322,28 +1322,28 @@ a:-webkit-any-link {
   line-height: 1.3;
 }
 
-/* Ajustement de la fenêtre de chat - collée juste au-dessus du message d'erreur */
+/* Ajustement de la fenêtre de chat - abaissée */
 .user-input-container {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 10px 0 10px; /* Suppression du padding bottom */
+  padding: 0 10px 0 10px;
   box-sizing: border-box;
-  position: fixed; /* Position fixe pour coller au-dessus du message */
-  bottom: 32px; /* Juste au-dessus du message d'erreur (8px + 24px de hauteur) */
+  position: fixed;
+  bottom: 20px; /* Abaissé de 32px à 20px */
   left: 0;
   right: 0;
   background: var(--colour-1);
   z-index: 100;
-  border-top: 1px solid rgba(0, 0, 0, 0.1); /* Bordure subtile pour séparer */
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .input-box {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 744px; /* Limite la largeur comme avant */
+  max-width: 744px;
   background-color: var(--light-gray);
   border: none;
   border-radius: 25px;
@@ -1414,7 +1414,7 @@ a:-webkit-any-link {
 @media (max-width: 600px) {
   .user-input-container {
     padding: 0 5px 0 5px;
-    bottom: 28px; /* Ajusté pour mobile */
+    bottom: 16px; /* Abaissé aussi pour mobile */
   }
   
   .usage-warning {
@@ -1428,7 +1428,7 @@ a:-webkit-any-link {
   }
   
   .conversation #messages {
-    padding: 20px 0 100px 0; /* Réduit pour mobile */
+    padding: 20px 0 100px 0;
   }
   
   #send-button {
@@ -1465,7 +1465,7 @@ a:-webkit-any-link {
   }
   
   .user-input-container {
-    bottom: 25px;
+    bottom: 15px; /* Abaissé pour très petits écrans */
   }
 }
 
