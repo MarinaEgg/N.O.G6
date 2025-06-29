@@ -445,6 +445,31 @@ async function writeNoRAGConversation(text, message, links) {
   }
 }
 
+// Fonction pour créer une bulle vidéo YouTube
+async function createVideoSourceBubble(url, title, index) {
+  const bubble = document.createElement('div');
+  bubble.className = 'video-source-bubble';
+  bubble.setAttribute('data-index', index);
+  bubble.style.animationDelay = `${0.1 * (index + 1)}s`;
+
+  bubble.innerHTML = `
+    <div class="video-source-title">
+      <svg class="youtube-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+      </svg>
+      <span>${title}</span>
+    </div>
+    <p class="video-source-url">${url}</p>
+  `;
+
+  bubble.addEventListener('click', async () => {
+    // Ouvrir la vidéo dans un nouvel onglet
+    window.open(url, '_blank');
+  });
+
+  return bubble;
+}
+
 async function writeRAGConversation(links, text, language) {
   responseContent = text;
 
@@ -452,7 +477,7 @@ async function writeRAGConversation(links, text, language) {
     hljs.highlightElement(el);
   });
 
-  video_ids = links.map((link) => getYouTubeID(link));
+  const video_ids = links.map((link) => getYouTubeID(link));
 
   const titles = await Promise.all(
     video_ids.map(async (video_id) => {
@@ -461,29 +486,32 @@ async function writeRAGConversation(links, text, language) {
     })
   );
 
+  // Créer le conteneur pour les bulles vidéo
+  const videoSourcesContainer = document.createElement('div');
+  videoSourcesContainer.className = 'video-sources-container';
+
+  // Créer les bulles pour chaque vidéo
+  for (let i = 0; i < Math.min(links.length, 3); i++) {
+    const bubble = await createVideoSourceBubble(links[i], titles[i], i);
+    videoSourcesContainer.appendChild(bubble);
+  }
+
+  // Ajouter le message avec les bulles vidéo
   message_box.innerHTML += `
-          <div class="message message-assistant">
-              ${video_image}
-            <div class="open-video-modal ${class_last_message_assistant} content" style="color: #3b68f1; text-decoration: underline; display: block; cursor: pointer;" onClick="openLinks(
-        \`${video_ids.join(get_sep)}\`,
-        \`${titles.join(get_sep)}\`
-          )">
-               ${
-                 language === "en"
-                   ? "Click here to watch videos"
-                   : "Cliquez ici pour regarder les vidéos"
-               }
-            </div>
-          </div>`;
+    <div class="message message-assistant">
+      ${video_image}
+      <div class="content ${class_last_message_assistant}">
+        ${videoSourcesContainer.outerHTML}
+      </div>
+    </div>`;
+    
   message_box.scrollTop = message_box.scrollHeight;
+  
   const last_message_assistant = document.getElementsByClassName(
     class_last_message_assistant
   )[0];
 
   const scrolly = getScrollY(last_message_assistant);
-  last_message_assistant.href = `/links/${conversation_id}/${scrolly}/${video_ids.join(
-    get_sep
-  )}/${titles.join(get_sep)}`;
   last_message_assistant.classList.remove(class_last_message_assistant);
 
   const links_and_language = {
@@ -492,6 +520,7 @@ async function writeRAGConversation(links, text, language) {
     scrolly: scrolly,
     titles: titles,
   };
+  
   add_message(
     window.conversation_id,
     "video_assistant",
@@ -649,22 +678,31 @@ const load_conversation = async (conversation_id) => {
       const links = item.content.links;
       const video_ids = links.map((link) => getYouTubeID(link));
       const titles = item.content.titles;
-
       const language = item.content.language;
+
+      // Créer le conteneur pour les bulles vidéo lors du rechargement
+      let videoSourcesHTML = '<div class="video-sources-container">';
+      for (let i = 0; i < Math.min(links.length, 3); i++) {
+        videoSourcesHTML += `
+          <div class="video-source-bubble" data-index="${i}" onclick="window.open('${links[i]}', '_blank')">
+            <div class="video-source-title">
+              <svg class="youtube-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+              </svg>
+              <span>${titles[i]}</span>
+            </div>
+            <p class="video-source-url">${links[i]}</p>
+          </div>
+        `;
+      }
+      videoSourcesHTML += '</div>';
 
       message_box.innerHTML += `
         <div class="message message-assistant">
-        ${img}
-          <div class="content" style="color: #3b68f1; text-decoration: underline; display: block; cursor: pointer;" onClick="openLinks(
-          \`${video_ids.join(get_sep)}\`,
-          \`${titles.join(get_sep)}\`
-          )">
-          ${
-            language === "en"
-              ? "Click here to watch videos"
-              : "Cliquez ici pour regarder les vidéos"
-          }
-        </div>
+          ${img}
+          <div class="content">
+            ${videoSourcesHTML}
+          </div>
         </div>`;
     }
   });
