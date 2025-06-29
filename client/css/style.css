@@ -208,7 +208,8 @@ li {
   display: flex;
   gap: var(--section-gap);
   overflow-y: auto;
-  height: calc(100vh - 50px); /* Ajustement pour la hauteur totale */
+  /* CORRECTION CRITIQUE: Hauteur exacte pour alignement */
+  height: calc(100vh - 50px);
 }
 
 .column {
@@ -332,6 +333,10 @@ h3 {
   /* CORRECTION CRITIQUE: Hauteur ajustée pour éviter la coupure du texte */
   height: calc(100vh - 200px);
   
+  /* CORRECTION CRITIQUE: Centrage du contenu comme avant */
+  display: flex;
+  align-items: center;
+  
   /* CORRECTION CRITIQUE: Padding pour éviter que le texte touche les bords */
   padding: 20px 0;
   
@@ -442,9 +447,6 @@ h3 {
   padding-top: var(--section-gap);
   padding-bottom: 0;
   max-width: 840px;
-  
-  /* CORRECTION CRITIQUE: Marge pour éviter que le texte touche les bords */
-  margin: 0 10px;
 }
 
 .message:last-child {
