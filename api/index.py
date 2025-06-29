@@ -5,8 +5,37 @@ import requests
 from json import loads
 import os
 
-# Create Flask app
-app = Flask(__name__, template_folder='./../client/html')
+# Create Flask app - fix template path for Vercel
+app = Flask(__name__, template_folder='../client/html')
+
+# Add debug route to check template loading
+@app.route('/debug')
+def debug():
+    import os
+    template_path_abs = os.path.abspath(app.template_folder)
+    files = []
+    exists = os.path.exists(template_path_abs)
+    try:
+        if exists:
+            files = os.listdir(template_path_abs)
+    except Exception as e:
+        files = [f"Error: {str(e)}"]
+    
+    current_dir = os.getcwd()
+    all_dirs = []
+    try:
+        all_dirs = os.listdir('.')
+    except:
+        pass
+        
+    return f"""
+    <h2>Debug Info:</h2>
+    <p><strong>Current directory:</strong> {current_dir}</p>
+    <p><strong>Template folder:</strong> {template_path_abs}</p>
+    <p><strong>Template folder exists:</strong> {exists}</p>
+    <p><strong>Files in template folder:</strong> {files}</p>
+    <p><strong>All directories in current:</strong> {all_dirs}</p>
+    """
 
 # Website routes
 class Website:
@@ -43,19 +72,28 @@ class Website:
         if not '-' in conversation_id:
             return redirect(f'/chat')
 
-        return render_template('index.html', chat_id=conversation_id)
+        try:
+            return render_template('index.html', chat_id=conversation_id)
+        except Exception as e:
+            return f"Template error: {str(e)}<br><a href='/debug'>Debug info</a>", 500
 
     def _index(self):
-        return render_template('index.html', chat_id=f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time() * 1000))[2:]}')
+        try:
+            return render_template('index.html', chat_id=f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time() * 1000))[2:]}')
+        except Exception as e:
+            return f"Template error: {str(e)}<br><a href='/debug'>Debug info</a>", 500
 
     def _assets(self, folder: str, file: str):
         try:
-            return send_file(f"./../client/{folder}/{file}", as_attachment=False)
+            return send_file(f"../client/{folder}/{file}", as_attachment=False)
         except:
             return "File not found", 404
 
     def _onboarding(self):
-        return render_template('onboarding.html')
+        try:
+            return render_template('onboarding.html')
+        except Exception as e:
+            return f"Template error: {str(e)}<br><a href='/debug'>Debug info</a>", 500
     
     def _links(self, 
                conversation_id, 
@@ -63,12 +101,15 @@ class Website:
                video_ids_concat,
                titles_concat
                ):
-        return render_template('links.html',
-                               chat_id=conversation_id,
-                               scrolly=scrolly,
-                               video_ids_concat=video_ids_concat,
-                               titles_concat=titles_concat
-                               )
+        try:
+            return render_template('links.html',
+                                   chat_id=conversation_id,
+                                   scrolly=scrolly,
+                                   video_ids_concat=video_ids_concat,
+                                   titles_concat=titles_concat
+                                   )
+        except Exception as e:
+            return f"Template error: {str(e)}<br><a href='/debug'>Debug info</a>", 500
 
 # Backend API routes
 class BackendApi:
@@ -83,28 +124,46 @@ class BackendApi:
 
     def _conversation(self):
         try:
+            # Check if request has JSON data
+            if not request.json:
+                return Response("No JSON data provided", status=400)
             
-            prompt = request.json['meta']['content']['parts'][0]
-            question_text = prompt['content'] if isinstance(prompt, dict) else prompt
+            # Safely extract the prompt
+            meta = request.json.get('meta', {})
+            content = meta.get('content', {})
+            parts = content.get('parts', [])
+            
+            if not parts:
+                return Response("No parts in content", status=400)
+                
+            prompt = parts[0]
+            question_text = prompt.get('content', '') if isinstance(prompt, dict) else str(prompt)
+            
+            if not question_text:
+                return Response("No question text provided", status=400)
             
             payload = {
                 "question": question_text.replace("?", "").replace("\n", "")
             }
 
-            
             api_url = "https://legal-chatbot.eastus.cloudapp.azure.com:443/v1/assist/stream/"
-            api_headers = {"Content-Type": "application/json", 'cache-control': 'no-cache', 'Connection': 'keep-alive'}
+            api_headers = {
+                "Content-Type": "application/json", 
+                'cache-control': 'no-cache', 
+                'Connection': 'keep-alive'
+            }
 
             def generate():
-                with requests.post(api_url, headers=api_headers, json=payload, stream=True) as r:
-                    
-                    if r.status_code >= 400:
-                        yield f"data: Error: Received status code {r.status_code} from API\n\n"
-                        return
-                    for line in r.iter_lines():
-                        if line:
-                            yield f"{line.decode('utf-8')}\n\n"
-                            # print(f"Received: {line.decode('utf-8')}")
+                try:
+                    with requests.post(api_url, headers=api_headers, json=payload, stream=True, timeout=30) as r:
+                        if r.status_code >= 400:
+                            yield f"data: Error: Received status code {r.status_code} from API\n\n"
+                            return
+                        for line in r.iter_lines():
+                            if line:
+                                yield f"{line.decode('utf-8')}\n\n"
+                except Exception as e:
+                    yield f"data: Stream error: {str(e)}\n\n"
 
             return Response(
                 stream_with_context(generate()),
@@ -116,30 +175,37 @@ class BackendApi:
             )
 
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error in _conversation: {e}")
             return Response(f"An error occurred: {str(e)}", status=500)
 
-# Initialize routes
-site = Website(app)
-for route in site.routes:
-    app.add_url_rule(
-        route,
-        view_func=site.routes[route]['function'],
-        methods=site.routes[route]['methods'],
-    )
+# Initialize routes with error handling
+try:
+    site = Website(app)
+    for route in site.routes:
+        app.add_url_rule(
+            route,
+            view_func=site.routes[route]['function'],
+            methods=site.routes[route]['methods'],
+        )
 
-backend_api = BackendApi(app)
-for route in backend_api.routes:
-    app.add_url_rule(
-        route,
-        view_func=backend_api.routes[route]['function'],
-        methods=backend_api.routes[route]['methods'],
-    )
+    backend_api = BackendApi(app)
+    for route in backend_api.routes:
+        app.add_url_rule(
+            route,
+            view_func=backend_api.routes[route]['function'],
+            methods=backend_api.routes[route]['methods'],
+        )
+except Exception as e:
+    print(f"Error initializing routes: {e}")
 
 # Vercel serverless function handler
 def handler(request, context):
-    return app(request, context)
+    try:
+        return app(request, context)
+    except Exception as e:
+        print(f"Handler error: {e}")
+        return Response(f"Handler error: {str(e)}", status=500)
 
 # For local development
 if __name__ == '__main__':
-    app.run(debug=True) 
+    app.run(debug=True)
