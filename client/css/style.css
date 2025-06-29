@@ -325,10 +325,10 @@ h3 {
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
-  padding: 20px 0 120px 0; /* Padding bottom pour éviter que le texte passe sous la barre de chat */
+  padding: 20px 0;
   scroll-behavior: smooth;
   align-items: center;
-  margin-bottom: 0; /* Suppression de la marge pour coller à la barre */
+  height: calc(100vh - 220px);
 }
 
 .conversation .user-input {
@@ -947,7 +947,7 @@ ul {
   }
   
   .conversation #messages {
-    padding: 20px 0 120px 0;
+    height: calc(100vh - 180px);
   }
   
   .buttons {
@@ -985,7 +985,7 @@ ul {
   }
   
   .conversation #messages {
-    padding: 20px 0 120px 0;
+    height: calc(100vh - 200px);
   }
   
   .user-input-container {
@@ -1322,28 +1322,24 @@ a:-webkit-any-link {
   line-height: 1.3;
 }
 
-/* Ajustement de la fenêtre de chat - abaissée */
+/* Ajustement de la fenêtre de chat - plus basse */
 .user-input-container {
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0 10px 0 10px;
+  padding: 0 10px 40px 10px; /* Augmenté pour laisser plus d'espace */
   box-sizing: border-box;
-  position: fixed;
-  bottom: 32px;
-  left: 0;
-  right: 0;
+  position: sticky;
+  bottom: 0;
   background: var(--colour-1);
-  z-index: 100;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .input-box {
   display: flex;
   align-items: center;
   width: 100%;
-  max-width: 744px;
   background-color: var(--light-gray);
   border: none;
   border-radius: 25px;
@@ -1365,19 +1361,18 @@ a:-webkit-any-link {
   padding: 10px;
   border-radius: 25px;
   font-family: "Inter";
-  margin-right: 10px;
+  margin-right: 10px; /* Réduit de 30px à 10px pour plus d'espace */
   height: 80px;
-  background-color: transparent;
 }
 
 /* Nouveau style pour le bouton d'envoi - fond blanc avec flèche noire et effet blur */
 #send-button {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.95); /* Fond blanc avec légère transparence */
+  backdrop-filter: blur(10px); /* Effet blur comme le reste */
   -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(47, 47, 46, 0.2);
+  border: 1px solid rgba(47, 47, 46, 0.2); /* Bordure subtile */
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1388,14 +1383,14 @@ a:-webkit-any-link {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   flex-shrink: 0;
-  color: #2f2f2e;
+  color: #2f2f2e; /* Flèche noire */
 }
 
 #send-button i {
   display: block;
   margin: auto;
   font-size: 16px;
-  color: #2f2f2e;
+  color: #2f2f2e; /* Flèche noire - même couleur que le thème */
 }
 
 #send-button:hover {
@@ -1413,8 +1408,8 @@ a:-webkit-any-link {
 /* Ajustements pour mobile */
 @media (max-width: 600px) {
   .user-input-container {
-    padding: 0 5px 0 5px;
-    bottom: 28px;
+    align-items: unset;
+    padding: 0 5px 35px 5px; /* Augmenté aussi pour mobile */
   }
   
   .usage-warning {
@@ -1428,7 +1423,7 @@ a:-webkit-any-link {
   }
   
   .conversation #messages {
-    padding: 20px 0 100px 0;
+    height: calc(100vh - 180px);
   }
   
   #send-button {
@@ -1441,7 +1436,7 @@ a:-webkit-any-link {
   }
 
   .stop_generating {
-    bottom: 110px;
+    bottom: 130px; /* Ajusté pour la nouvelle position */
   }
   
   #message-input {
@@ -1451,21 +1446,6 @@ a:-webkit-any-link {
   
   .input-box {
     padding: 5px 10px;
-  }
-}
-
-/* Ajustements pour les très petits écrans */
-@media screen and (max-height: 640px) {
-  .conversations {
-    height: calc(100vh - 60px);
-  }
-  
-  .conversation #messages {
-    padding: 20px 0 90px 0;
-  }
-  
-  .user-input-container {
-    bottom: 25px;
   }
 }
 
