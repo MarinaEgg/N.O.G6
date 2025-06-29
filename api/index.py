@@ -258,5 +258,3 @@ def handler(event, context):
     return app(event, context)
 
 # Alternative : exporter directement l'app
-# C'est ce que Vercel utilisera
-app = app
