@@ -198,13 +198,8 @@ try:
 except Exception as e:
     print(f"Error initializing routes: {e}")
 
-# Vercel serverless function handler
-def handler(request, context):
-    try:
-        return app(request, context)
-    except Exception as e:
-        print(f"Handler error: {e}")
-        return Response(f"Handler error: {str(e)}", status=500)
+# For Vercel deployment - Flask app is automatically detected
+# No handler function needed
 
 # For local development
 if __name__ == '__main__':
