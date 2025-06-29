@@ -1327,13 +1327,15 @@ a:-webkit-any-link {
   align-items: center;
   padding: 15px 10px 15px 10px;
   box-sizing: border-box;
-  position: fixed;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
   background: var(--colour-1);
-  z-index: 1000;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Masquer la barre de chat dans les pages media/library */
+.sidenav .user-input-container {
+  display: none !important;
 }
 
 .input-box {
