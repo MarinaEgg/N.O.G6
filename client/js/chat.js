@@ -14,13 +14,31 @@ const get_sep = "|||";
 const copyButton = `<div class="copy-icon"> <img src="/assets/img/copy.png" height="14px" /> </div>`;
 const likeButton = `<div class="like-icon"> <img src="/assets/img/like.png" height="14px" /> </div>`;
 const dislikeButton = `<div class="dislike-icon"> <img src="/assets/img/dislike.png" height="14px" /> </div>`;
+
+// Fonction pour générer l'avertissement dynamique
+const getDynamicWarning = () => {
+  const language = navigator.language.startsWith('fr') ? 'fr' : 'en';
+  const warnings = {
+    fr: "N.O.G peut faire des erreurs, assurez-vous de vérifier ses réponses",
+    en: "N.O.G can make mistakes, make sure to verify its responses"
+  };
+  return `<span class="dynamic-warning">${warnings[language]}</span>`;
+};
+
 const actionsButtons = `<div class="actions">
                               ${copyButton}
                               ${likeButton}
                               ${dislikeButton}
+                              ${getDynamicWarning()}
                           </div>`;
 const loadingStream = `<span class="loading-stream"></span>`;
 let prompt_lock = false;
+
+// Messages de greeting mis à jour
+const greetingMessages = {
+  fr: "Bonjour. Je suis N.O.G – Nested Orchestration & Governance.\nJe suis conçu pour orchestrer et gouverner les interactions entre différents agents spécialisés, avec une capacité native de connexion à des systèmes tiers tels qu'iManage, entre autres.\n\nInteropérable avec plusieurs grands modèles de langage (GPT, Mistral, Claude), je prends en charge des opérations complexes tout en assurant une traçabilité fine et systématique de chaque interaction.\n\nCette architecture garantit une gouvernance robuste, conforme aux exigences des environnements juridiques professionnels.",
+  en: "Hi. I am N.O.G – Nested Orchestration & Governance.\nI am designed to orchestrate and govern interactions between specialized agents, with native integration capabilities for third-party systems such as iManage, among others.\n\nInteroperable with leading large language models (GPT, Mistral, Claude), I support complex operations while ensuring fine-grained, systematic traceability of every interaction.\n\nThis architecture guarantees robust governance, aligned with the standards and expectations of professional legal environments."
+};
 
 hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
@@ -520,6 +538,26 @@ const new_conversation = async () => {
   window.conversation_id = uuid();
 
   await clear_conversation();
+  
+  // Afficher le message de greeting au début d'une nouvelle conversation
+  const language = navigator.language.startsWith('fr') ? 'fr' : 'en';
+  const greetingText = greetingMessages[language];
+  
+  // Ajouter le message de greeting
+  message_box.innerHTML += `
+    <div class="message message-assistant">
+      ${nog_image}
+      <div class="content">
+        <div class="assistant-content" style="word-wrap: break-word; max-width: 100%; overflow-x: auto;">
+          ${markdown.render(greetingText)}
+        </div>
+        ${actionsButtons}
+      </div>
+    </div>
+  `;
+  
+  message_box.scrollTop = message_box.scrollHeight;
+  
   await load_conversations(20, 0, true);
 };
 
