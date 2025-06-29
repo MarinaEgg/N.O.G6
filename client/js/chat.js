@@ -53,7 +53,7 @@ function createCodeWindow(content, title = "Code", type = "code") {
   const windowId = `code-window-${++codeWindowCounter}`;
   
   const windowHTML = `
-    <div class="code-window collapsed" id="${windowId}" data-type="${type}">
+    <div class="code-window" id="${windowId}" data-type="${type}">
       <div class="code-window-header" onclick="toggleCodeWindow('${windowId}')">
         <h3 class="code-window-title">${title}</h3>
         <button class="code-close-btn" onclick="closeCodeWindow('${windowId}')" title="Fermer">×</button>
@@ -77,7 +77,7 @@ function createCodeWindow(content, title = "Code", type = "code") {
 }
 
 // Fonction pour animer l'expansion d'une fenêtre
-function expandCodeWindow(windowId, content) {
+function expandCodeWindow(windowId, content, autoClose = true) {
   const window = document.getElementById(windowId);
   if (!window) return;
   
@@ -105,12 +105,14 @@ function expandCodeWindow(windowId, content) {
         leftProgress.style.background = 'var(--progress-complete-color)';
         rightProgress.style.background = 'var(--progress-complete-color)';
         
-        // Auto-fermeture après 3 secondes
-        setTimeout(() => {
-          if (!window.classList.contains('collapsed')) {
-            closeCodeWindow(windowId);
-          }
-        }, 3000);
+        // Auto-fermeture seulement pour les blocs de code, pas les tableaux
+        if (autoClose && window.dataset.type === 'code') {
+          setTimeout(() => {
+            if (!window.classList.contains('collapsed')) {
+              closeCodeWindow(windowId);
+            }
+          }, 4000); // Augmenté à 4 secondes
+        }
       } else {
         requestAnimationFrame(animateProgress);
       }
@@ -204,7 +206,7 @@ function wrapCodeBlocks(html) {
     
     // Programmer l'expansion après l'insertion
     setTimeout(() => {
-      expandCodeWindow(windowId, codeContent);
+      expandCodeWindow(windowId, codeContent, true); // Auto-fermeture activée pour le code
     }, 100);
     
     return windowHTML;
@@ -222,9 +224,9 @@ function wrapTables(html) {
     
     const { windowHTML, windowId } = createCodeWindow(match, title, 'table');
     
-    // Programmer l'expansion après l'insertion
+    // Programmer l'expansion après l'insertion - PAS d'auto-fermeture pour les tableaux
     setTimeout(() => {
-      expandCodeWindow(windowId, match);
+      expandCodeWindow(windowId, match, false); // Auto-fermeture désactivée pour les tableaux
     }, 100);
     
     return windowHTML;
