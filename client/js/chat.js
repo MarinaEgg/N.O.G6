@@ -213,24 +213,60 @@ function wrapCodeBlocks(html) {
   });
 }
 
-// Fonction pour détecter et encapsuler les tableaux
+// Fonction améliorée pour détecter et encapsuler les tableaux
 function wrapTables(html) {
-  const tableRegex = /<table[^>]*>([\s\S]*?)<\/table>/g;
+  // Regex plus flexible pour détecter les tableaux
+  const tableRegex = /<table[^>]*>[\s\S]*?<\/table>/gi;
   
   return html.replace(tableRegex, (match) => {
+    console.log('Tableau détecté:', match.substring(0, 100) + '...');
+    
     // Extraire le titre du tableau s'il y a un caption ou utiliser un titre par défaut
-    const captionMatch = match.match(/<caption[^>]*>(.*?)<\/caption>/);
-    const title = captionMatch ? captionMatch[1].replace(/<[^>]*>/g, '') : 'Tableau de données';
+    const captionMatch = match.match(/<caption[^>]*>(.*?)<\/caption>/i);
+    let title = 'Tableau de données';
+    
+    if (captionMatch) {
+      title = captionMatch[1].replace(/<[^>]*>/g, '').trim();
+    } else {
+      // Essayer d'extraire le premier en-tête comme titre
+      const firstThMatch = match.match(/<th[^>]*>(.*?)<\/th>/i);
+      if (firstThMatch) {
+        const headerText = firstThMatch[1].replace(/<[^>]*>/g, '').trim();
+        if (headerText.length > 0 && headerText.length < 50) {
+          title = `Tableau - ${headerText}`;
+        }
+      }
+    }
     
     const { windowHTML, windowId } = createCodeWindow(match, title, 'table');
     
     // Programmer l'expansion après l'insertion - PAS d'auto-fermeture pour les tableaux
     setTimeout(() => {
+      console.log('Expansion du tableau:', windowId);
       expandCodeWindow(windowId, match, false); // Auto-fermeture désactivée pour les tableaux
     }, 100);
     
     return windowHTML;
   });
+}
+
+// Fonction pour traiter le contenu et encapsuler les éléments
+function processContent(text) {
+  console.log('Traitement du contenu:', text.substring(0, 100) + '...');
+  
+  // D'abord convertir le markdown en HTML
+  let processedText = marked.parse(text);
+  console.log('Après markdown:', processedText.substring(0, 100) + '...');
+  
+  // Ensuite encapsuler les tableaux (avant les blocs de code pour éviter les conflits)
+  processedText = wrapTables(processedText);
+  console.log('Après wrapTables:', processedText.substring(0, 100) + '...');
+  
+  // Enfin encapsuler les blocs de code
+  processedText = wrapCodeBlocks(processedText);
+  console.log('Après wrapCodeBlocks:', processedText.substring(0, 100) + '...');
+  
+  return processedText;
 }
 
 // Fonction pour redimensionner dynamiquement le textarea et la barre de chat
@@ -480,13 +516,11 @@ const ask_gpt = async (message) => {
 
         for (const char of chars) {
           text += char;
-          let processedText = marked.parse(text);
           
-          // Encapsuler les blocs de code et tableaux dans des fenêtres
-          processedText = wrapCodeBlocks(processedText);
-          processedText = wrapTables(processedText);
+          // Utiliser la nouvelle fonction de traitement
+          const processedContent = processContent(text);
           
-          document.getElementById(`imanage_${window.token}`).innerHTML = processedText;
+          document.getElementById(`imanage_${window.token}`).innerHTML = processedContent;
           document.getElementById(
             `imanage_${window.token}`
           ).lastElementChild.innerHTML += loadingStream;
@@ -644,11 +678,8 @@ function createVideoSourceBubble(url, title, index, allVideoIds, allTitles) {
 }
 
 async function writeNoRAGConversation(text, message, links) {
-  let processedText = marked.parse(text);
-  
-  // Encapsuler les blocs de code et tableaux dans des fenêtres
-  processedText = wrapCodeBlocks(processedText);
-  processedText = wrapTables(processedText);
+  // Utiliser la nouvelle fonction de traitement
+  const processedText = processContent(text);
   
   document.getElementById(`imanage_${window.token}`).innerHTML =
     processedText + actionsButtons;
@@ -877,11 +908,8 @@ const load_conversation = async (conversation_id) => {
       
       if (item.role === "assistant") {
         // Traiter le contenu pour encapsuler les blocs de code et tableaux
-        let htmlContent = markdown.render(item.content);
-        htmlContent = wrapCodeBlocks(htmlContent);
-        htmlContent = wrapTables(htmlContent);
-        
-        processedContent = `<div class="assistant-content" style="word-wrap: break-word; max-width: 100%; overflow-x: auto;">${htmlContent}</div>`;
+        processedContent = processContent(item.content);
+        processedContent = `<div class="assistant-content" style="word-wrap: break-word; max-width: 100%; overflow-x: auto;">${processedContent}</div>`;
       }
       
       message_box.innerHTML += `
