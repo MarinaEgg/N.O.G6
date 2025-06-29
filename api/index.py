@@ -199,10 +199,11 @@ def backend_api(endpoint):
         "timestamp": "2025-06-29"
     })
 
-# Routes pour les fichiers statiques
-@app.route('/css/<path:filename>')
-def css_files(filename):
+# CORRECTION CRITIQUE: Routes pour les fichiers statiques avec gestion d'erreurs améliorée
+@app.route('/assets/css/<path:filename>')
+def serve_css(filename):
     try:
+        # Chercher le fichier CSS dans différents emplacements
         possible_paths = [
             f'client/css/{filename}',
             f'../client/css/{filename}',
@@ -211,15 +212,18 @@ def css_files(filename):
         
         for path in possible_paths:
             if os.path.exists(path):
-                return send_from_directory(os.path.dirname(path), os.path.basename(path))
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return content, 200, {'Content-Type': 'text/css'}
         
         return f"CSS file not found: {filename}", 404
     except Exception as e:
-        return f"Error serving CSS: {str(e)}", 500
+        return f"Error serving CSS {filename}: {str(e)}", 500
 
-@app.route('/js/<path:filename>')
-def js_files(filename):
+@app.route('/assets/js/<path:filename>')
+def serve_js(filename):
     try:
+        # Chercher le fichier JS dans différents emplacements
         possible_paths = [
             f'client/js/{filename}',
             f'../client/js/{filename}',
@@ -228,15 +232,18 @@ def js_files(filename):
         
         for path in possible_paths:
             if os.path.exists(path):
-                return send_from_directory(os.path.dirname(path), os.path.basename(path))
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                return content, 200, {'Content-Type': 'application/javascript'}
         
         return f"JS file not found: {filename}", 404
     except Exception as e:
-        return f"Error serving JS: {str(e)}", 500
+        return f"Error serving JS {filename}: {str(e)}", 500
 
-@app.route('/img/<path:filename>')
-def img_files(filename):
+@app.route('/assets/img/<path:filename>')
+def serve_img(filename):
     try:
+        # Chercher le fichier image dans différents emplacements
         possible_paths = [
             f'client/img/{filename}',
             f'../client/img/{filename}',
@@ -245,11 +252,69 @@ def img_files(filename):
         
         for path in possible_paths:
             if os.path.exists(path):
-                return send_from_directory(os.path.dirname(path), os.path.basename(path))
+                # Déterminer le type MIME basé sur l'extension
+                if filename.lower().endswith('.png'):
+                    mimetype = 'image/png'
+                elif filename.lower().endswith('.jpg') or filename.lower().endswith('.jpeg'):
+                    mimetype = 'image/jpeg'
+                elif filename.lower().endswith('.gif'):
+                    mimetype = 'image/gif'
+                elif filename.lower().endswith('.svg'):
+                    mimetype = 'image/svg+xml'
+                elif filename.lower().endswith('.webp'):
+                    mimetype = 'image/webp'
+                elif filename.lower().endswith('.ico'):
+                    mimetype = 'image/x-icon'
+                elif filename.lower().endswith('.webmanifest'):
+                    mimetype = 'application/manifest+json'
+                else:
+                    mimetype = 'application/octet-stream'
+                
+                # Pour les fichiers texte comme webmanifest
+                if filename.lower().endswith('.webmanifest'):
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    return content, 200, {'Content-Type': mimetype}
+                else:
+                    # Pour les fichiers binaires
+                    with open(path, 'rb') as f:
+                        content = f.read()
+                    return content, 200, {'Content-Type': mimetype}
         
         return f"Image file not found: {filename}", 404
     except Exception as e:
-        return f"Error serving image: {str(e)}", 500
+        return f"Error serving image {filename}: {str(e)}", 500
+
+# Route générique pour les assets (fallback)
+@app.route('/assets/<folder>/<file>')
+def assets_fallback(folder: str, file: str):
+    try:
+        possible_paths = [
+            f'client/{folder}/{file}',
+            f'../client/{folder}/{file}',
+            f'./client/{folder}/{file}'
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                # Déterminer le type de contenu
+                if folder == 'css':
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    return content, 200, {'Content-Type': 'text/css'}
+                elif folder == 'js':
+                    with open(path, 'r', encoding='utf-8') as f:
+                        content = f.read()
+                    return content, 200, {'Content-Type': 'application/javascript'}
+                else:
+                    # Pour les autres types de fichiers
+                    with open(path, 'rb') as f:
+                        content = f.read()
+                    return content, 200, {'Content-Type': 'application/octet-stream'}
+        
+        return f"Asset not found: {folder}/{file}", 404
+    except Exception as e:
+        return f"Error serving asset {folder}/{file}: {str(e)}", 500
 
 # Point d'entrée pour Vercel - CORRECTION CRITIQUE
 # Vercel attend une variable nommée 'app' au niveau du module
