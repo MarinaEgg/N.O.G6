@@ -446,7 +446,7 @@ async function writeNoRAGConversation(text, message, links) {
 }
 
 // Fonction pour créer une bulle vidéo YouTube qui redirige vers la page de liens
-async function createVideoSourceBubble(url, title, index, allVideoIds, allTitles) {
+function createVideoSourceBubble(url, title, index, allVideoIds, allTitles) {
   const bubble = document.createElement('div');
   bubble.className = 'video-source-bubble';
   bubble.setAttribute('data-index', index);
@@ -462,9 +462,12 @@ async function createVideoSourceBubble(url, title, index, allVideoIds, allTitles
     <p class="video-source-url">${url}</p>
   `;
 
-  bubble.addEventListener('click', async () => {
-    // Ouvrir la page de liens avec tous les vidéos (comme l'ancien comportement)
-    await openLinks(allVideoIds.join(get_sep), allTitles.join(get_sep));
+  // Ajouter l'événement de clic pour ouvrir la page de liens
+  bubble.addEventListener('click', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Bubble clicked, opening links with:', allVideoIds.join(get_sep), allTitles.join(get_sep));
+    openLinks(allVideoIds.join(get_sep), allTitles.join(get_sep));
   });
 
   return bubble;
@@ -492,7 +495,7 @@ async function writeRAGConversation(links, text, language) {
 
   // Créer les bulles pour chaque vidéo (maximum 3)
   for (let i = 0; i < Math.min(links.length, 3); i++) {
-    const bubble = await createVideoSourceBubble(links[i], titles[i], i, video_ids, titles);
+    const bubble = createVideoSourceBubble(links[i], titles[i], i, video_ids, titles);
     videoSourcesContainer.appendChild(bubble);
   }
 
@@ -506,6 +509,17 @@ async function writeRAGConversation(links, text, language) {
     </div>`;
     
   message_box.scrollTop = message_box.scrollHeight;
+  
+  // Réattacher les événements de clic après l'ajout au DOM
+  const addedBubbles = message_box.querySelectorAll('.video-source-bubble');
+  addedBubbles.forEach((bubble, index) => {
+    bubble.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Bubble clicked from DOM, opening links with:', video_ids.join(get_sep), titles.join(get_sep));
+      openLinks(video_ids.join(get_sep), titles.join(get_sep));
+    });
+  });
   
   const last_message_assistant = document.getElementsByClassName(
     class_last_message_assistant
@@ -683,8 +697,9 @@ const load_conversation = async (conversation_id) => {
       // Créer le conteneur pour les bulles vidéo lors du rechargement
       let videoSourcesHTML = '<div class="video-sources-container">';
       for (let i = 0; i < Math.min(links.length, 3); i++) {
+        const bubbleId = `bubble-${conversation_id}-${i}`;
         videoSourcesHTML += `
-          <div class="video-source-bubble" data-index="${i}" onclick="openLinks('${video_ids.join(get_sep)}', '${titles.join(get_sep)}')">
+          <div class="video-source-bubble" data-index="${i}" id="${bubbleId}">
             <div class="video-source-title">
               <svg class="youtube-icon" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
@@ -704,6 +719,22 @@ const load_conversation = async (conversation_id) => {
             ${videoSourcesHTML}
           </div>
         </div>`;
+
+      // Ajouter les événements de clic après l'ajout au DOM
+      setTimeout(() => {
+        for (let i = 0; i < Math.min(links.length, 3); i++) {
+          const bubbleId = `bubble-${conversation_id}-${i}`;
+          const bubbleElement = document.getElementById(bubbleId);
+          if (bubbleElement) {
+            bubbleElement.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log('Loaded bubble clicked, opening links with:', video_ids.join(get_sep), titles.join(get_sep));
+              openLinks(video_ids.join(get_sep), titles.join(get_sep));
+            });
+          }
+        }
+      }, 100);
     }
   });
 
