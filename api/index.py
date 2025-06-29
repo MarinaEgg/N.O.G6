@@ -1,9 +1,13 @@
-from flask import Flask, render_template, send_from_directory, jsonify
+from flask import Flask, render_template, send_from_directory, jsonify, request
 import os
+import sys
 
 app = Flask(__name__, 
            static_folder='../client',
            template_folder='../client/html')
+
+# Configuration pour Flask 3.x
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 @app.route('/')
 def home():
@@ -24,18 +28,40 @@ def debug():
         files = os.listdir('.')
         api_files = os.listdir('./api') if os.path.exists('./api') else ["No api folder"]
         client_files = os.listdir('./client') if os.path.exists('./client') else ["No client folder"]
+        
+        # Vérifier les sous-dossiers du client
+        client_subdirs = {}
+        if os.path.exists('./client'):
+            for subdir in ['html', 'css', 'js', 'img']:
+                path = f'./client/{subdir}'
+                if os.path.exists(path):
+                    try:
+                        client_subdirs[subdir] = os.listdir(path)
+                    except:
+                        client_subdirs[subdir] = ["Error reading"]
+                else:
+                    client_subdirs[subdir] = ["Folder not found"]
     except Exception as e:
         files = [f"Error listing files: {str(e)}"]
         api_files = []
         client_files = []
+        client_subdirs = {}
     
     return f"""
     <h2>Vercel Debug Info:</h2>
     <p><strong>Current directory:</strong> {current_dir}</p>
+    <p><strong>Python version:</strong> {sys.version}</p>
+    <p><strong>Flask version:</strong> {Flask.__version__}</p>
+    <p><strong>Request method:</strong> {request.method}</p>
+    <p><strong>Request path:</strong> {request.path}</p>
+    <hr>
+    <h3>File Structure:</h3>
     <p><strong>Root files:</strong> {files}</p>
     <p><strong>API files:</strong> {api_files}</p>
     <p><strong>Client files:</strong> {client_files}</p>
-    <p><strong>Python version:</strong> {os.sys.version}</p>
+    <hr>
+    <h3>Client Subdirectories:</h3>
+    {''.join([f'<p><strong>{k}:</strong> {v}</p>' for k, v in client_subdirs.items()])}
     """
 
 @app.route('/onboarding')
@@ -101,9 +127,15 @@ def assets(filename):
             continue
     return "Asset not found", 404
 
-# Point d'entrée pour Vercel
-def handler(request):
-    return app(request.environ, start_response)
+# Point d'entrée pour Vercel - Compatible Flask 3.x
+app.wsgi_app = app.wsgi_app
+
+# Handler pour Vercel
+def handler(event, context):
+    return app
+
+# Export de l'app pour Vercel
+application = app
 
 # Pour les tests locaux
 if __name__ == '__main__':
