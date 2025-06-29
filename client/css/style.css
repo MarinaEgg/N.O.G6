@@ -314,6 +314,7 @@ h3 {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
 }
 
 .conversation #messages {
@@ -327,6 +328,7 @@ h3 {
   padding: 20px 0;
   scroll-behavior: smooth;
   align-items: center;
+  height: calc(100vh - 200px);
 }
 
 .conversation .user-input {
