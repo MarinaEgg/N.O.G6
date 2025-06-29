@@ -1355,6 +1355,7 @@ a:-webkit-any-link {
   min-height: 60px;
   transition: all 0.2s ease;
   flex-direction: column;
+  position: relative;
 }
 
 #message-input {
@@ -1378,7 +1379,13 @@ a:-webkit-any-link {
   height: auto;
   transition: height 0.1s ease;
   
-  /* Forcer l'alignement du texte vers le bas */
+  /* Forcer l'expansion vers le haut */
+  position: absolute;
+  bottom: 50px; /* Position fixe par rapport au bas de la boîte */
+  left: 10px;
+  right: 10px;
+  
+  /* Alignement du texte vers le bas */
   display: flex;
   align-items: flex-end;
   vertical-align: bottom;
@@ -1415,6 +1422,8 @@ a:-webkit-any-link {
   justify-content: space-between;
   width: 100%;
   margin-top: 5px;
+  position: relative;
+  z-index: 10;
 }
 
 #send-button {

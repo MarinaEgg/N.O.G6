@@ -61,8 +61,12 @@ function resizeTextarea(textarea) {
   // Adjust the input box height accordingly - expansion vers le haut
   const inputBox = textarea.closest('.input-box');
   if (inputBox) {
-    const boxHeight = Math.max(newHeight + 20, 60);
+    const boxHeight = Math.max(newHeight + 60, 60); // +60 pour les contrôles
     inputBox.style.height = boxHeight + 'px';
+    
+    // Ajuster la position du textarea pour qu'il reste ancré en bas
+    const controlsHeight = 50; // Hauteur des contrôles
+    textarea.style.bottom = controlsHeight + 'px';
     
     // Ajuster le padding-bottom des messages pour éviter le chevauchement
     const messagesContainer = document.getElementById('messages');
@@ -88,9 +92,14 @@ function resizeTextarea(textarea) {
 function resetChatBarHeight() {
   const inputBox = document.querySelector('.input-box');
   const messagesContainer = document.getElementById('messages');
+  const textarea = document.getElementById('message-input');
   
   if (inputBox) {
     inputBox.style.height = '60px';
+  }
+  
+  if (textarea) {
+    textarea.style.bottom = '50px'; // Position par défaut
   }
   
   if (messagesContainer) {
