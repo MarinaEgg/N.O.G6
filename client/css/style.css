@@ -104,15 +104,34 @@ blockquote {
   padding-left: 26px;
 }
 
+/* Code inline - SUPPRESSION de l'encadrement */
 code {
   font-family: "Inter Mono", monospace;
+  font-size: inherit;
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  font-weight: inherit;
+}
+
+/* Code dans les blocs pre uniquement */
+pre code {
+  font-family: "Inter Mono", monospace;
   font-size: 14px;
-  background: rgba(252, 233, 107, 0.15);
+  background: transparent;
   color: #2f2f2e;
-  padding: 3px 6px;
-  border-radius: 4px;
-  border: 1px solid rgba(252, 233, 107, 0.3);
-  font-weight: 500;
+  padding: 20px;
+  border-radius: 0;
+  border: none;
+  display: block;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
 }
 
 pre {
@@ -147,23 +166,6 @@ pre::before {
   border-radius: 12px;
   pointer-events: none;
   z-index: 0;
-}
-
-pre code {
-  font-family: "Inter Mono", monospace;
-  font-size: 14px;
-  background: transparent;
-  color: #2f2f2e;
-  padding: 20px;
-  border-radius: 0;
-  border: none;
-  display: block;
-  white-space: pre-wrap;
-  line-height: 1.6;
-  font-weight: 400;
-  position: relative;
-  z-index: 1;
-  overflow-x: auto;
 }
 
 /* Styles pour highlight.js avec thème personnalisé */
@@ -1429,7 +1431,7 @@ a:-webkit-any-link {
 }
 
 .hljs-copy-button:after {
-  content: 'Copier';
+  content: 'Copy';
   font-size: 12px;
   font-weight: 600;
   color: #2f2f2e;
@@ -1467,7 +1469,7 @@ a:-webkit-any-link {
 }
 
 .hljs-copy-button[data-copied="true"]:after {
-  content: 'Copié !';
+  content: 'Copied!';
   color: #22c55e;
 }
 
