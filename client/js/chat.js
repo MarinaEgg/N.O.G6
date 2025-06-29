@@ -44,9 +44,20 @@ hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
   onBoardingContent();
 
+// Fonction pour redimensionner dynamiquement le textarea
 function resizeTextarea(textarea) {
-  textarea.style.height = "80px";
-  textarea.style.height = Math.min(textarea.scrollHeight, 200) + "px";
+  // Reset height to auto to get the correct scrollHeight
+  textarea.style.height = "auto";
+  
+  // Calculate new height based on content
+  const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 200);
+  textarea.style.height = newHeight + "px";
+  
+  // Adjust the input box height accordingly
+  const inputBox = textarea.closest('.input-box');
+  if (inputBox) {
+    inputBox.style.minHeight = (newHeight + 20) + "px";
+  }
 }
 
 function openLibrary() {
@@ -110,7 +121,7 @@ const delete_conversations = async () => {
 };
 
 const handle_ask = async () => {
-  message_input.style.height = `80px`;
+  message_input.style.height = `40px`;
   message_input.focus();
 
   window.scrollTo(0, 0);
@@ -118,6 +129,8 @@ const handle_ask = async () => {
 
   if (message.length > 0) {
     message_input.value = ``;
+    // Reset textarea height after clearing
+    resizeTextarea(message_input);
     await ask_gpt(message);
   }
 };
@@ -749,12 +762,16 @@ window.onload = async () => {
     if (prompt_lock) return;
     if (evt.keyCode === 13 && !evt.shiftKey) {
       evt.preventDefault();
-
       await handle_ask();
     } else {
-      message_input.style.removeProperty("height");
-      message_input.style.height = message_input.scrollHeight + 4 + "px";
+      // Auto-resize on input
+      setTimeout(() => resizeTextarea(message_input), 0);
     }
+  });
+
+  // Auto-resize on input event
+  message_input.addEventListener(`input`, () => {
+    resizeTextarea(message_input);
   });
 
   send_button.addEventListener(`click`, async () => {
