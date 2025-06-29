@@ -58,7 +58,7 @@ function resizeTextarea(textarea) {
   const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
   textarea.style.height = newHeight + 'px';
   
-  // Adjust the input box height accordingly
+  // Adjust the input box height accordingly - expansion vers le haut
   const inputBox = textarea.closest('.input-box');
   if (inputBox) {
     const boxHeight = Math.max(newHeight + 20, 60);
@@ -72,9 +72,15 @@ function resizeTextarea(textarea) {
     }
   }
   
-  // If content exceeds max height, ensure scroll is at bottom to show cursor
+  // Maintenir le scroll en bas du textarea pour voir le curseur
   if (scrollHeight > maxHeight) {
-    textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
+    // Forcer le scroll à rester en bas
+    setTimeout(() => {
+      textarea.scrollTop = textarea.scrollHeight;
+    }, 0);
+  } else {
+    // Si pas de scroll nécessaire, s'assurer que le curseur est visible
+    textarea.scrollTop = 0;
   }
 }
 

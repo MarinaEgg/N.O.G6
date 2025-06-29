@@ -1354,6 +1354,7 @@ a:-webkit-any-link {
   overflow: visible;
   min-height: 60px;
   transition: all 0.2s ease;
+  flex-direction: column;
 }
 
 #message-input {
@@ -1364,11 +1365,10 @@ a:-webkit-any-link {
   overflow-y: auto;
   max-height: 400px;
   min-height: 40px;
-  width: calc(100% - 50px);
+  width: 100%;
   padding: 10px;
   border-radius: 25px;
   font-family: "Inter";
-  margin-right: 10px;
   background: transparent;
   line-height: 1.4;
   scrollbar-width: thin;
@@ -1377,6 +1377,19 @@ a:-webkit-any-link {
   white-space: pre-wrap;
   height: auto;
   transition: height 0.1s ease;
+  
+  /* Forcer l'alignement du texte vers le bas */
+  display: flex;
+  align-items: flex-end;
+  vertical-align: bottom;
+  
+  /* Assurer que le scroll reste en bas */
+  scroll-behavior: smooth;
+}
+
+/* Forcer le scroll à rester en bas lors de l'expansion */
+#message-input:focus {
+  scroll-behavior: auto;
 }
 
 #message-input::-webkit-scrollbar {
@@ -1396,6 +1409,14 @@ a:-webkit-any-link {
   background: #a8a8a8;
 }
 
+.input-controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 5px;
+}
+
 #send-button {
   width: 40px;
   height: 40px;
@@ -1408,7 +1429,6 @@ a:-webkit-any-link {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  margin-left: 10px;
   transition: all 0.2s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -1470,7 +1490,6 @@ a:-webkit-any-link {
   }
   
   #message-input {
-    margin-right: 5px;
     font-size: 14px;
   }
   
