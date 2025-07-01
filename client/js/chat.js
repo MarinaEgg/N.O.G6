@@ -44,7 +44,7 @@ hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
   onBoardingContent();
 
-// Fonction pour redimensionner dynamiquement le textarea et la barre de chat
+// FONCTION CORRIGÉE pour redimensionner dynamiquement le textarea et la barre de chat
 function resizeTextarea(textarea) {
   // Reset height to calculate scrollHeight properly
   textarea.style.height = 'auto';
@@ -52,10 +52,10 @@ function resizeTextarea(textarea) {
   // Calculate the new height based on content
   const scrollHeight = textarea.scrollHeight;
   const minHeight = 40;
-  const maxHeight = 300;
+  // SUPPRESSION de la limite maxHeight - permettre l'agrandissement illimité
   
-  // Set the new height within bounds
-  const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+  // Set the new height based on content without upper limit
+  const newHeight = Math.max(scrollHeight, minHeight);
   textarea.style.height = newHeight + 'px';
   
   // Adjust the input box height accordingly
@@ -78,10 +78,8 @@ function resizeTextarea(textarea) {
     }
   }
   
-  // If content exceeds max height, ensure scroll is at bottom to show cursor
-  if (scrollHeight > maxHeight) {
-    textarea.scrollTop = textarea.scrollHeight - textarea.clientHeight;
-  }
+  // CORRECTION : Toujours maintenir le scroll en bas pour voir le curseur
+  textarea.scrollTop = textarea.scrollHeight;
 }
 
 // Fonction pour réinitialiser la hauteur de la barre de chat
