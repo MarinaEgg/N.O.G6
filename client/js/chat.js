@@ -52,7 +52,7 @@ function resizeTextarea(textarea) {
   // Calculate the new height based on content
   const scrollHeight = textarea.scrollHeight;
   const minHeight = 40;
-  const maxHeight = 400;
+  const maxHeight = 300;
   
   // Set the new height within bounds
   const newHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
@@ -64,17 +64,16 @@ function resizeTextarea(textarea) {
     const boxHeight = Math.max(newHeight + 20, 60);
     inputBox.style.height = boxHeight + 'px';
     
-    // Ajuster la position du conteneur pour qu'il s'étende vers le haut
-    const userInputContainer = inputBox.closest('.user-input-container');
-    if (userInputContainer) {
-      // Calculer le décalage vers le haut basé sur la différence de hauteur
+    // Ajuster la zone de messages pour éviter le chevauchement
+    const messagesContainer = document.getElementById('messages');
+    if (messagesContainer) {
       const heightDifference = boxHeight - 60; // 60 est la hauteur minimale
-      userInputContainer.style.transform = `translateY(-${heightDifference}px)`;
-      
-      // Ajuster aussi la zone de messages pour éviter le chevauchement
-      const messagesContainer = document.getElementById('messages');
-      if (messagesContainer) {
+      if (heightDifference > 0) {
+        messagesContainer.classList.add('expanded-input');
         messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
+      } else {
+        messagesContainer.classList.remove('expanded-input');
+        messagesContainer.style.paddingBottom = '120px';
       }
     }
   }
@@ -88,18 +87,14 @@ function resizeTextarea(textarea) {
 // Fonction pour réinitialiser la hauteur de la barre de chat
 function resetChatBarHeight() {
   const inputBox = document.querySelector('.input-box');
-  const userInputContainer = document.querySelector('.user-input-container');
   const messagesContainer = document.getElementById('messages');
   
   if (inputBox) {
     inputBox.style.height = '60px';
   }
   
-  if (userInputContainer) {
-    userInputContainer.style.transform = 'translateY(0px)';
-  }
-  
   if (messagesContainer) {
+    messagesContainer.classList.remove('expanded-input');
     messagesContainer.style.paddingBottom = '120px';
   }
 }
