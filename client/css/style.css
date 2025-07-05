@@ -290,74 +290,302 @@ li {
   font-weight: 400;
 }
 
-/* Styles pour les tableaux - NOUVEAU */
+/* Styles pour les tableaux - GLASSMORPHISME AVANCÉ */
 table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin: 16px 0;
-  font-family: "Inter", sans-serif;
+  font-family: "JetBrains Mono", monospace;
   font-size: 15px;
-  background: #ffffff;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e1e5e9;
+  position: relative;
+  
+  /* Effet liquid glass */
+  background: rgba(228, 233, 244, 0.12);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(130, 173, 214, 0.25);
+  box-shadow: 
+    0 8px 40px rgba(6, 57, 125, 0.08),
+    0 4px 20px rgba(6, 57, 125, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7),
+    inset 0 -1px 0 rgba(130, 173, 214, 0.15),
+    inset 0 0 30px 8px rgba(228, 233, 244, 0.2);
 }
 
+/* Reflets liquides sur les bords */
+table::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(130, 173, 214, 0.9),
+    rgba(254, 215, 106, 0.6),
+    rgba(130, 173, 214, 0.9),
+    transparent
+  );
+  z-index: 2;
+}
+
+table::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 2px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(130, 173, 214, 0.9),
+    transparent,
+    rgba(254, 215, 106, 0.4),
+    transparent,
+    rgba(130, 173, 214, 0.6)
+  );
+  z-index: 2;
+}
+
+/* En-tête avec effet frosted glass renforcé */
 thead {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  background: linear-gradient(135deg, 
+    rgba(228, 233, 244, 0.4) 0%, 
+    rgba(130, 173, 214, 0.25) 50%,
+    rgba(214, 216, 221, 0.3) 100%
+  );
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+
+thead::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.3) 0%,
+    rgba(130, 173, 214, 0.1) 50%,
+    rgba(228, 233, 244, 0.2) 100%
+  );
+  z-index: 1;
 }
 
 th {
-  padding: 12px 16px;
+  padding: 14px 18px;
   text-align: left;
   font-weight: 600;
-  color: #2f2f2e;
-  border-bottom: 2px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
-  font-size: 14px;
+  color: #06397d;
+  font-size: 13px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.8px;
+  position: relative;
+  z-index: 2;
+  border-right: 1px solid rgba(130, 173, 214, 0.2);
+  border-bottom: 1px solid rgba(130, 173, 214, 0.3);
+  
+  /* Effet de brillance sur le texte */
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
 }
 
 th:last-child {
   border-right: none;
 }
 
+/* Effet de survol sur les en-têtes */
+th:hover {
+  background: linear-gradient(135deg, 
+    rgba(130, 173, 214, 0.2) 0%, 
+    rgba(254, 215, 106, 0.15) 100%
+  );
+  color: #911f1e;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cellules avec effet liquid glass */
 td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #f1f3f4;
-  border-right: 1px solid #f1f3f4;
-  color: #2f2f2e;
-  line-height: 1.5;
+  padding: 14px 18px;
+  color: #06397d;
+  line-height: 1.6;
   vertical-align: top;
+  position: relative;
+  border-right: 1px solid rgba(130, 173, 214, 0.15);
+  border-bottom: 1px solid rgba(130, 173, 214, 0.1);
+  
+  /* Micro-reflets sur chaque cellule */
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    transparent 50%,
+    rgba(228, 233, 244, 0.03) 100%
+  );
 }
 
 td:last-child {
   border-right: none;
 }
 
+/* Effet de survol liquide sur les lignes */
 tbody tr {
-  transition: background-color 0.2s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 tbody tr:hover {
-  background-color: #f8f9fa;
+  background: linear-gradient(135deg, 
+    rgba(254, 215, 106, 0.08) 0%, 
+    rgba(130, 173, 214, 0.12) 50%,
+    rgba(228, 233, 244, 0.15) 100%
+  );
+  transform: translateY(-1px);
+  box-shadow: 
+    0 4px 20px rgba(6, 57, 125, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
+/* Effet de vague sur les lignes paires */
 tbody tr:nth-child(even) {
-  background-color: #fdfdfd;
+  background: linear-gradient(135deg, 
+    rgba(228, 233, 244, 0.05) 0%, 
+    rgba(214, 216, 221, 0.08) 100%
+  );
 }
 
 tbody tr:nth-child(even):hover {
-  background-color: #f5f5f5;
+  background: linear-gradient(135deg, 
+    rgba(254, 215, 106, 0.12) 0%, 
+    rgba(130, 173, 214, 0.15) 50%,
+    rgba(228, 233, 244, 0.18) 100%
+  );
 }
 
 tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* Tableaux responsives */
+/* Animation de flux liquide */
+@keyframes liquidFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Conteneur avec effet de profondeur */
+.table-container {
+  overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 18px;
+  position: relative;
+  
+  /* Effet de profondeur du conteneur */
+  background: linear-gradient(135deg, 
+    rgba(228, 233, 244, 0.1) 0%, 
+    rgba(130, 173, 214, 0.05) 100%
+  );
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(130, 173, 214, 0.2);
+  box-shadow: 
+    0 12px 50px rgba(6, 57, 125, 0.06),
+    0 6px 25px rgba(6, 57, 125, 0.04),
+    inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  padding: 4px;
+}
+
+.table-container table {
+  margin: 0;
+  box-shadow: none;
+  border: none;
+}
+
+/* Styles spéciaux pour différents types de contenu */
+td.long-content {
+  max-width: 220px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  position: relative;
+}
+
+td.long-content::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(130, 173, 214, 0.3),
+    transparent
+  );
+}
+
+/* Cellules numériques avec effet cristal */
+td.numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: #eda501;
+  position: relative;
+}
+
+td.numeric::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 2px;
+  height: 60%;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    180deg,
+    rgba(237, 165, 1, 0.4),
+    transparent
+  );
+}
+
+/* Cellules centrées avec effet holographique */
+th.center,
+td.center {
+  text-align: center;
+  position: relative;
+}
+
+th.center::after,
+td.center::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(130, 173, 214, 0.2),
+    transparent
+  );
+  z-index: -1;
+}
+
+/* Responsive avec maintien des effets */
 @media (max-width: 768px) {
   table {
     font-size: 13px;
@@ -365,174 +593,49 @@ tbody tr:last-child td {
   }
   
   th, td {
-    padding: 8px 12px;
+    padding: 10px 14px;
   }
   
   th {
-    font-size: 12px;
+    font-size: 11px;
+  }
+  
+  .table-container {
+    margin: 16px 0;
+    border-radius: 12px;
+  }
+  
+  table::before {
+    height: 1px;
+  }
+  
+  table::after {
+    width: 1px;
   }
 }
 
-/* Conteneur de tableau avec scroll horizontal si nécessaire */
-.table-container {
-  overflow-x: auto;
-  margin: 16px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+/* Effet de particules sur le survol du tableau */
+table:hover::before {
+  animation: liquidFlow 3s ease-in-out infinite;
+  background-size: 200% 200%;
 }
 
-.table-container table {
-  margin: 0;
-  box-shadow: none;
-  border-radius: 0;
+/* Amélioration de l'accessibilité avec maintien des effets */
+@media (prefers-reduced-motion: reduce) {
+  tbody tr {
+    transition: none;
+  }
+  
+  table:hover::before {
+    animation: none;
+  }
 }
 
-/* Styles pour les cellules avec du contenu long */
-td.long-content {
-  max-width: 200px;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+/* Effet de focus pour l'accessibilité */
+table:focus-within {
+  outline: 2px solid rgba(130, 173, 214, 0.6);
+  outline-offset: 2px;
 }
-
-/* Styles pour les cellules numériques */
-td.numeric {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-
-/* Styles pour les en-têtes centrés */
-th.center {
-  text-align: center;
-}
-
-td.center {
-  text-align: center;
-}
-
-.modal-overlay {
-  position: absolute;
-  right: 5px;
-  left: 5px;
-  background: var(--light-gray);
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.video-modal {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #eeebeb;
-  padding: 20px;
-  border-radius: 8px;
-  z-index: 99999;
-  width: 90%;
-  height: 70vh;
-  overflow-y: auto;
-  gap: 20px;
-  align-items: center;
-}
-
-.nav-element {
-  color: #2f2f2e;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-.top-navigation {
-  display: flex;
-  align-items: flex-start;
-  margin: 8px;
-  justify-content: space-around;
-  background-color: var(--light-gray);
-  padding: 10px;
-  width: 744px;
-  margin-bottom: 10px;
-  padding: 14px;
-  gap: 32px;
-  border-radius: 8px;
-  z-index: 69;
-}
-
-.top-navigation a:hover {
-  color: black;
-}
-.top-navigation a {
-  padding: 8px;
-}
-
-.top-navigation-container {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-}
-
-.top-navigation-a-container {
-  height: 32px;
-  display: flex;
-  border-radius: 8px;
-}
-
-.top-navigation-a-container:hover {
-  background-color: var(--light-gray-hover);
-}
-
-.nav-element:hover {
-  color: var(--blur-border);
-}
-
-.row {
-  display: flex;
-  gap: var(--section-gap);
-  height: calc(100vh - 16px);
-  overflow: hidden;
-}
-
-.column {
-  display: flex;
-  flex: auto;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.box {
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  background-color: var(--blur-bg);
-  height: 100%;
-  width: 100%;
-  border-radius: var(--border-radius-1);
-  border: 1px solid var(--blur-border);
-}
-
-.center {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  width: 50%;
-}
-
-.conversations {
-  margin: 0;
-  max-width: 260px;
-  min-width: 0;
-  padding: var(--section-gap);
-
-  background-color: var(--light-gray);
-  border-radius: 8px;
-
-  overflow-y: auto;
-  height: calc(100vh - 16px);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 16px;
 
   @media screen and (max-width: 990px) {
     display: none;
