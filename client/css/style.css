@@ -139,12 +139,17 @@ pre {
   border-radius: 16px;
   overflow: hidden;
   position: relative;
-  /* Effet frosted glass personnalisé */
-  background: rgba(255, 255, 255, 0.38);
-  backdrop-filter: blur(7.7px);
-  -webkit-backdrop-filter: blur(7.7px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  /* Glassmorphisme adapté pour fond blanc */
+  background: rgba(228, 233, 244, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(130, 173, 214, 0.3);
+  box-shadow: 
+    0 8px 32px rgba(6, 57, 125, 0.08),
+    0 4px 16px rgba(6, 57, 125, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -1px 0 rgba(130, 173, 214, 0.2),
+    inset 0 0 20px 5px rgba(228, 233, 244, 0.3);
 }
 
 pre::before {
@@ -153,16 +158,30 @@ pre::before {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;
+  height: 1px;
   background: linear-gradient(
-    135deg, 
-    rgba(228, 233, 244, 0.15) 0%, 
-    rgba(130, 173, 214, 0.08) 50%,
-    rgba(214, 216, 221, 0.12) 100%
+    90deg,
+    transparent,
+    rgba(130, 173, 214, 0.8),
+    transparent
   );
-  border-radius: 16px;
-  pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+}
+
+pre::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    rgba(130, 173, 214, 0.8),
+    transparent,
+    rgba(130, 173, 214, 0.4)
+  );
+  z-index: 1;
 }
 
 /* Styles pour highlight.js avec thème personnalisé */
