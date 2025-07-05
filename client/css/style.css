@@ -106,7 +106,7 @@ blockquote {
 
 /* Code inline - SUPPRESSION de l'encadrement */
 code {
-  font-family: "Inter Mono", monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: inherit;
   background: transparent;
   color: inherit;
@@ -118,10 +118,10 @@ code {
 
 /* Code dans les blocs pre uniquement */
 pre code {
-  font-family: "Inter Mono", monospace;
+  font-family: "JetBrains Mono", monospace;
   font-size: 14px;
   background: transparent;
-  color: #2f2f2e;
+  color: #06397d;
   padding: 20px;
   border-radius: 0;
   border: none;
@@ -136,18 +136,15 @@ pre code {
 
 pre {
   margin: 16px 0;
-  border-radius: 12px;
+  border-radius: 16px;
   overflow: hidden;
   position: relative;
-  /* Effet frosted glass sur fond blanc */
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  /* Effet frosted glass personnalisé */
+  background: rgba(255, 255, 255, 0.38);
+  backdrop-filter: blur(7.7px);
+  -webkit-backdrop-filter: blur(7.7px);
   border: 1px solid rgba(255, 255, 255, 0.4);
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 pre::before {
@@ -159,11 +156,11 @@ pre::before {
   bottom: 0;
   background: linear-gradient(
     135deg, 
-    rgba(255, 255, 255, 0.2) 0%, 
-    rgba(255, 255, 255, 0.05) 50%,
-    rgba(255, 255, 255, 0.1) 100%
+    rgba(228, 233, 244, 0.15) 0%, 
+    rgba(130, 173, 214, 0.08) 50%,
+    rgba(214, 216, 221, 0.12) 100%
   );
-  border-radius: 12px;
+  border-radius: 16px;
   pointer-events: none;
   z-index: 0;
 }
@@ -171,7 +168,7 @@ pre::before {
 /* Styles pour highlight.js avec thème personnalisé */
 .hljs {
   background: transparent !important;
-  color: #2f2f2e !important;
+  color: #06397d !important;
   padding: 20px !important;
   border-radius: 0 !important;
   font-size: 14px !important;
@@ -179,13 +176,13 @@ pre::before {
   overflow-x: auto;
 }
 
-/* Couleurs de syntaxe personnalisées pour rester lisibles sur fond blanc */
+/* Couleurs de syntaxe personnalisées avec votre palette */
 .hljs-keyword,
 .hljs-selector-tag,
 .hljs-literal,
 .hljs-section,
 .hljs-link {
-  color: #d73a49 !important;
+  color: #911f1e !important;
   font-weight: 600;
 }
 
@@ -200,7 +197,7 @@ pre::before {
 .hljs-variable,
 .hljs-template-tag,
 .hljs-template-variable {
-  color: #032f62 !important;
+  color: #06397d !important;
   font-weight: 500;
 }
 
@@ -208,35 +205,37 @@ pre::before {
 .hljs-quote,
 .hljs-deletion,
 .hljs-meta {
-  color: #6a737d !important;
+  color: #82add6 !important;
   font-style: italic;
+  opacity: 0.8;
 }
 
 .hljs-number,
 .hljs-regexp,
 .hljs-literal {
-  color: #005cc5 !important;
+  color: #eda501 !important;
   font-weight: 500;
 }
 
 .hljs-built_in,
 .hljs-builtin-name,
 .hljs-class .hljs-title {
-  color: #6f42c1 !important;
+  color: #733e01 !important;
   font-weight: 600;
 }
 
 .hljs-function .hljs-title {
-  color: #6f42c1 !important;
+  color: #6a1410 !important;
   font-weight: 600;
 }
 
 .hljs-tag {
-  color: #22863a !important;
+  color: #06397d !important;
+  font-weight: 500;
 }
 
 .hljs-attr {
-  color: #6f42c1 !important;
+  color: #911f1e !important;
 }
 
 .hljs-emphasis {
@@ -245,6 +244,24 @@ pre::before {
 
 .hljs-strong {
   font-weight: bold;
+}
+
+/* Styles spéciaux pour certains éléments */
+.hljs-params {
+  color: #82add6 !important;
+}
+
+.hljs-property {
+  color: #733e01 !important;
+}
+
+.hljs-operator {
+  color: #911f1e !important;
+}
+
+.hljs-punctuation {
+  color: #06397d !important;
+  opacity: 0.7;
 }
 
 p,
