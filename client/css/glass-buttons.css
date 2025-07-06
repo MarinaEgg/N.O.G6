@@ -1,4 +1,4 @@
-/* ========== GLASS BUTTON EFFECT - VERSION CORRIGÉE AVEC SPÉCIFICITÉ ========== */
+/* ========== GLASS BUTTON EFFECT - VERSION FINALE AVEC SPÉCIFICITÉ MAXIMALE ========== */
 
 /* Propriétés CSS personnalisées pour l'effet Glass Button */
 @property --angle-1 {
@@ -20,78 +20,80 @@
   --glass-border-width: clamp(1px, 0.0625em, 4px);
 }
 
-/* ========== RESET COMPLET DES STYLES EXISTANTS ========== */
+/* ========== RESET COMPLET ET FORCÉ DES STYLES EXISTANTS ========== */
 
-/* Reset pour "Nouvelle conversation" */
-.conversations .new_convo {
+/* Reset ultra-spécifique pour "Nouvelle conversation" */
+.conversations .new_convo,
+.conversations .new_convo:hover,
+.conversations .new_convo:focus,
+.conversations .new_convo:active {
   background: none !important;
   background-color: transparent !important;
   border: none !important;
   box-shadow: none !important;
-}
-
-.conversations .new_convo:hover {
-  background: none !important;
-  background-color: transparent !important;
-}
-
-/* Reset pour "Supprimer les conversations" */
-.conversations .bottom_buttons button {
-  background: none !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-/* Reset pour le bouton d'envoi */
-.user-input-container #send-button {
-  background: none !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.user-input-container #send-button:hover {
-  background: none !important;
-  background-color: transparent !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   transform: none !important;
 }
 
+/* Reset ultra-spécifique pour "Supprimer les conversations" */
+.conversations .bottom_buttons button,
+.conversations .bottom_buttons button:hover,
+.conversations .bottom_buttons button:focus,
+.conversations .bottom_buttons button:active {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+/* Reset ultra-spécifique pour le bouton d'envoi */
+.user-input-container #send-button,
+.user-input-container #send-button:hover,
+.user-input-container #send-button:focus,
 .user-input-container #send-button:active {
+  background: none !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
   transform: none !important;
 }
 
-/* Reset pour les boutons de la page Media */
+/* Reset ultra-spécifique pour les boutons de la page Media */
 .library-side-nav-content .onboarding-section,
 .library-side-nav-content .video-button,
 .library-side-nav-content .collapsible,
-.library-side-nav-content .onboarding-subsection {
+.library-side-nav-content .onboarding-subsection,
+.library-side-nav-content .onboarding-section:hover,
+.library-side-nav-content .video-button:hover,
+.library-side-nav-content .collapsible:hover,
+.library-side-nav-content .onboarding-subsection:hover {
   background: none !important;
   background-color: transparent !important;
   border: none !important;
   border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
 }
 
-.library-side-nav-content .onboarding-subsection:hover {
-  border-color: transparent !important;
-}
+/* ========== APPLICATION FORCÉE DE L'EFFET GLASS BUTTON ========== */
 
-.library-side-nav-content .collapsible:hover {
-  background: none !important;
-  background-color: transparent !important;
-}
-
-/* ========== APPLICATION DE L'EFFET GLASS BUTTON ========== */
-
-/* Styles Glass Button pour "Nouvelle conversation" */
-.conversations .new_convo {
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
+/* Styles Glass Button pour "Nouvelle conversation" avec spécificité maximale */
+body .conversations .new_convo {
+  position: relative !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  pointer-events: auto !important;
+  z-index: 3 !important;
   
-  /* Effet Glass avec fond blanc - proportions du code de référence */
+  /* Effet Glass avec fond blanc - proportions exactes du code de référence */
   background: linear-gradient(
     -75deg,
     rgba(255, 255, 255, 0.05),
@@ -117,13 +119,13 @@
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease) !important;
 }
 
-/* Styles Glass Button pour "Supprimer les conversations" */
-.conversations .bottom_buttons button {
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
+/* Styles Glass Button pour "Supprimer les conversations" avec spécificité maximale */
+body .conversations .bottom_buttons button {
+  position: relative !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  pointer-events: auto !important;
+  z-index: 3 !important;
   
   /* Effet Glass avec fond blanc */
   background: linear-gradient(
@@ -151,13 +153,13 @@
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease) !important;
 }
 
-/* Styles Glass Button pour le bouton d'envoi */
-.user-input-container #send-button {
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
+/* Styles Glass Button pour le bouton d'envoi avec spécificité maximale */
+body .user-input-container #send-button {
+  position: relative !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  pointer-events: auto !important;
+  z-index: 3 !important;
   border-radius: 50% !important;
   
   /* Effet Glass avec fond blanc */
@@ -186,16 +188,16 @@
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease) !important;
 }
 
-/* Styles Glass Button pour les boutons de la page Media */
-.library-side-nav-content .onboarding-section,
-.library-side-nav-content .video-button,
-.library-side-nav-content .collapsible,
-.library-side-nav-content .onboarding-subsection {
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
+/* Styles Glass Button pour les boutons de la page Media avec spécificité maximale */
+body .library-side-nav-content .onboarding-section,
+body .library-side-nav-content .video-button,
+body .library-side-nav-content .collapsible,
+body .library-side-nav-content .onboarding-subsection {
+  position: relative !important;
+  cursor: pointer !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0) !important;
+  pointer-events: auto !important;
+  z-index: 3 !important;
   
   /* Effet Glass avec fond blanc */
   background: linear-gradient(
@@ -223,10 +225,10 @@
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease) !important;
 }
 
-/* ========== EFFETS HOVER ========== */
+/* ========== EFFETS HOVER AVEC SPÉCIFICITÉ MAXIMALE ========== */
 
 /* Effet hover pour "Nouvelle conversation" */
-.conversations .new_convo:hover {
+body .conversations .new_convo:hover {
   transform: scale(0.975) !important;
   
   backdrop-filter: blur(0.01em) !important;
@@ -243,7 +245,7 @@
 }
 
 /* Effet hover pour "Supprimer les conversations" */
-.conversations .bottom_buttons button:hover {
+body .conversations .bottom_buttons button:hover {
   transform: scale(0.975) !important;
   
   backdrop-filter: blur(0.01em) !important;
@@ -260,7 +262,7 @@
 }
 
 /* Effet hover pour le bouton d'envoi */
-.user-input-container #send-button:hover {
+body .user-input-container #send-button:hover {
   transform: scale(0.975) !important;
   
   backdrop-filter: blur(0.01em) !important;
@@ -277,10 +279,10 @@
 }
 
 /* Effet hover pour les boutons de la page Media */
-.library-side-nav-content .onboarding-section:hover,
-.library-side-nav-content .video-button:hover,
-.library-side-nav-content .collapsible:hover,
-.library-side-nav-content .onboarding-subsection:hover {
+body .library-side-nav-content .onboarding-section:hover,
+body .library-side-nav-content .video-button:hover,
+body .library-side-nav-content .collapsible:hover,
+body .library-side-nav-content .onboarding-subsection:hover {
   transform: scale(0.975) !important;
   
   backdrop-filter: blur(0.01em) !important;
@@ -296,21 +298,21 @@
     0 0 0 0 rgba(255, 255, 255, 1) !important;
 }
 
-/* ========== BORDURES ANIMÉES ========== */
+/* ========== BORDURES ANIMÉES AVEC SPÉCIFICITÉ MAXIMALE ========== */
 
 /* Bordure animée pour "Nouvelle conversation" */
-.conversations .new_convo::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: inherit;
-  width: calc(100% + var(--glass-border-width));
-  height: calc(100% + var(--glass-border-width));
-  top: calc(0% - var(--glass-border-width) / 2);
-  left: calc(0% - var(--glass-border-width) / 2);
-  padding: var(--glass-border-width);
-  box-sizing: border-box;
+body .conversations .new_convo::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  width: calc(100% + var(--glass-border-width)) !important;
+  height: calc(100% + var(--glass-border-width)) !important;
+  top: calc(0% - var(--glass-border-width) / 2) !important;
+  left: calc(0% - var(--glass-border-width) / 2) !important;
+  padding: var(--glass-border-width) !important;
+  box-sizing: border-box !important;
   
   /* CORRECTION: Proportions exactes du code de référence */
   background: conic-gradient(
@@ -321,28 +323,28 @@
       rgba(0, 0, 0, 0) 60% 95%,
       rgba(0, 0, 0, 0.5)
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) !important;
   
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+  mask-composite: exclude !important;
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5);
+    --angle-1 500ms ease !important;
+  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Bordure animée pour "Supprimer les conversations" */
-.conversations .bottom_buttons button::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: inherit;
-  width: calc(100% + var(--glass-border-width));
-  height: calc(100% + var(--glass-border-width));
-  top: calc(0% - var(--glass-border-width) / 2);
-  left: calc(0% - var(--glass-border-width) / 2);
-  padding: var(--glass-border-width);
-  box-sizing: border-box;
+body .conversations .bottom_buttons button::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  width: calc(100% + var(--glass-border-width)) !important;
+  height: calc(100% + var(--glass-border-width)) !important;
+  top: calc(0% - var(--glass-border-width) / 2) !important;
+  left: calc(0% - var(--glass-border-width) / 2) !important;
+  padding: var(--glass-border-width) !important;
+  box-sizing: border-box !important;
   
   background: conic-gradient(
       from var(--angle-1) at 50% 50%,
@@ -352,28 +354,28 @@
       rgba(0, 0, 0, 0) 60% 95%,
       rgba(0, 0, 0, 0.5)
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) !important;
   
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+  mask-composite: exclude !important;
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5);
+    --angle-1 500ms ease !important;
+  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Bordure animée pour le bouton d'envoi */
-.user-input-container #send-button::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: 50%;
-  width: calc(100% + var(--glass-border-width));
-  height: calc(100% + var(--glass-border-width));
-  top: calc(0% - var(--glass-border-width) / 2);
-  left: calc(0% - var(--glass-border-width) / 2);
-  padding: var(--glass-border-width);
-  box-sizing: border-box;
+body .user-input-container #send-button::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  border-radius: 50% !important;
+  width: calc(100% + var(--glass-border-width)) !important;
+  height: calc(100% + var(--glass-border-width)) !important;
+  top: calc(0% - var(--glass-border-width) / 2) !important;
+  left: calc(0% - var(--glass-border-width) / 2) !important;
+  padding: var(--glass-border-width) !important;
+  box-sizing: border-box !important;
   
   background: conic-gradient(
       from var(--angle-1) at 50% 50%,
@@ -383,31 +385,31 @@
       rgba(0, 0, 0, 0) 60% 95%,
       rgba(0, 0, 0, 0.5)
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) !important;
   
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+  mask-composite: exclude !important;
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5);
+    --angle-1 500ms ease !important;
+  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5) !important;
 }
 
 /* Bordure animée pour les boutons de la page Media */
-.library-side-nav-content .onboarding-section::after,
-.library-side-nav-content .video-button::after,
-.library-side-nav-content .collapsible::after,
-.library-side-nav-content .onboarding-subsection::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: inherit;
-  width: calc(100% + var(--glass-border-width));
-  height: calc(100% + var(--glass-border-width));
-  top: calc(0% - var(--glass-border-width) / 2);
-  left: calc(0% - var(--glass-border-width) / 2);
-  padding: var(--glass-border-width);
-  box-sizing: border-box;
+body .library-side-nav-content .onboarding-section::after,
+body .library-side-nav-content .video-button::after,
+body .library-side-nav-content .collapsible::after,
+body .library-side-nav-content .onboarding-subsection::after {
+  content: "" !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  width: calc(100% + var(--glass-border-width)) !important;
+  height: calc(100% + var(--glass-border-width)) !important;
+  top: calc(0% - var(--glass-border-width) / 2) !important;
+  left: calc(0% - var(--glass-border-width) / 2) !important;
+  padding: var(--glass-border-width) !important;
+  box-sizing: border-box !important;
   
   background: conic-gradient(
       from var(--angle-1) at 50% 50%,
@@ -417,106 +419,106 @@
       rgba(0, 0, 0, 0) 60% 95%,
       rgba(0, 0, 0, 0.5)
     ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)) !important;
   
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0) !important;
+  mask-composite: exclude !important;
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5);
+    --angle-1 500ms ease !important;
+  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5) !important;
 }
 
 /* ========== ANIMATIONS DES BORDURES AU HOVER ========== */
 
 /* Animation de la bordure au hover */
-.conversations .new_convo:hover::after,
-.conversations .bottom_buttons button:hover::after,
-.user-input-container #send-button:hover::after,
-.library-side-nav-content .onboarding-section:hover::after,
-.library-side-nav-content .video-button:hover::after,
-.library-side-nav-content .collapsible:hover::after,
-.library-side-nav-content .onboarding-subsection:hover::after {
-  --angle-1: -125deg;
+body .conversations .new_convo:hover::after,
+body .conversations .bottom_buttons button:hover::after,
+body .user-input-container #send-button:hover::after,
+body .library-side-nav-content .onboarding-section:hover::after,
+body .library-side-nav-content .video-button:hover::after,
+body .library-side-nav-content .collapsible:hover::after,
+body .library-side-nav-content .onboarding-subsection:hover::after {
+  --angle-1: -125deg !important;
 }
 
 /* Effet actif (clic) */
-.conversations .new_convo:active::after,
-.conversations .bottom_buttons button:active::after,
-.user-input-container #send-button:active::after,
-.library-side-nav-content .onboarding-section:active::after,
-.library-side-nav-content .video-button:active::after,
-.library-side-nav-content .collapsible:active::after,
-.library-side-nav-content .onboarding-subsection:active::after {
-  --angle-1: -75deg;
+body .conversations .new_convo:active::after,
+body .conversations .bottom_buttons button:active::after,
+body .user-input-container #send-button:active::after,
+body .library-side-nav-content .onboarding-section:active::after,
+body .library-side-nav-content .video-button:active::after,
+body .library-side-nav-content .collapsible:active::after,
+body .library-side-nav-content .onboarding-subsection:active::after {
+  --angle-1: -75deg !important;
 }
 
-/* ========== STYLES POUR LE TEXTE ========== */
+/* ========== STYLES POUR LE TEXTE - SUPPRESSION DE L'EFFET MIROIR ========== */
 
-/* CORRECTION: Suppression de l'effet miroir/reflection sur le texte */
-.conversations .new_convo span,
-.conversations .bottom_buttons button span {
-  position: relative;
-  display: block;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  font-family: "Inter", sans-serif;
+/* Styles de texte sans effet miroir */
+body .conversations .new_convo span,
+body .conversations .bottom_buttons button span {
+  position: relative !important;
+  display: block !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  font-family: "Inter", sans-serif !important;
   color: rgba(50, 50, 50, 1) !important;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-  transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease);
-  z-index: 2;
+  -webkit-font-smoothing: antialiased !important;
+  -moz-osx-font-smoothing: grayscale !important;
+  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1) !important;
+  transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease) !important;
+  z-index: 2 !important;
 }
 
 /* Effet de brillance au hover sur le texte */
-.conversations .new_convo:hover span,
-.conversations .bottom_buttons button:hover span {
-  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
+body .conversations .new_convo:hover span,
+body .conversations .bottom_buttons button:hover span {
+  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12) !important;
 }
 
 /* CORRECTION: Effet de brillance mobile UNIQUEMENT pour les boutons avec span */
-.conversations .new_convo span::after,
-.conversations .bottom_buttons button span::after {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 1;
-  width: calc(100% - var(--glass-border-width));
-  height: calc(100% - var(--glass-border-width));
-  top: calc(0% + var(--glass-border-width) / 2);
-  left: calc(0% + var(--glass-border-width) / 2);
-  box-sizing: border-box;
-  border-radius: inherit;
-  overflow: clip;
+body .conversations .new_convo span::before,
+body .conversations .bottom_buttons button span::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  z-index: 1 !important;
+  width: calc(100% - var(--glass-border-width)) !important;
+  height: calc(100% - var(--glass-border-width)) !important;
+  top: calc(0% + var(--glass-border-width) / 2) !important;
+  left: calc(0% + var(--glass-border-width) / 2) !important;
+  box-sizing: border-box !important;
+  border-radius: inherit !important;
+  overflow: clip !important;
   background: linear-gradient(
     var(--angle-2),
     rgba(255, 255, 255, 0) 0%,
     rgba(255, 255, 255, 0.5) 40% 50%,
     rgba(255, 255, 255, 0) 55%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  background-size: 200% 200%;
-  background-position: 0% 50%;
-  background-repeat: no-repeat;
+  ) !important;
+  mix-blend-mode: screen !important;
+  pointer-events: none !important;
+  background-size: 200% 200% !important;
+  background-position: 0% 50% !important;
+  background-repeat: no-repeat !important;
   transition: background-position calc(var(--glass-anim-hover-time) * 1.25)
       var(--glass-anim-hover-ease),
-    --angle-2 calc(var(--glass-anim-hover-time) * 1.25) var(--glass-anim-hover-ease);
+    --angle-2 calc(var(--glass-anim-hover-time) * 1.25) var(--glass-anim-hover-ease) !important;
 }
 
 /* Animation de brillance au hover */
-.conversations .new_convo:hover span::after,
-.conversations .bottom_buttons button:hover span::after {
-  background-position: 25% 50%;
+body .conversations .new_convo:hover span::before,
+body .conversations .bottom_buttons button:hover span::before {
+  background-position: 25% 50% !important;
 }
 
 /* Animation de brillance au clic */
-.conversations .new_convo:active span::after,
-.conversations .bottom_buttons button:active span::after {
-  background-position: 50% 15%;
-  --angle-2: -15deg;
+body .conversations .new_convo:active span::before,
+body .conversations .bottom_buttons button:active span::before {
+  background-position: 50% 15% !important;
+  --angle-2: -15deg !important;
 }
 
 /* ========== EXCLUSIONS EXPLICITES ========== */
@@ -545,34 +547,49 @@
 
 /* Adaptations pour les appareils tactiles */
 @media (hover: none) and (pointer: coarse) {
-  .conversations .new_convo span::after,
-  .conversations .bottom_buttons button span::after,
-  .conversations .new_convo:active span::after,
-  .conversations .bottom_buttons button:active span::after {
-    --angle-2: -45deg;
+  body .conversations .new_convo span::before,
+  body .conversations .bottom_buttons button span::before,
+  body .conversations .new_convo:active span::before,
+  body .conversations .bottom_buttons button:active span::before {
+    --angle-2: -45deg !important;
   }
   
-  .conversations .new_convo::after,
-  .conversations .bottom_buttons button::after,
-  .user-input-container #send-button::after,
-  .library-side-nav-content .onboarding-section::after,
-  .library-side-nav-content .video-button::after,
-  .library-side-nav-content .collapsible::after,
-  .library-side-nav-content .onboarding-subsection::after,
-  .conversations .new_convo:hover::after,
-  .conversations .bottom_buttons button:hover::after,
-  .user-input-container #send-button:hover::after,
-  .library-side-nav-content .onboarding-section:hover::after,
-  .library-side-nav-content .video-button:hover::after,
-  .library-side-nav-content .collapsible:hover::after,
-  .library-side-nav-content .onboarding-subsection:hover::after,
-  .conversations .new_convo:active::after,
-  .conversations .bottom_buttons button:active::after,
-  .user-input-container #send-button:active::after,
-  .library-side-nav-content .onboarding-section:active::after,
-  .library-side-nav-content .video-button:active::after,
-  .library-side-nav-content .collapsible:active::after,
-  .library-side-nav-content .onboarding-subsection:active::after {
-    --angle-1: -75deg;
+  body .conversations .new_convo::after,
+  body .conversations .bottom_buttons button::after,
+  body .user-input-container #send-button::after,
+  body .library-side-nav-content .onboarding-section::after,
+  body .library-side-nav-content .video-button::after,
+  body .library-side-nav-content .collapsible::after,
+  body .library-side-nav-content .onboarding-subsection::after,
+  body .conversations .new_convo:hover::after,
+  body .conversations .bottom_buttons button:hover::after,
+  body .user-input-container #send-button:hover::after,
+  body .library-side-nav-content .onboarding-section:hover::after,
+  body .library-side-nav-content .video-button:hover::after,
+  body .library-side-nav-content .collapsible:hover::after,
+  body .library-side-nav-content .onboarding-subsection:hover::after,
+  body .conversations .new_convo:active::after,
+  body .conversations .bottom_buttons button:active::after,
+  body .user-input-container #send-button:active::after,
+  body .library-side-nav-content .onboarding-section:active::after,
+  body .library-side-nav-content .video-button:active::after,
+  body .library-side-nav-content .collapsible:active::after,
+  body .library-side-nav-content .onboarding-subsection:active::after {
+    --angle-1: -75deg !important;
   }
+}
+
+/* ========== DEBUG - FORCER L'AFFICHAGE ========== */
+
+/* Force l'affichage pour debug */
+body .conversations .new_convo,
+body .conversations .bottom_buttons button,
+body .user-input-container #send-button,
+body .library-side-nav-content .onboarding-section,
+body .library-side-nav-content .video-button,
+body .library-side-nav-content .collapsible,
+body .library-side-nav-content .onboarding-subsection {
+  /* Forcer l'affichage avec une couleur de test temporaire */
+  border: 2px solid red !important;
+  background-color: rgba(255, 0, 0, 0.1) !important;
 }
