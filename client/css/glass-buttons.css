@@ -1,4 +1,4 @@
-/* ========== GLASS BUTTON EFFECT ========== */
+/* ========== GLASS BUTTON EFFECT - VERSION CORRIGÉE ========== */
 
 /* Propriétés CSS personnalisées pour l'effet Glass Button */
 @property --angle-1 {
@@ -13,7 +13,7 @@
   initial-value: -45deg;
 }
 
-/* Variables pour l'effet Glass Button */
+/* Variables pour l'effet Glass Button - basées sur le code de référence */
 :root {
   --glass-anim-hover-time: 400ms;
   --glass-anim-hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
@@ -34,27 +34,28 @@
   border: none !important;
   background-color: transparent !important;
   
-  /* Styles Glass Button de base */
+  /* Styles Glass Button de base - EXACTEMENT comme dans le code de référence */
   position: relative;
   cursor: pointer;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
   pointer-events: auto;
   z-index: 3;
   
-  /* Effet Glass avec fond blanc */
+  /* Effet Glass avec fond blanc - proportions du code de référence */
   background: linear-gradient(
     -75deg,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.8)
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.05)
   ) !important;
   
-  /* Ombres et effets de profondeur */
+  /* Ombres et effets de profondeur - EXACTEMENT comme dans le code de référence */
   box-shadow: 
     inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
     inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
     0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2) !important;
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+    0 0 0 0 rgba(255, 255, 255, 1) !important;
   
   /* Effet de flou en arrière-plan */
   backdrop-filter: blur(clamp(1px, 0.125em, 4px));
@@ -66,7 +67,7 @@
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease);
 }
 
-/* Effet hover pour les boutons Glass */
+/* Effet hover pour les boutons Glass - EXACTEMENT comme dans le code de référence */
 .new_convo:hover,
 .bottom_buttons button:hover,
 #send-button:hover,
@@ -85,10 +86,11 @@
     inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
     inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
     0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5) !important;
+    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5),
+    0 0 0 0 rgba(255, 255, 255, 1) !important;
 }
 
-/* Bordure animée avec dégradé conique */
+/* Bordure animée avec dégradé conique - PROPORTIONS CORRIGÉES */
 .new_convo::after,
 .bottom_buttons button::after,
 .onboarding-section::after,
@@ -106,15 +108,18 @@
   left: calc(0% - var(--glass-border-width) / 2);
   padding: var(--glass-border-width);
   box-sizing: border-box;
+  
+  /* CORRECTION: Proportions exactes du code de référence */
   background: conic-gradient(
       from var(--angle-1) at 50% 50%,
-      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 0.5),
       rgba(0, 0, 0, 0) 5% 40%,
-      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0.5) 50%,
       rgba(0, 0, 0, 0) 60% 95%,
-      rgba(0, 0, 0, 0.3)
+      rgba(0, 0, 0, 0.5)
     ),
     linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+  
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
   transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
@@ -142,7 +147,7 @@
   --angle-1: -75deg;
 }
 
-/* Effet de brillance sur le texte */
+/* CORRECTION: Suppression de l'effet miroir/reflection sur le texte */
 .new_convo span,
 .bottom_buttons button span,
 .onboarding-section,
@@ -174,7 +179,7 @@
   text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
 }
 
-/* Effet de brillance mobile avec pseudo-élément */
+/* CORRECTION: Effet de brillance mobile UNIQUEMENT pour les boutons avec span */
 .new_convo span::after,
 .bottom_buttons button span::after {
   content: "";
@@ -231,6 +236,11 @@
 
 #send-button::after {
   border-radius: 50% !important;
+}
+
+/* CORRECTION: Pas d'effet de brillance pour le bouton d'envoi */
+#send-button::before {
+  display: none !important;
 }
 
 /* ========== SUPPRESSION DES ANCIENS STYLES ========== */
@@ -302,5 +312,21 @@
 #onboardingButton::after,
 .closebtn::after,
 #back-button::after {
+  display: none !important;
+}
+
+/* CORRECTION: Suppression complète de l'effet miroir pour tous les éléments non-span */
+.onboarding-section::after,
+.video-button::after,
+.collapsible::after,
+.onboarding-subsection::after {
+  /* Garde seulement la bordure, pas d'effet de brillance */
+}
+
+/* CORRECTION: Pas d'effet de brillance sur les boutons sans span */
+.onboarding-section::before,
+.video-button::before,
+.collapsible::before,
+.onboarding-subsection::before {
   display: none !important;
 }
