@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 
-/* Defs pour les boutons glassmorphiques */
+/* Propriétés CSS personnalisées pour les tableaux glassmorphiques */
 @property --angle-1 {
   syntax: "<angle>";
   inherits: false;
@@ -22,15 +22,15 @@
 :root {
   --colour-1: #ffffff;
   --colour-2: #f3f4e5;
-  --colour-3: #2f2f2e;
-  --colour-4: #f9e479;
+  --colour-3: #F9E479;
+  --colour-4: #2f2f2e;
   --colour-5: #2f2f2e;
   --colour-6: #2f2f2e;
 
   --light-gray: #f7f7f7;
   --light-gray-hover: #f1f1f1;
   --gray: #d5d5d5;
-  --yellow: #f9e479;
+  --yellow: #F9E479;
 
   --accent: #ffffff;
   --blur-bg: #ffffff;
@@ -45,11 +45,11 @@
   --menu-percentage: 80%;
   --font-1: "Inter";
 
-  /* Variables pour les boutons glassmorphiques */
-  --global--size: clamp(2rem, 4vw, 5rem);
+  /* Variables pour les tableaux glassmorphiques */
+  --border-width: clamp(1px, 0.0625em, 4px);
   --anim--hover-time: 400ms;
   --anim--hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
-  --border-width: clamp(1px, 0.0625em, 4px);
+  --anim--apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --shadow-cuttoff-fix: 2em;
 }
 
@@ -281,7 +281,7 @@ li {
   font-weight: 400;
 }
 
-/* ========== STYLES POUR TABLEAUX GLASSMORPHIQUES ========== */
+/* ========== NOUVEAUX STYLES POUR TABLEAUX GLASSMORPHIQUES ========== */
 
 /* Conteneur principal du tableau */
 .table-wrap {
@@ -329,14 +329,11 @@ li {
   opacity: 1;
 }
 
-/* Styles pour les tableaux - NOUVEAU */
+/* Tableau principal */
 table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 16px 0;
-  font-family: "Inter", sans-serif;
-  font-size: 15px;
   position: relative;
   z-index: 3;
   pointer-events: auto;
@@ -358,6 +355,9 @@ table {
   -moz-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
   -ms-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
   transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  margin: 16px 0;
+  font-family: "Inter", sans-serif;
+  font-size: 15px;
 }
 
 /* Bordure animée du tableau */
@@ -389,6 +389,7 @@ table::after {
   box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
 }
 
+/* En-tête du tableau */
 thead {
   position: relative;
   background: linear-gradient(
@@ -403,17 +404,18 @@ thead {
   -ms-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
 }
 
+/* Cellules d'en-tête */
 th {
-  padding: 1em 1.5em;
+  padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  color: #2f2f2e;
   font-size: 14px;
+  color: #2f2f2e;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   position: relative;
-  border-bottom: 2px solid #dee2e6;
-  border-right: 1px solid #dee2e6;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid rgba(255, 255, 255, 0.15);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-shadow: 0em 0.125em 0.025em rgba(0, 0, 0, 0.1);
@@ -478,18 +480,20 @@ th::after {
   opacity: 0.5;
 }
 
+/* Cellules du corps */
 td {
   padding: 12px 16px;
-  border-bottom: 1px solid #f1f3f4;
-  border-right: 1px solid #f1f3f4;
   color: #2f2f2e;
   line-height: 1.5;
   vertical-align: top;
   position: relative;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   font-weight: 400;
-  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 300ms var(--anim--apple-ease);
+  font-size: 15px;
 }
 
 td:last-child {
@@ -499,7 +503,7 @@ td:last-child {
 /* Lignes du tableau */
 tbody tr {
   position: relative;
-  transition: all 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 350ms var(--anim--apple-ease);
   cursor: pointer;
   transform-origin: center;
   transform-style: preserve-3d;
@@ -514,14 +518,6 @@ tbody tr:nth-child(even) {
   );
 }
 
-tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-tbody tr:nth-child(even):hover {
-  background-color: #f5f5f5;
-}
-
 tbody tr:last-child td {
   border-bottom: none;
 }
@@ -533,6 +529,8 @@ tbody tr:last-child td:first-child {
 tbody tr:last-child td:last-child {
   border-bottom-right-radius: 20px;
 }
+
+/* ========== NOUVEAU EFFET DE TIRER ========== */
 
 /* Effet de "tirer" vers l'utilisateur */
 tbody tr:hover {
@@ -562,7 +560,7 @@ tbody tr:hover td {
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
   letter-spacing: 0.02em;
   transform: translateZ(10px);
-  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 300ms var(--anim--apple-ease);
 }
 
 /* Effet de flou sur les autres lignes */
@@ -571,7 +569,7 @@ tbody:hover tr:not(:hover) {
   filter: blur(2px);
   -webkit-filter: blur(2px);
   transform: scale(0.98);
-  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 300ms var(--anim--apple-ease);
 }
 
 /* Effet au clic - enfoncement */
@@ -581,7 +579,7 @@ tbody tr:active {
     0 15px 40px rgba(0, 0, 0, 0.3),
     0 8px 20px rgba(0, 0, 0, 0.2),
     inset 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: all 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 150ms var(--anim--apple-ease);
 }
 
 /* Effets de survol sur le tableau global */
@@ -656,42 +654,16 @@ th:hover::after {
   --angle-2: -15deg;
 }
 
-/* Tableaux responsives */
-@media (max-width: 768px) {
-  .table-wrap {
-    margin: 12px 0;
-  }
-  
-  table {
-    font-size: 13px;
-    margin: 12px 0;
-  }
-  
-  th, td {
-    padding: 8px 12px;
-  }
-  
-  th {
-    font-size: 12px;
-  }
-  
-  tbody tr:hover {
-    transform: translateZ(30px) scale(1.05);
-  }
-}
-
 /* Conteneur de tableau avec scroll horizontal si nécessaire */
 .table-container {
   overflow-x: auto;
   margin: 16px 0;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  position: relative;
 }
 
 .table-container table {
   margin: 0;
-  box-shadow: none;
-  border-radius: 0;
 }
 
 /* Styles pour les cellules avec du contenu long */
@@ -715,6 +687,26 @@ th.center {
 td.center {
   text-align: center;
 }
+
+/* Touch Devices */
+@media (hover: none) and (pointer: coarse) {
+  th::after,
+  .table-wrap:hover th::after,
+  .table-wrap:active th::after {
+    --angle-2: -45deg;
+  }
+  
+  table::after,
+  .table-wrap:hover table::after {
+    --angle-1: -75deg;
+  }
+  
+  tbody tr:hover {
+    transform: scale(1.05);
+  }
+}
+
+/* ========== FIN DES STYLES TABLEAUX GLASSMORPHIQUES ========== */
 
 .modal-overlay {
   position: absolute;
@@ -903,6 +895,10 @@ h3 {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
+  /* Ajout du motif de points en arrière-plan */
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: 0 0;
 }
 
 .conversation #messages {
@@ -918,7 +914,7 @@ h3 {
   align-items: center;
   height: calc(100vh - 136px);
   padding-bottom: 120px;
-  transition: padding-bottom 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: padding-bottom 0.2s ease;
 }
 
 .conversation .user-input {
@@ -1180,342 +1176,26 @@ div.message:last-child {
   border-radius: 32px;
 }
 
-/* ========== STYLES GLASSMORPHIQUES POUR BOUTONS ========== */
-
-/* Button Shadow Container */
-.button-shadow {
-  position: absolute;
-  width: calc(100% + var(--shadow-cuttoff-fix));
-  height: calc(100% + var(--shadow-cuttoff-fix));
-  top: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  left: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  filter: blur(clamp(2px, 0.125em, 12px));
-  -webkit-filter: blur(clamp(2px, 0.125em, 12px));
-  -moz-filter: blur(clamp(2px, 0.125em, 12px));
-  -ms-filter: blur(clamp(2px, 0.125em, 12px));
-  overflow: visible;
-  pointer-events: none;
-}
-
-/* Shadow */
-.button-shadow::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  border-radius: 999vw;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
-  width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
-  height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
-  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
-  left: calc(var(--shadow-cuttoff-fix) - 0.875em);
-  padding: 0.125em;
-  box-sizing: border-box;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  overflow: visible;
-  opacity: 1;
-}
-
-/* Styles de base pour tous les boutons glassmorphiques */
-.new_convo,
-.bottom_buttons button,
-.onboarding-section,
-.onboarding-subsection,
-.video-button,
-.collapsible,
-.stop_generating button {
-  /* Reset et base */
-  position: relative;
-  cursor: pointer;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
-  
-  /* Style glassmorphique */
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.05)
-  );
-  border-radius: 999vw;
-  border: none;
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  
-  /* Typographie */
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
-  color: rgba(50, 50, 50, 1);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-  
-  /* Espacement */
-  padding: 0.875em 1.5em;
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  user-select: none;
-}
-
-/* Effets hover pour tous les boutons glassmorphiques */
-.new_convo:hover,
-.bottom_buttons button:hover,
-.onboarding-section:hover,
-.onboarding-subsection:hover,
-.video-button:hover,
-.collapsible:hover,
-.stop_generating button:hover {
-  transform: scale(0.975);
-  backdrop-filter: blur(0.01em);
-  -webkit-backdrop-filter: blur(0.01em);
-  -moz-backdrop-filter: blur(0.01em);
-  -ms-backdrop-filter: blur(0.01em);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5);
-  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
-}
-
-/* Bordure animée pour tous les boutons glassmorphiques */
-.new_convo::after,
-.bottom_buttons button::after,
-.onboarding-section::after,
-.onboarding-subsection::after,
-.video-button::after,
-.collapsible::after,
-.stop_generating button::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: 999vw;
-  width: calc(100% + var(--border-width));
-  height: calc(100% + var(--border-width));
-  top: calc(0% - var(--border-width) / 2);
-  left: calc(0% - var(--border-width) / 2);
-  padding: var(--border-width);
-  box-sizing: border-box;
-  background: conic-gradient(
-    from var(--angle-1) at 50% 50%,
-    rgba(0, 0, 0, 0.5),
-    rgba(0, 0, 0, 0) 5% 40%,
-    rgba(0, 0, 0, 0.5) 50%,
-    rgba(0, 0, 0, 0) 60% 95%,
-    rgba(0, 0, 0, 0.5)
-  ),
-  linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
-}
-
-/* Animation de la bordure au hover */
-.new_convo:hover::after,
-.bottom_buttons button:hover::after,
-.onboarding-section:hover::after,
-.onboarding-subsection:hover::after,
-.video-button:hover::after,
-.collapsible:hover::after,
-.stop_generating button:hover::after {
-  --angle-1: -125deg;
-}
-
-/* Effet de brillance sur le texte */
-.new_convo span::after,
-.bottom_buttons button span::after,
-.onboarding-section::before,
-.onboarding-subsection::before,
-.video-button::before,
-.collapsible::before,
-.stop_generating button span::after {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 1;
-  width: calc(100% - var(--border-width));
-  height: calc(100% - var(--border-width));
-  top: calc(0% + var(--border-width) / 2);
-  left: calc(0% + var(--border-width) / 2);
-  box-sizing: border-box;
-  border-radius: 999vw;
-  overflow: clip;
-  background: linear-gradient(
-    var(--angle-2),
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.5) 40% 50%,
-    rgba(255, 255, 255, 0) 55%
-  );
-  z-index: 3;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  background-size: 200% 200%;
-  background-position: 0% 50%;
-  background-repeat: no-repeat;
-  transition: background-position calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease),
-    --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
-}
-
-/* Animation de brillance au hover */
-.new_convo:hover span::after,
-.bottom_buttons button:hover span::after,
-.onboarding-section:hover::before,
-.onboarding-subsection:hover::before,
-.video-button:hover::before,
-.collapsible:hover::before,
-.stop_generating button:hover span::after {
-  background-position: 25% 50%;
-}
-
-/* Styles spécifiques pour certains boutons */
 .new_convo {
+  padding: 8px 12px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
   background: transparent;
   border: none;
   margin: 4px;
   border-radius: var(--border-radius-1);
-  width: 100%;
 }
 
 .new_convo span {
   color: var(--colour-3);
   font-size: 14px;
-  position: relative;
 }
 
-.bottom_buttons {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  margin-top: 0;
-}
-
-.bottom_buttons button {
-  width: 100%;
-  border: 1px solid var(--blur-border);
-  border-radius: var(--border-radius-1);
-}
-
-.bottom_buttons button span {
-  color: var(--colour-3);
-  font-size: 14px;
-  position: relative;
-}
-
-/* Bouton d'envoi avec style glassmorphique */
-#send-button {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.05)
-  );
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(47, 47, 46, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin-left: 10px;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
-  overflow: hidden;
-  flex-shrink: 0;
-  color: #2f2f2e;
-  align-self: flex-end;
-  margin-bottom: 5px;
-  position: relative;
-  z-index: 3;
-}
-
-#send-button::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: 50%;
-  width: calc(100% + var(--border-width));
-  height: calc(100% + var(--border-width));
-  top: calc(0% - var(--border-width) / 2);
-  left: calc(0% - var(--border-width) / 2);
-  padding: var(--border-width);
-  box-sizing: border-box;
-  background: conic-gradient(
-    from var(--angle-1) at 50% 50%,
-    rgba(0, 0, 0, 0.5),
-    rgba(0, 0, 0, 0) 5% 40%,
-    rgba(0, 0, 0, 0.5) 50%,
-    rgba(0, 0, 0, 0) 60% 95%,
-    rgba(0, 0, 0, 0.5)
-  ),
-  linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
-}
-
-#send-button i {
-  display: block;
-  margin: auto;
-  font-size: 18px;
-  color: #000000;
-  font-weight: 900;
-  position: relative;
-  z-index: 4;
-}
-
-#send-button:hover {
-  transform: scale(1.05);
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
-  );
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5);
-  border-color: rgba(47, 47, 46, 0.3);
-}
-
-#send-button:hover::after {
-  --angle-1: -125deg;
-}
-
-#send-button:active {
-  transform: scale(0.95);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
+.new_convo:hover {
+  background-color: var(--light-gray-hover);
 }
 
 .stop_generating {
@@ -1529,12 +1209,7 @@ div.message:last-child {
 .stop_generating button {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.05)
-  );
+  background-color: var(--blur-bg);
   border-radius: var(--border-radius-1);
   border: 1px solid var(--blur-border);
   padding: 10px 15px;
@@ -1545,12 +1220,6 @@ div.message:last-child {
   gap: 12px;
   cursor: pointer;
   animation: show_popup 0.4s;
-  position: relative;
-}
-
-.stop_generating button span {
-  position: relative;
-  z-index: 4;
 }
 
 @keyframes show_popup {
@@ -1702,6 +1371,39 @@ select {
   border: 1px dashed var(--conversations);
 }
 
+.bottom_buttons {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin-top: 0;
+}
+
+.bottom_buttons button {
+  padding: 8px 12px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: 1px solid var(--blur-border);
+  border-radius: var(--border-radius-1);
+  width: 100%;
+}
+
+.bottom_buttons button span {
+  color: var(--colour-3);
+  font-size: 14px;
+}
+
+.conversations .top {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+
 #cursor {
   line-height: 17px;
   margin-left: 3px;
@@ -1847,6 +1549,24 @@ ul {
   
   .stop_generating {
     bottom: 90px;
+  }
+
+  /* Responsive pour les tableaux glassmorphiques */
+  .table-wrap {
+    margin: 20px 0;
+  }
+  
+  th, td {
+    padding: 0.75em 1em;
+    font-size: 0.9em;
+  }
+  
+  th {
+    font-size: 0.8em;
+  }
+  
+  tbody tr:hover {
+    transform: translateZ(30px) scale(1.05);
   }
 }
 
@@ -2312,9 +2032,7 @@ a:-webkit-any-link {
   line-height: 1.3;
 }
 
-/* ========== BARRE DE CHAT CORRIGÉE ========== */
-
-/* Conteneur principal de la barre de chat */
+/* NOUVELLE BARRE DE CHAT RESPONSIVE - CORRECTION COMPLÈTE */
 .user-input-container {
   position: fixed;
   bottom: 0;
@@ -2327,7 +2045,7 @@ a:-webkit-any-link {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
@@ -2336,7 +2054,6 @@ a:-webkit-any-link {
   display: none !important;
 }
 
-/* Conteneur de l'input avec hauteur dynamique */
 .input-box {
   display: flex;
   align-items: flex-end;
@@ -2349,19 +2066,18 @@ a:-webkit-any-link {
   box-sizing: border-box;
   overflow: visible;
   min-height: 60px;
-  /* CORRECTION : Hauteur dynamique basée sur le contenu */
-  height: auto;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   position: relative;
 }
 
-/* Textarea avec redimensionnement progressif */
+/* CORRECTION CRITIQUE : Suppression des contraintes de hauteur sur le textarea */
 #message-input {
   flex: 1;
   border: none;
   outline: none;
   resize: none;
   overflow-y: auto;
+  /* SUPPRESSION des contraintes max-height et min-height qui bloquaient l'agrandissement */
   width: calc(100% - 50px);
   padding: 10px;
   border-radius: 25px;
@@ -2373,22 +2089,12 @@ a:-webkit-any-link {
   scrollbar-color: #c1c1c1 transparent;
   word-wrap: break-word;
   white-space: pre-wrap;
-  
-  /* CORRECTION : Hauteur progressive ligne par ligne */
-  height: 40px; /* Hauteur initiale pour une ligne */
-  min-height: 40px; /* Hauteur minimale */
-  max-height: 200px; /* Hauteur maximale avant scroll */
-  
-  /* Transition fluide pour le redimensionnement */
-  transition: height 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-  
-  /* Suppression du scroll interne par défaut */
-  overflow-y: hidden;
-}
-
-/* Scroll interne seulement quand nécessaire */
-#message-input.scrollable {
-  overflow-y: auto;
+  /* Hauteur dynamique contrôlée par JavaScript uniquement */
+  height: 40px; /* Hauteur initiale seulement */
+  transition: height 0.1s ease;
+  /* Permettre l'agrandissement sans limite CSS */
+  max-height: none !important;
+  min-height: 40px !important;
 }
 
 #message-input::-webkit-scrollbar {
@@ -2408,7 +2114,6 @@ a:-webkit-any-link {
   background: #a8a8a8;
 }
 
-/* Conteneur des contrôles (bouton d'envoi) */
 .input-controls {
   display: flex;
   flex-direction: column;
@@ -2418,15 +2123,46 @@ a:-webkit-any-link {
   flex-shrink: 0;
 }
 
-/* Bouton "Arrêtez la génération" - CORRECTION DU POSITIONNEMENT */
-.stop_generating {
-  position: fixed;
-  /* CORRECTION : Position dynamique basée sur la hauteur de la barre de chat */
-  bottom: calc(80px + var(--chat-height-offset, 0px));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1001;
-  transition: bottom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+#send-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(47, 47, 46, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+  color: #2f2f2e;
+  align-self: flex-end;
+  margin-bottom: 5px;
+}
+
+#send-button i {
+  display: block;
+  margin: auto;
+  font-size: 18px;
+  color: #000000;
+  font-weight: 900;
+}
+
+#send-button:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(47, 47, 46, 0.3);
+}
+
+#send-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive pour mobile */
@@ -2458,12 +2194,14 @@ a:-webkit-any-link {
   }
 
   .stop_generating {
-    bottom: calc(100px + var(--chat-height-offset, 0px));
+    bottom: 100px;
   }
   
   #message-input {
     margin-right: 5px;
     font-size: 14px;
+    /* Suppression des contraintes mobiles aussi */
+    max-height: none !important;
   }
   
   .input-box {
@@ -2489,7 +2227,9 @@ a:-webkit-any-link {
   
   #message-input {
     font-size: 13px;
-    min-height: 35px;
+    /* Suppression des contraintes sur petits écrans */
+    max-height: none !important;
+    min-height: 35px !important;
   }
   
   #send-button {
@@ -2505,7 +2245,7 @@ a:-webkit-any-link {
 
 /* Ajustement de la zone de messages pour éviter le chevauchement */
 .conversation #messages.expanded-input {
-  transition: padding-bottom 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 200px;
 }
 
 ::-webkit-scrollbar {
@@ -2731,65 +2471,5 @@ font {
   .video-source-bubble {
     width: 100%;
     min-width: unset;
-  }
-}
-
-/* ========== FOND AVEC MOTIF DE POINTS ========== */
-
-/* Fond avec motif de points pour la zone de conversation */
-.conversation::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  opacity: 0.3;
-  background-image: url('data:image/svg+xml;utf8,<svg width="30" height="30" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dottedGrid" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(0,0,0,0.15)" /></pattern></defs><rect width="100%" height="100%" fill="url(%23dottedGrid)" /></svg>');
-  background-repeat: repeat;
-  background-size: 30px 30px;
-  pointer-events: none;
-}
-
-/* Touch Devices */
-@media (hover: none) and (pointer: coarse) {
-  .new_convo span::after,
-  .bottom_buttons button span::after,
-  .onboarding-section::before,
-  .onboarding-subsection::before,
-  .video-button::before,
-  .collapsible::before,
-  .stop_generating button span::after,
-  .new_convo:hover span::after,
-  .bottom_buttons button:hover span::after,
-  .onboarding-section:hover::before,
-  .onboarding-subsection:hover::before,
-  .video-button:hover::before,
-  .collapsible:hover::before,
-  .stop_generating button:hover span::after {
-    --angle-2: -45deg;
-  }
-  
-  .new_convo::after,
-  .bottom_buttons button::after,
-  .onboarding-section::after,
-  .onboarding-subsection::after,
-  .video-button::after,
-  .collapsible::after,
-  .stop_generating button::after,
-  .new_convo:hover::after,
-  .bottom_buttons button:hover::after,
-  .onboarding-section:hover::after,
-  .onboarding-subsection:hover::after,
-  .video-button:hover::after,
-  .collapsible:hover::after,
-  .stop_generating button:hover::after {
-    --angle-1: -75deg;
-  }
-  
-  #send-button::after,
-  #send-button:hover::after {
-    --angle-1: -75deg;
   }
 }
