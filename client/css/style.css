@@ -1,24 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
-
-/* Propriétés CSS personnalisées pour les tableaux glassmorphiques */
-@property --angle-1 {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: -75deg;
-}
-
-@property --angle-2 {
-  syntax: "<angle>";
-  inherits: false;
-  initial-value: -45deg;
-}
-
-@property --glow-opacity {
-  syntax: "<number>";
-  inherits: false;
-  initial-value: 0;
-}
-
 :root {
   --colour-1: #ffffff;
   --colour-2: #f3f4e5;
@@ -44,13 +24,6 @@
 
   --menu-percentage: 80%;
   --font-1: "Inter";
-
-  /* Variables pour les tableaux glassmorphiques */
-  --border-width: clamp(1px, 0.0625em, 4px);
-  --anim--hover-time: 400ms;
-  --anim--hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
-  --anim--apple-ease: cubic-bezier(0.16, 1, 0.3, 1);
-  --shadow-cuttoff-fix: 2em;
 }
 
 * {
@@ -281,389 +254,101 @@ li {
   font-weight: 400;
 }
 
-/* ========== NOUVEAUX STYLES POUR TABLEAUX GLASSMORPHIQUES ========== */
-
-/* Conteneur principal du tableau */
-.table-wrap {
-  position: relative;
-  z-index: 2;
-  border-radius: 20px;
-  background: transparent;
-  max-width: 1200px;
-  margin: 16px auto;
-  pointer-events: none;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-/* Ombre du tableau */
-.table-shadow {
-  position: absolute;
-  width: calc(100% + var(--shadow-cuttoff-fix));
-  height: calc(100% + var(--shadow-cuttoff-fix));
-  top: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  left: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  filter: blur(clamp(4px, 0.25em, 16px));
-  -webkit-filter: blur(clamp(4px, 0.25em, 16px));
-  -moz-filter: blur(clamp(4px, 0.25em, 16px));
-  -ms-filter: blur(clamp(4px, 0.25em, 16px));
-  overflow: visible;
-  pointer-events: none;
-}
-
-.table-shadow::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
-  width: calc(100% - var(--shadow-cuttoff-fix) - 0.5em);
-  height: calc(100% - var(--shadow-cuttoff-fix) - 0.5em);
-  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
-  left: calc(var(--shadow-cuttoff-fix) - 0.875em);
-  padding: 0.25em;
-  box-sizing: border-box;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  opacity: 1;
-}
-
-/* Tableau principal */
+/* Styles pour les tableaux - NOUVEAU */
 table {
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  position: relative;
-  z-index: 3;
-  pointer-events: auto;
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.05)
-  );
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -webkit-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -moz-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -ms-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  border-collapse: collapse;
   margin: 16px 0;
   font-family: "Inter", sans-serif;
   font-size: 15px;
+  background: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e1e5e9;
 }
 
-/* Bordure animée du tableau */
-table::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: 20px;
-  width: calc(100% + var(--border-width));
-  height: calc(100% + var(--border-width));
-  top: calc(0% - var(--border-width) / 2);
-  left: calc(0% - var(--border-width) / 2);
-  padding: var(--border-width);
-  box-sizing: border-box;
-  background: conic-gradient(
-    from var(--angle-1) at 50% 50%,
-    rgba(0, 0, 0, 0.5),
-    rgba(0, 0, 0, 0) 5% 40%,
-    rgba(0, 0, 0, 0.5) 50%,
-    rgba(0, 0, 0, 0) 60% 95%,
-    rgba(0, 0, 0, 0.5)
-  ),
-  linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
-}
-
-/* En-tête du tableau */
 thead {
-  position: relative;
-  background: linear-gradient(
-    var(--angle-2),
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.1) 100%
-  );
-  backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -webkit-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -moz-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
-  -ms-backdrop-filter: blur(clamp(2px, 0.125em, 8px));
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
-/* Cellules d'en-tête */
 th {
   padding: 12px 16px;
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
   color: #2f2f2e;
+  border-bottom: 2px solid #dee2e6;
+  border-right: 1px solid #dee2e6;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  position: relative;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 0em 0.125em 0.025em rgba(0, 0, 0, 0.1);
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-/* Séparateurs subtils avec dégradé */
-th::before,
-td::before {
-  content: "";
-  position: absolute;
-  top: 25%;
-  right: 0;
-  width: 1px;
-  height: 50%;
-  background: linear-gradient(
-    180deg,
-    transparent,
-    rgba(0, 0, 0, 0.05) 20%,
-    rgba(0, 0, 0, 0.08) 50%,
-    rgba(0, 0, 0, 0.05) 80%,
-    transparent
-  );
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-}
-
-th:last-child::before,
-td:last-child::before {
-  display: none;
-}
-
-th:first-child {
-  border-top-left-radius: 20px;
 }
 
 th:last-child {
-  border-top-right-radius: 20px;
   border-right: none;
 }
 
-/* Effet de brillance sur les en-têtes */
-th::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  width: calc(100% - var(--border-width));
-  height: calc(100% - var(--border-width));
-  top: calc(0% + var(--border-width) / 2);
-  left: calc(0% + var(--border-width) / 2);
-  border-radius: 8px;
-  background: linear-gradient(
-    var(--angle-2),
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.3) 40% 60%,
-    rgba(255, 255, 255, 0) 100%
-  );
-  mix-blend-mode: screen;
-  pointer-events: none;
-  background-size: 200% 200%;
-  background-position: 0% 50%;
-  transition: background-position calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
-  opacity: 0.5;
-}
-
-/* Cellules du corps */
 td {
   padding: 12px 16px;
+  border-bottom: 1px solid #f1f3f4;
+  border-right: 1px solid #f1f3f4;
   color: #2f2f2e;
   line-height: 1.5;
   vertical-align: top;
-  position: relative;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-weight: 400;
-  transition: all 300ms var(--anim--apple-ease);
-  font-size: 15px;
 }
 
 td:last-child {
   border-right: none;
 }
 
-/* Lignes du tableau */
 tbody tr {
-  position: relative;
-  transition: all 350ms var(--anim--apple-ease);
-  cursor: pointer;
-  transform-origin: center;
-  transform-style: preserve-3d;
+  transition: background-color 0.2s ease;
+}
+
+tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
 tbody tr:nth-child(even) {
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.02),
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.02)
-  );
+  background-color: #fdfdfd;
+}
+
+tbody tr:nth-child(even):hover {
+  background-color: #f5f5f5;
 }
 
 tbody tr:last-child td {
   border-bottom: none;
 }
 
-tbody tr:last-child td:first-child {
-  border-bottom-left-radius: 20px;
-}
-
-tbody tr:last-child td:last-child {
-  border-bottom-right-radius: 20px;
-}
-
-/* ========== NOUVEAU EFFET DE TIRER ========== */
-
-/* Effet de "tirer" vers l'utilisateur */
-tbody tr:hover {
-  transform: translateZ(50px) scale(1.08);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.95),
-    rgba(255, 255, 255, 0.9)
-  ) !important;
-  box-shadow: 
-    0 25px 60px rgba(0, 0, 0, 0.25),
-    0 15px 40px rgba(0, 0, 0, 0.15),
-    0 8px 20px rgba(0, 0, 0, 0.1),
-    inset 0 2px 0 rgba(255, 255, 255, 0.9);
-  border-radius: 12px;
-  z-index: 10;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
-}
-
-/* Texte en gras et plus grand au survol */
-tbody tr:hover td {
-  font-weight: 700;
-  font-size: 1.1em;
-  color: rgba(10, 10, 10, 1);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-  letter-spacing: 0.02em;
-  transform: translateZ(10px);
-  transition: all 300ms var(--anim--apple-ease);
-}
-
-/* Effet de flou sur les autres lignes */
-tbody:hover tr:not(:hover) {
-  opacity: 0.4;
-  filter: blur(2px);
-  -webkit-filter: blur(2px);
-  transform: scale(0.98);
-  transition: all 300ms var(--anim--apple-ease);
-}
-
-/* Effet au clic - enfoncement */
-tbody tr:active {
-  transform: translateZ(30px) scale(1.05);
-  box-shadow: 
-    0 15px 40px rgba(0, 0, 0, 0.3),
-    0 8px 20px rgba(0, 0, 0, 0.2),
-    inset 0 3px 6px rgba(0, 0, 0, 0.1);
-  transition: all 150ms var(--anim--apple-ease);
-}
-
-/* Effets de survol sur le tableau global */
-.table-wrap:hover table::after {
-  --angle-1: -125deg;
-}
-
-.table-wrap:hover table {
-  transform: scale(0.995);
-  backdrop-filter: blur(clamp(1px, 0.0625em, 4px));
-  -webkit-backdrop-filter: blur(clamp(1px, 0.0625em, 4px));
-  -moz-backdrop-filter: blur(clamp(1px, 0.0625em, 4px));
-  -ms-backdrop-filter: blur(clamp(1px, 0.0625em, 4px));
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5);
-}
-
-.table-wrap:hover .table-shadow {
-  filter: blur(clamp(2px, 0.0625em, 8px));
-  -webkit-filter: blur(clamp(2px, 0.0625em, 8px));
-  -moz-filter: blur(clamp(2px, 0.0625em, 8px));
-  -ms-filter: blur(clamp(2px, 0.0625em, 8px));
-}
-
-.table-wrap:hover .table-shadow::after {
-  top: calc(var(--shadow-cuttoff-fix) - 0.875em);
-  opacity: 1;
-}
-
-/* Effet d'enfoncement au clic */
-.table-wrap:active {
-  transform: rotate3d(1, 0, 0, 15deg);
-}
-
-.table-wrap:active table {
-  transform: scale(0.98);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
-    0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
-    0 0.25em 0 0 rgba(255, 255, 255, 0.75),
-    inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
-}
-
-.table-wrap:active .table-shadow {
-  filter: blur(clamp(4px, 0.25em, 16px));
-  -webkit-filter: blur(clamp(4px, 0.25em, 16px));
-  -moz-filter: blur(clamp(4px, 0.25em, 16px));
-  -ms-filter: blur(clamp(4px, 0.25em, 16px));
-}
-
-.table-wrap:active .table-shadow::after {
-  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
-  opacity: 0.75;
-}
-
-th:hover::after {
-  background-position: 25% 50%;
-}
-
-.table-wrap:hover th::after {
-  background-position: 25% 50%;
-}
-
-.table-wrap:active th::after {
-  background-position: 50% 15%;
-  --angle-2: -15deg;
+/* Tableaux responsives */
+@media (max-width: 768px) {
+  table {
+    font-size: 13px;
+    margin: 12px 0;
+  }
+  
+  th, td {
+    padding: 8px 12px;
+  }
+  
+  th {
+    font-size: 12px;
+  }
 }
 
 /* Conteneur de tableau avec scroll horizontal si nécessaire */
 .table-container {
   overflow-x: auto;
   margin: 16px 0;
-  border-radius: 20px;
-  position: relative;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .table-container table {
   margin: 0;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 /* Styles pour les cellules avec du contenu long */
@@ -687,433 +372,6 @@ th.center {
 td.center {
   text-align: center;
 }
-
-/* Touch Devices */
-@media (hover: none) and (pointer: coarse) {
-  th::after,
-  .table-wrap:hover th::after,
-  .table-wrap:active th::after {
-    --angle-2: -45deg;
-  }
-  
-  table::after,
-  .table-wrap:hover table::after {
-    --angle-1: -75deg;
-  }
-  
-  tbody tr:hover {
-    transform: scale(1.05);
-  }
-}
-
-/* ========== FIN DES STYLES TABLEAUX GLASSMORPHIQUES ========== */
-
-/* ========== STYLES GLASSMORPHIQUES POUR TOUS LES BOUTONS ========== */
-
-/* Conteneur de bouton avec ombre */
-.button-wrap {
-  position: relative;
-  z-index: 2;
-  border-radius: 999vw;
-  background: transparent;
-  pointer-events: none;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  display: inline-block;
-}
-
-/* Ombre du bouton */
-.button-shadow {
-  --shadow-cuttoff-fix: 2em;
-  position: absolute;
-  width: calc(100% + var(--shadow-cuttoff-fix));
-  height: calc(100% + var(--shadow-cuttoff-fix));
-  top: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  left: calc(0% - var(--shadow-cuttoff-fix) / 2);
-  filter: blur(clamp(2px, 0.125em, 12px));
-  -webkit-filter: blur(clamp(2px, 0.125em, 12px));
-  -moz-filter: blur(clamp(2px, 0.125em, 12px));
-  -ms-filter: blur(clamp(2px, 0.125em, 12px));
-  overflow: visible;
-  pointer-events: none;
-}
-
-.button-shadow::after {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  border-radius: 999vw;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
-  width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
-  height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
-  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
-  left: calc(var(--shadow-cuttoff-fix) - 0.875em);
-  padding: 0.125em;
-  box-sizing: border-box;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  overflow: visible;
-  opacity: 1;
-}
-
-/* Styles de base pour tous les boutons */
-button,
-.new_convo,
-.bottom_buttons button,
-.onboarding-section,
-.onboarding-subsection,
-.video-button,
-.collapsible {
-  /* Reset des styles */
-  all: unset;
-  cursor: pointer;
-  position: relative;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  pointer-events: auto;
-  z-index: 3;
-  
-  /* Styles glassmorphiques */
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.05),
-    rgba(255, 255, 255, 0.2),
-    rgba(255, 255, 255, 0.05)
-  );
-  border-radius: 999vw;
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  
-  /* Typographie */
-  font-family: "Inter", sans-serif;
-  font-weight: 500;
-  color: rgba(50, 50, 50, 1);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-  
-  /* Espacement */
-  padding: 0.875em 1.5em;
-  display: flex;
-  align-items: center;
-  gap: 0.75em;
-  
-  /* Bordure */
-  border: none;
-  outline: none;
-}
-
-/* Effet hover pour tous les boutons */
-button:hover,
-.new_convo:hover,
-.bottom_buttons button:hover,
-.onboarding-section:hover,
-.onboarding-subsection:hover,
-.video-button:hover,
-.collapsible:hover {
-  transform: scale(0.975);
-  backdrop-filter: blur(0.01em);
-  -webkit-backdrop-filter: blur(0.01em);
-  -moz-backdrop-filter: blur(0.01em);
-  -ms-backdrop-filter: blur(0.01em);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
-    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5);
-  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
-}
-
-/* Bordure animée pour tous les boutons */
-button::after,
-.new_convo::after,
-.bottom_buttons button::after,
-.onboarding-section::after,
-.onboarding-subsection::after,
-.video-button::after,
-.collapsible::after {
-  content: "";
-  position: absolute;
-  z-index: 1;
-  inset: 0;
-  border-radius: 999vw;
-  width: calc(100% + var(--border-width));
-  height: calc(100% + var(--border-width));
-  top: calc(0% - var(--border-width) / 2);
-  left: calc(0% - var(--border-width) / 2);
-  padding: var(--border-width);
-  box-sizing: border-box;
-  background: conic-gradient(
-      from var(--angle-1) at 50% 50%,
-      rgba(0, 0, 0, 0.5),
-      rgba(0, 0, 0, 0) 5% 40%,
-      rgba(0, 0, 0, 0.5) 50%,
-      rgba(0, 0, 0, 0) 60% 95%,
-      rgba(0, 0, 0, 0.5)
-    ),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-  transition: all var(--anim--hover-time) var(--anim--hover-ease),
-    --angle-1 500ms ease;
-  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
-}
-
-/* Animation de la bordure au hover */
-button:hover::after,
-.new_convo:hover::after,
-.bottom_buttons button:hover::after,
-.onboarding-section:hover::after,
-.onboarding-subsection:hover::after,
-.video-button:hover::after,
-.collapsible:hover::after {
-  --angle-1: -125deg;
-}
-
-/* Effet de brillance sur le texte */
-button span,
-.new_convo span,
-.new_convo div,
-.bottom_buttons button span {
-  position: relative;
-  display: block;
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  font-family: "Inter", sans-serif;
-  letter-spacing: -0.05em;
-  font-weight: 500;
-  color: rgba(50, 50, 50, 1);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
-  transition: all var(--anim--hover-time) var(--anim--hover-ease);
-  z-index: 4;
-}
-
-/* Effet de brillance animé */
-button span::after,
-.new_convo span::after,
-.new_convo div::after,
-.bottom_buttons button span::after {
-  content: "";
-  display: block;
-  position: absolute;
-  z-index: 1;
-  width: calc(100% - var(--border-width));
-  height: calc(100% - var(--border-width));
-  top: calc(0% + var(--border-width) / 2);
-  left: calc(0% + var(--border-width) / 2);
-  box-sizing: border-box;
-  border-radius: 999vw;
-  overflow: clip;
-  background: linear-gradient(
-    var(--angle-2),
-    rgba(255, 255, 255, 0) 0%,
-    rgba(255, 255, 255, 0.5) 40% 50%,
-    rgba(255, 255, 255, 0) 55%
-  );
-  z-index: 3;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  background-size: 200% 200%;
-  background-position: 0% 50%;
-  background-repeat: no-repeat;
-  transition: background-position calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease),
-    --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
-}
-
-/* Animation de brillance au hover */
-button:hover span::after,
-.new_convo:hover span::after,
-.new_convo:hover div::after,
-.bottom_buttons button:hover span::after {
-  background-position: 25% 50%;
-}
-
-/* Styles spécifiques pour les boutons de conversation */
-.new_convo {
-  width: 100%;
-  justify-content: flex-start;
-  margin: 4px 0;
-  border-radius: 12px;
-  font-size: 14px;
-}
-
-.new_convo i {
-  color: #2f2f2e;
-  z-index: 4;
-}
-
-/* Styles pour les boutons du bas */
-.bottom_buttons button {
-  width: 100%;
-  justify-content: flex-start;
-  border-radius: 12px;
-  font-size: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.bottom_buttons button i {
-  color: #2f2f2e;
-  z-index: 4;
-}
-
-/* Styles pour les boutons d'onboarding */
-.onboarding-section {
-  width: var(--menu-percentage);
-  margin-bottom: 10px;
-  border-radius: 12px;
-  font-size: 15px;
-  text-align: left;
-  justify-content: flex-start;
-  padding: 10px 15px;
-}
-
-.onboarding-subsection {
-  width: 100%;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  text-align: left;
-  justify-content: flex-start;
-  padding: 10px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-/* Styles pour les boutons vidéo */
-.video-button {
-  width: 100%;
-  margin-bottom: 10px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: left;
-  justify-content: flex-start;
-  padding: 12px 20px;
-  background: rgba(255, 255, 255, 0.1);
-}
-
-/* Styles pour les boutons collapsibles */
-.collapsible {
-  border-radius: 12px;
-  justify-content: flex-start;
-}
-
-/* Effet d'enfoncement au clic */
-button:active,
-.new_convo:active,
-.bottom_buttons button:active,
-.onboarding-section:active,
-.onboarding-subsection:active,
-.video-button:active,
-.collapsible:active {
-  transform: scale(0.95);
-  box-shadow: 
-    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
-    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
-    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
-    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
-    0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
-    0 0.25em 0 0 rgba(255, 255, 255, 0.75),
-    inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
-}
-
-/* Animation de brillance au clic */
-button:active span::after,
-.new_convo:active span::after,
-.new_convo:active div::after,
-.bottom_buttons button:active span::after {
-  background-position: 50% 15%;
-  --angle-2: -15deg;
-}
-
-/* Animation de bordure au clic */
-button:active::after,
-.new_convo:active::after,
-.bottom_buttons button:active::after,
-.onboarding-section:active::after,
-.onboarding-subsection:active::after,
-.video-button:active::after,
-.collapsible:active::after {
-  --angle-1: -75deg;
-}
-
-/* Bouton d'envoi spécial */
-#send-button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 10px;
-  align-self: flex-end;
-  margin-bottom: 5px;
-  background: linear-gradient(
-    -75deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.3),
-    rgba(255, 255, 255, 0.1)
-  );
-}
-
-#send-button i {
-  font-size: 18px;
-  color: #2f2f2e;
-  font-weight: 900;
-  z-index: 4;
-}
-
-/* Touch Devices pour boutons */
-@media (hover: none) and (pointer: coarse) {
-  button span::after,
-  .new_convo span::after,
-  .new_convo div::after,
-  .bottom_buttons button span::after,
-  button:active span::after,
-  .new_convo:active span::after,
-  .new_convo:active div::after,
-  .bottom_buttons button:active span::after {
-    --angle-2: -45deg;
-  }
-  
-  button::after,
-  .new_convo::after,
-  .bottom_buttons button::after,
-  .onboarding-section::after,
-  .onboarding-subsection::after,
-  .video-button::after,
-  .collapsible::after,
-  button:hover::after,
-  .new_convo:hover::after,
-  .bottom_buttons button:hover::after,
-  .onboarding-section:hover::after,
-  .onboarding-subsection:hover::after,
-  .video-button:hover::after,
-  .collapsible:hover::after,
-  button:active::after,
-  .new_convo:active::after,
-  .bottom_buttons button:active::after,
-  .onboarding-section:active::after,
-  .onboarding-subsection:active::after,
-  .video-button:active::after,
-  .collapsible:active::after {
-    --angle-1: -75deg;
-  }
-}
-
-/* ========== FIN DES STYLES BOUTONS GLASSMORPHIQUES ========== */
 
 .modal-overlay {
   position: absolute;
@@ -1302,10 +560,6 @@ h3 {
   flex-direction: column;
   justify-content: space-between;
   position: relative;
-  /* Ajout du motif de points en arrière-plan */
-  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-  background-size: 30px 30px;
-  background-position: 0 0;
 }
 
 .conversation #messages {
@@ -1583,6 +837,28 @@ div.message:last-child {
   border-radius: 32px;
 }
 
+.new_convo {
+  padding: 8px 12px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: none;
+  margin: 4px;
+  border-radius: var(--border-radius-1);
+}
+
+.new_convo span {
+  color: var(--colour-3);
+  font-size: 14px;
+}
+
+.new_convo:hover {
+  background-color: var(--light-gray-hover);
+}
+
 .stop_generating {
   position: fixed;
   bottom: 80px;
@@ -1764,6 +1040,24 @@ select {
   margin-top: 0;
 }
 
+.bottom_buttons button {
+  padding: 8px 12px;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  border: 1px solid var(--blur-border);
+  border-radius: var(--border-radius-1);
+  width: 100%;
+}
+
+.bottom_buttons button span {
+  color: var(--colour-3);
+  font-size: 14px;
+}
+
 .conversations .top {
   display: flex;
   flex-direction: column;
@@ -1917,24 +1211,6 @@ ul {
   .stop_generating {
     bottom: 90px;
   }
-
-  /* Responsive pour les tableaux glassmorphiques */
-  .table-wrap {
-    margin: 20px 0;
-  }
-  
-  th, td {
-    padding: 0.75em 1em;
-    font-size: 0.9em;
-  }
-  
-  th {
-    font-size: 0.8em;
-  }
-  
-  tbody tr:hover {
-    transform: translateZ(30px) scale(1.05);
-  }
 }
 
 @media screen and (max-height: 640px) {
@@ -1982,12 +1258,85 @@ a:-webkit-any-link {
   min-height: 80px;
 }
 
+.onboarding-section {
+  cursor: pointer;
+  width: var(--menu-percentage);
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: var(--border-radius-1);
+  border: 1px solid var(--blur-border);
+  display: inline-block;
+  color: #2f2f2e;
+  text-align: left;
+  font-size: 15px;
+}
+
 .loading-stream {
   display: inline-block;
   height: 10px;
   width: 10px;
   border-radius: 50%;
   background-color: #2f2f2e;
+}
+
+.onboarding-subsection {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  margin-bottom: 10px;
+  text-align: left;
+  font-size: small;
+  border-radius: var(--border-radius-1);
+  border: 1px solid var(--blur-border);
+  border-color: white;
+}
+
+.onboarding-subsection:hover {
+  border-color: var(--blur-border);
+}
+
+.collapsible:hover {
+  background: var(--blur-border);
+}
+
+.onboard-collapsible-content {
+  width: var(--menu-percentage);
+  padding: 0 18px;
+  display: none;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.collapsible.onboarding-section {
+  display: flex;
+  align-items: center;
+}
+
+.video-buttons button,
+.video-buttons a {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  color: var(--colour-3);
+  background: var(--light-gray);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  margin-bottom: 10px;
+}
+
+.video-buttons button:hover,
+.video-buttons a:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.video-buttons button:focus,
+.video-buttons a:focus {
+  outline: none;
 }
 
 /* Styles améliorés pour les blocs de code avec effet frosted glass */
@@ -2415,6 +1764,48 @@ a:-webkit-any-link {
   justify-content: flex-end;
   gap: 8px;
   flex-shrink: 0;
+}
+
+#send-button {
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(47, 47, 46, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+  color: #2f2f2e;
+  align-self: flex-end;
+  margin-bottom: 5px;
+}
+
+#send-button i {
+  display: block;
+  margin: auto;
+  font-size: 18px;
+  color: #000000;
+  font-weight: 900;
+}
+
+#send-button:hover {
+  transform: scale(1.05);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(47, 47, 46, 0.3);
+}
+
+#send-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive pour mobile */
