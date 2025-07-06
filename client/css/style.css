@@ -708,6 +708,413 @@ td.center {
 
 /* ========== FIN DES STYLES TABLEAUX GLASSMORPHIQUES ========== */
 
+/* ========== STYLES GLASSMORPHIQUES POUR TOUS LES BOUTONS ========== */
+
+/* Conteneur de bouton avec ombre */
+.button-wrap {
+  position: relative;
+  z-index: 2;
+  border-radius: 999vw;
+  background: transparent;
+  pointer-events: none;
+  transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  display: inline-block;
+}
+
+/* Ombre du bouton */
+.button-shadow {
+  --shadow-cuttoff-fix: 2em;
+  position: absolute;
+  width: calc(100% + var(--shadow-cuttoff-fix));
+  height: calc(100% + var(--shadow-cuttoff-fix));
+  top: calc(0% - var(--shadow-cuttoff-fix) / 2);
+  left: calc(0% - var(--shadow-cuttoff-fix) / 2);
+  filter: blur(clamp(2px, 0.125em, 12px));
+  -webkit-filter: blur(clamp(2px, 0.125em, 12px));
+  -moz-filter: blur(clamp(2px, 0.125em, 12px));
+  -ms-filter: blur(clamp(2px, 0.125em, 12px));
+  overflow: visible;
+  pointer-events: none;
+}
+
+.button-shadow::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: 999vw;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.1));
+  width: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+  height: calc(100% - var(--shadow-cuttoff-fix) - 0.25em);
+  top: calc(var(--shadow-cuttoff-fix) - 0.5em);
+  left: calc(var(--shadow-cuttoff-fix) - 0.875em);
+  padding: 0.125em;
+  box-sizing: border-box;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  overflow: visible;
+  opacity: 1;
+}
+
+/* Styles de base pour tous les boutons */
+button,
+.new_convo,
+.bottom_buttons button,
+.onboarding-section,
+.onboarding-subsection,
+.video-button,
+.collapsible {
+  /* Reset des styles */
+  all: unset;
+  cursor: pointer;
+  position: relative;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  pointer-events: auto;
+  z-index: 3;
+  
+  /* Styles glassmorphiques */
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.2),
+    rgba(255, 255, 255, 0.05)
+  );
+  border-radius: 999vw;
+  box-shadow: 
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  
+  /* Typographie */
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  color: rgba(50, 50, 50, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+  
+  /* Espacement */
+  padding: 0.875em 1.5em;
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  
+  /* Bordure */
+  border: none;
+  outline: none;
+}
+
+/* Effet hover pour tous les boutons */
+button:hover,
+.new_convo:hover,
+.bottom_buttons button:hover,
+.onboarding-section:hover,
+.onboarding-subsection:hover,
+.video-button:hover,
+.collapsible:hover {
+  transform: scale(0.975);
+  backdrop-filter: blur(0.01em);
+  -webkit-backdrop-filter: blur(0.01em);
+  -moz-backdrop-filter: blur(0.01em);
+  -ms-backdrop-filter: blur(0.01em);
+  box-shadow: 
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
+    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5);
+  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
+}
+
+/* Bordure animée pour tous les boutons */
+button::after,
+.new_convo::after,
+.bottom_buttons button::after,
+.onboarding-section::after,
+.onboarding-subsection::after,
+.video-button::after,
+.collapsible::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: 999vw;
+  width: calc(100% + var(--border-width));
+  height: calc(100% + var(--border-width));
+  top: calc(0% - var(--border-width) / 2);
+  left: calc(0% - var(--border-width) / 2);
+  padding: var(--border-width);
+  box-sizing: border-box;
+  background: conic-gradient(
+      from var(--angle-1) at 50% 50%,
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0) 5% 40%,
+      rgba(0, 0, 0, 0.5) 50%,
+      rgba(0, 0, 0, 0) 60% 95%,
+      rgba(0, 0, 0, 0.5)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all var(--anim--hover-time) var(--anim--hover-ease),
+    --angle-1 500ms ease;
+  box-shadow: inset 0 0 0 calc(var(--border-width) / 2) rgba(255, 255, 255, 0.5);
+}
+
+/* Animation de la bordure au hover */
+button:hover::after,
+.new_convo:hover::after,
+.bottom_buttons button:hover::after,
+.onboarding-section:hover::after,
+.onboarding-subsection:hover::after,
+.video-button:hover::after,
+.collapsible:hover::after {
+  --angle-1: -125deg;
+}
+
+/* Effet de brillance sur le texte */
+button span,
+.new_convo span,
+.new_convo div,
+.bottom_buttons button span {
+  position: relative;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  font-family: "Inter", sans-serif;
+  letter-spacing: -0.05em;
+  font-weight: 500;
+  color: rgba(50, 50, 50, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+  transition: all var(--anim--hover-time) var(--anim--hover-ease);
+  z-index: 4;
+}
+
+/* Effet de brillance animé */
+button span::after,
+.new_convo span::after,
+.new_convo div::after,
+.bottom_buttons button span::after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 1;
+  width: calc(100% - var(--border-width));
+  height: calc(100% - var(--border-width));
+  top: calc(0% + var(--border-width) / 2);
+  left: calc(0% + var(--border-width) / 2);
+  box-sizing: border-box;
+  border-radius: 999vw;
+  overflow: clip;
+  background: linear-gradient(
+    var(--angle-2),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 40% 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  z-index: 3;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  transition: background-position calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease),
+    --angle-2 calc(var(--anim--hover-time) * 1.25) var(--anim--hover-ease);
+}
+
+/* Animation de brillance au hover */
+button:hover span::after,
+.new_convo:hover span::after,
+.new_convo:hover div::after,
+.bottom_buttons button:hover span::after {
+  background-position: 25% 50%;
+}
+
+/* Styles spécifiques pour les boutons de conversation */
+.new_convo {
+  width: 100%;
+  justify-content: flex-start;
+  margin: 4px 0;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.new_convo i {
+  color: #2f2f2e;
+  z-index: 4;
+}
+
+/* Styles pour les boutons du bas */
+.bottom_buttons button {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 12px;
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.bottom_buttons button i {
+  color: #2f2f2e;
+  z-index: 4;
+}
+
+/* Styles pour les boutons d'onboarding */
+.onboarding-section {
+  width: var(--menu-percentage);
+  margin-bottom: 10px;
+  border-radius: 12px;
+  font-size: 15px;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 10px 15px;
+}
+
+.onboarding-subsection {
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 10px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Styles pour les boutons vidéo */
+.video-button {
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: left;
+  justify-content: flex-start;
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Styles pour les boutons collapsibles */
+.collapsible {
+  border-radius: 12px;
+  justify-content: flex-start;
+}
+
+/* Effet d'enfoncement au clic */
+button:active,
+.new_convo:active,
+.bottom_buttons button:active,
+.onboarding-section:active,
+.onboarding-subsection:active,
+.video-button:active,
+.collapsible:active {
+  transform: scale(0.95);
+  box-shadow: 
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2),
+    0 0.225em 0.05em 0 rgba(0, 0, 0, 0.05),
+    0 0.25em 0 0 rgba(255, 255, 255, 0.75),
+    inset 0 0.25em 0.05em 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Animation de brillance au clic */
+button:active span::after,
+.new_convo:active span::after,
+.new_convo:active div::after,
+.bottom_buttons button:active span::after {
+  background-position: 50% 15%;
+  --angle-2: -15deg;
+}
+
+/* Animation de bordure au clic */
+button:active::after,
+.new_convo:active::after,
+.bottom_buttons button:active::after,
+.onboarding-section:active::after,
+.onboarding-subsection:active::after,
+.video-button:active::after,
+.collapsible:active::after {
+  --angle-1: -75deg;
+}
+
+/* Bouton d'envoi spécial */
+#send-button {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10px;
+  align-self: flex-end;
+  margin-bottom: 5px;
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.1),
+    rgba(255, 255, 255, 0.3),
+    rgba(255, 255, 255, 0.1)
+  );
+}
+
+#send-button i {
+  font-size: 18px;
+  color: #2f2f2e;
+  font-weight: 900;
+  z-index: 4;
+}
+
+/* Touch Devices pour boutons */
+@media (hover: none) and (pointer: coarse) {
+  button span::after,
+  .new_convo span::after,
+  .new_convo div::after,
+  .bottom_buttons button span::after,
+  button:active span::after,
+  .new_convo:active span::after,
+  .new_convo:active div::after,
+  .bottom_buttons button:active span::after {
+    --angle-2: -45deg;
+  }
+  
+  button::after,
+  .new_convo::after,
+  .bottom_buttons button::after,
+  .onboarding-section::after,
+  .onboarding-subsection::after,
+  .video-button::after,
+  .collapsible::after,
+  button:hover::after,
+  .new_convo:hover::after,
+  .bottom_buttons button:hover::after,
+  .onboarding-section:hover::after,
+  .onboarding-subsection:hover::after,
+  .video-button:hover::after,
+  .collapsible:hover::after,
+  button:active::after,
+  .new_convo:active::after,
+  .bottom_buttons button:active::after,
+  .onboarding-section:active::after,
+  .onboarding-subsection:active::after,
+  .video-button:active::after,
+  .collapsible:active::after {
+    --angle-1: -75deg;
+  }
+}
+
+/* ========== FIN DES STYLES BOUTONS GLASSMORPHIQUES ========== */
+
 .modal-overlay {
   position: absolute;
   right: 5px;
@@ -1176,28 +1583,6 @@ div.message:last-child {
   border-radius: 32px;
 }
 
-.new_convo {
-  padding: 8px 12px;
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  background: transparent;
-  border: none;
-  margin: 4px;
-  border-radius: var(--border-radius-1);
-}
-
-.new_convo span {
-  color: var(--colour-3);
-  font-size: 14px;
-}
-
-.new_convo:hover {
-  background-color: var(--light-gray-hover);
-}
-
 .stop_generating {
   position: fixed;
   bottom: 80px;
@@ -1377,24 +1762,6 @@ select {
   flex-direction: column;
   gap: 30px;
   margin-top: 0;
-}
-
-.bottom_buttons button {
-  padding: 8px 12px;
-  display: flex;
-  gap: 18px;
-  align-items: center;
-  cursor: pointer;
-  user-select: none;
-  background: transparent;
-  border: 1px solid var(--blur-border);
-  border-radius: var(--border-radius-1);
-  width: 100%;
-}
-
-.bottom_buttons button span {
-  color: var(--colour-3);
-  font-size: 14px;
 }
 
 .conversations .top {
@@ -1615,85 +1982,12 @@ a:-webkit-any-link {
   min-height: 80px;
 }
 
-.onboarding-section {
-  cursor: pointer;
-  width: var(--menu-percentage);
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: var(--border-radius-1);
-  border: 1px solid var(--blur-border);
-  display: inline-block;
-  color: #2f2f2e;
-  text-align: left;
-  font-size: 15px;
-}
-
 .loading-stream {
   display: inline-block;
   height: 10px;
   width: 10px;
   border-radius: 50%;
   background-color: #2f2f2e;
-}
-
-.onboarding-subsection {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 10px;
-  text-align: left;
-  font-size: small;
-  border-radius: var(--border-radius-1);
-  border: 1px solid var(--blur-border);
-  border-color: white;
-}
-
-.onboarding-subsection:hover {
-  border-color: var(--blur-border);
-}
-
-.collapsible:hover {
-  background: var(--blur-border);
-}
-
-.onboard-collapsible-content {
-  width: var(--menu-percentage);
-  padding: 0 18px;
-  display: none;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.collapsible.onboarding-section {
-  display: flex;
-  align-items: center;
-}
-
-.video-buttons button,
-.video-buttons a {
-  width: 100%;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: left;
-  color: var(--colour-3);
-  background: var(--light-gray);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  margin-bottom: 10px;
-}
-
-.video-buttons button:hover,
-.video-buttons a:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.video-buttons button:focus,
-.video-buttons a:focus {
-  outline: none;
 }
 
 /* Styles améliorés pour les blocs de code avec effet frosted glass */
@@ -2121,48 +2415,6 @@ a:-webkit-any-link {
   justify-content: flex-end;
   gap: 8px;
   flex-shrink: 0;
-}
-
-#send-button {
-  width: 40px;
-  height: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(47, 47, 46, 0.2);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  margin-left: 10px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
-  flex-shrink: 0;
-  color: #2f2f2e;
-  align-self: flex-end;
-  margin-bottom: 5px;
-}
-
-#send-button i {
-  display: block;
-  margin: auto;
-  font-size: 18px;
-  color: #000000;
-  font-weight: 900;
-}
-
-#send-button:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: rgba(47, 47, 46, 0.3);
-}
-
-#send-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive pour mobile */
