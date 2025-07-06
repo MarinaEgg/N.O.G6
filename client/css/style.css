@@ -1176,6 +1176,7 @@ div.message:last-child {
   border-radius: 32px;
 }
 
+/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
 .new_convo {
   padding: 8px 12px;
   display: flex;
@@ -1183,8 +1184,6 @@ div.message:last-child {
   align-items: center;
   cursor: pointer;
   user-select: none;
-  background: transparent;
-  border: none;
   margin: 4px;
   border-radius: var(--border-radius-1);
 }
@@ -1192,10 +1191,6 @@ div.message:last-child {
 .new_convo span {
   color: var(--colour-3);
   font-size: 14px;
-}
-
-.new_convo:hover {
-  background-color: var(--light-gray-hover);
 }
 
 .stop_generating {
@@ -1379,6 +1374,7 @@ select {
   margin-top: 0;
 }
 
+/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
 .bottom_buttons button {
   padding: 8px 12px;
   display: flex;
@@ -1386,8 +1382,6 @@ select {
   align-items: center;
   cursor: pointer;
   user-select: none;
-  background: transparent;
-  border: 1px solid var(--blur-border);
   border-radius: var(--border-radius-1);
   width: 100%;
 }
@@ -1615,13 +1609,13 @@ a:-webkit-any-link {
   min-height: 80px;
 }
 
+/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
 .onboarding-section {
   cursor: pointer;
   width: var(--menu-percentage);
   padding: 10px;
   margin-bottom: 10px;
   border-radius: var(--border-radius-1);
-  border: 1px solid var(--blur-border);
   display: inline-block;
   color: #2f2f2e;
   text-align: left;
@@ -1636,6 +1630,7 @@ a:-webkit-any-link {
   background-color: #2f2f2e;
 }
 
+/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
 .onboarding-subsection {
   width: 100%;
   padding: 10px;
@@ -1644,16 +1639,11 @@ a:-webkit-any-link {
   text-align: left;
   font-size: small;
   border-radius: var(--border-radius-1);
-  border: 1px solid var(--blur-border);
-  border-color: white;
 }
 
-.onboarding-subsection:hover {
-  border-color: var(--blur-border);
-}
-
-.collapsible:hover {
-  background: var(--blur-border);
+.collapsible.onboarding-section {
+  display: flex;
+  align-items: center;
 }
 
 .onboard-collapsible-content {
@@ -1662,11 +1652,6 @@ a:-webkit-any-link {
   display: none;
   max-height: 300px;
   overflow-y: auto;
-}
-
-.collapsible.onboarding-section {
-  display: flex;
-  align-items: center;
 }
 
 .video-buttons button,
@@ -2123,21 +2108,16 @@ a:-webkit-any-link {
   flex-shrink: 0;
 }
 
+/* SUPPRESSION DES ANCIENS STYLES POUR LE BOUTON D'ENVOI GLASS */
 #send-button {
   width: 40px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(47, 47, 46, 0.2);
-  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   margin-left: 10px;
   transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   flex-shrink: 0;
   color: #2f2f2e;
@@ -2151,18 +2131,6 @@ a:-webkit-any-link {
   font-size: 18px;
   color: #000000;
   font-weight: 900;
-}
-
-#send-button:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border-color: rgba(47, 47, 46, 0.3);
-}
-
-#send-button:active {
-  transform: scale(0.95);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Responsive pour mobile */

@@ -1,0 +1,306 @@
+/* ========== GLASS BUTTON EFFECT ========== */
+
+/* Propriétés CSS personnalisées pour l'effet Glass Button */
+@property --angle-1 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -75deg;
+}
+
+@property --angle-2 {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: -45deg;
+}
+
+/* Variables pour l'effet Glass Button */
+:root {
+  --glass-anim-hover-time: 400ms;
+  --glass-anim-hover-ease: cubic-bezier(0.25, 1, 0.5, 1);
+  --glass-border-width: clamp(1px, 0.0625em, 4px);
+}
+
+/* ========== STYLES GLASS BUTTON POUR BOUTONS SPÉCIFIQUES ========== */
+
+/* Sélecteurs pour tous les boutons concernés */
+.new_convo,
+.bottom_buttons button,
+#send-button,
+.onboarding-section,
+.video-button,
+.collapsible,
+.onboarding-subsection {
+  /* Reset des styles existants */
+  border: none !important;
+  background-color: transparent !important;
+  
+  /* Styles Glass Button de base */
+  position: relative;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  pointer-events: auto;
+  z-index: 3;
+  
+  /* Effet Glass avec fond blanc */
+  background: linear-gradient(
+    -75deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.8)
+  ) !important;
+  
+  /* Ombres et effets de profondeur */
+  box-shadow: 
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.25em 0.125em -0.125em rgba(0, 0, 0, 0.2),
+    0 0 0.1em 0.25em inset rgba(255, 255, 255, 0.2) !important;
+  
+  /* Effet de flou en arrière-plan */
+  backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -webkit-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -moz-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  -ms-backdrop-filter: blur(clamp(1px, 0.125em, 4px));
+  
+  /* Transitions fluides */
+  transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease);
+}
+
+/* Effet hover pour les boutons Glass */
+.new_convo:hover,
+.bottom_buttons button:hover,
+#send-button:hover,
+.onboarding-section:hover,
+.video-button:hover,
+.collapsible:hover,
+.onboarding-subsection:hover {
+  transform: scale(0.975);
+  
+  backdrop-filter: blur(0.01em);
+  -webkit-backdrop-filter: blur(0.01em);
+  -moz-backdrop-filter: blur(0.01em);
+  -ms-backdrop-filter: blur(0.01em);
+  
+  box-shadow: 
+    inset 0 0.125em 0.125em rgba(0, 0, 0, 0.05),
+    inset 0 -0.125em 0.125em rgba(255, 255, 255, 0.5),
+    0 0.15em 0.05em -0.1em rgba(0, 0, 0, 0.25),
+    0 0 0.05em 0.1em inset rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Bordure animée avec dégradé conique */
+.new_convo::after,
+.bottom_buttons button::after,
+.onboarding-section::after,
+.video-button::after,
+.collapsible::after,
+.onboarding-subsection::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  border-radius: inherit;
+  width: calc(100% + var(--glass-border-width));
+  height: calc(100% + var(--glass-border-width));
+  top: calc(0% - var(--glass-border-width) / 2);
+  left: calc(0% - var(--glass-border-width) / 2);
+  padding: var(--glass-border-width);
+  box-sizing: border-box;
+  background: conic-gradient(
+      from var(--angle-1) at 50% 50%,
+      rgba(0, 0, 0, 0.3),
+      rgba(0, 0, 0, 0) 5% 40%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(0, 0, 0, 0) 60% 95%,
+      rgba(0, 0, 0, 0.3)
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5));
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease),
+    --angle-1 500ms ease;
+  box-shadow: inset 0 0 0 calc(var(--glass-border-width) / 2) rgba(255, 255, 255, 0.5);
+}
+
+/* Animation de la bordure au hover */
+.new_convo:hover::after,
+.bottom_buttons button:hover::after,
+.onboarding-section:hover::after,
+.video-button:hover::after,
+.collapsible:hover::after,
+.onboarding-subsection:hover::after {
+  --angle-1: -125deg;
+}
+
+/* Effet actif (clic) */
+.new_convo:active::after,
+.bottom_buttons button:active::after,
+.onboarding-section:active::after,
+.video-button:active::after,
+.collapsible:active::after,
+.onboarding-subsection:active::after {
+  --angle-1: -75deg;
+}
+
+/* Effet de brillance sur le texte */
+.new_convo span,
+.bottom_buttons button span,
+.onboarding-section,
+.video-button,
+.collapsible,
+.onboarding-subsection {
+  position: relative;
+  display: block;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  font-family: "Inter", sans-serif;
+  color: rgba(50, 50, 50, 1) !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 0em 0.25em 0.05em rgba(0, 0, 0, 0.1);
+  transition: all var(--glass-anim-hover-time) var(--glass-anim-hover-ease);
+  z-index: 2;
+}
+
+/* Effet de brillance au hover sur le texte */
+.new_convo:hover span,
+.bottom_buttons button:hover span,
+.onboarding-section:hover,
+.video-button:hover,
+.collapsible:hover,
+.onboarding-subsection:hover {
+  text-shadow: 0.025em 0.025em 0.025em rgba(0, 0, 0, 0.12);
+}
+
+/* Effet de brillance mobile avec pseudo-élément */
+.new_convo span::after,
+.bottom_buttons button span::after {
+  content: "";
+  display: block;
+  position: absolute;
+  z-index: 1;
+  width: calc(100% - var(--glass-border-width));
+  height: calc(100% - var(--glass-border-width));
+  top: calc(0% + var(--glass-border-width) / 2);
+  left: calc(0% + var(--glass-border-width) / 2);
+  box-sizing: border-box;
+  border-radius: inherit;
+  overflow: clip;
+  background: linear-gradient(
+    var(--angle-2),
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.5) 40% 50%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  mix-blend-mode: screen;
+  pointer-events: none;
+  background-size: 200% 200%;
+  background-position: 0% 50%;
+  background-repeat: no-repeat;
+  transition: background-position calc(var(--glass-anim-hover-time) * 1.25)
+      var(--glass-anim-hover-ease),
+    --angle-2 calc(var(--glass-anim-hover-time) * 1.25) var(--glass-anim-hover-ease);
+}
+
+/* Animation de brillance au hover */
+.new_convo:hover span::after,
+.bottom_buttons button:hover span::after {
+  background-position: 25% 50%;
+}
+
+/* Animation de brillance au clic */
+.new_convo:active span::after,
+.bottom_buttons button:active span::after {
+  background-position: 50% 15%;
+  --angle-2: -15deg;
+}
+
+/* ========== BOUTON D'ENVOI SPÉCIAL ========== */
+
+/* Le bouton d'envoi garde sa forme circulaire */
+#send-button {
+  border-radius: 50% !important;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#send-button::after {
+  border-radius: 50% !important;
+}
+
+/* ========== SUPPRESSION DES ANCIENS STYLES ========== */
+
+/* Suppression des anciens backgrounds et bordures */
+.new_convo,
+.bottom_buttons button {
+  background: none !important;
+  border: none !important;
+}
+
+/* Suppression des anciens effets hover */
+.new_convo:hover,
+.bottom_buttons button:hover,
+.onboarding-section:hover,
+.video-button:hover {
+  background-color: transparent !important;
+}
+
+/* ========== RESPONSIVE ========== */
+
+/* Adaptations pour les appareils tactiles */
+@media (hover: none) and (pointer: coarse) {
+  .new_convo span::after,
+  .bottom_buttons button span::after,
+  .new_convo:active span::after,
+  .bottom_buttons button:active span::after {
+    --angle-2: -45deg;
+  }
+  
+  .new_convo::after,
+  .bottom_buttons button::after,
+  .onboarding-section::after,
+  .video-button::after,
+  .collapsible::after,
+  .onboarding-subsection::after,
+  .new_convo:hover::after,
+  .bottom_buttons button:hover::after,
+  .onboarding-section:hover::after,
+  .video-button:hover::after,
+  .collapsible:hover::after,
+  .onboarding-subsection:hover::after,
+  .new_convo:active::after,
+  .bottom_buttons button:active::after,
+  .onboarding-section:active::after,
+  .video-button:active::after,
+  .collapsible:active::after,
+  .onboarding-subsection:active::after {
+    --angle-1: -75deg;
+  }
+}
+
+/* ========== EXCLUSIONS ========== */
+
+/* Exclusion des boutons Media et Retour */
+.side-nav-header a,
+#onboardingButton,
+.closebtn,
+#back-button {
+  /* Ces boutons gardent leur style original */
+  background: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  transform: none !important;
+}
+
+.side-nav-header a::after,
+#onboardingButton::after,
+.closebtn::after,
+#back-button::after {
+  display: none !important;
+}
