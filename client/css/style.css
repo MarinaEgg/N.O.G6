@@ -708,6 +708,206 @@ td.center {
 
 /* ========== FIN DES STYLES TABLEAUX GLASSMORPHIQUES ========== */
 
+/* ========== ZONE DE CHAT AVEC EFFET PUSH ========== */
+/* Conteneur principal de chat */
+.chat-main-container {
+  margin-left: 0;
+  transition: margin-left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  min-height: 100vh;
+}
+
+body.sidebar-open .chat-main-container {
+  margin-left: 288px; /* 280px sidebar + 8px gap */
+}
+
+/* Barre de chat responsive avec sidebar */
+.user-input-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  padding: 20px;
+  transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body.sidebar-open .user-input-container {
+  left: 288px; /* Décalage avec la sidebar */
+}
+
+/* Bouton stop generating */
+.stop_generating {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body.sidebar-open .stop_generating {
+  left: calc(50% + 144px); /* 288px/2 = 144px de décalage */
+}
+
+
+/* ========== SIDEBAR PUSH MENU ========== */
+.conversations {
+  position: fixed;
+  top: 8px;
+  left: -280px; /* Cachée par défaut */
+  width: 280px;
+  height: calc(100vh - 16px);
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  padding: var(--section-gap);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  overflow-y: auto;
+  z-index: 999; /* Z-index inférieur aux modals */
+  transition: left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 1px solid #e0e0e0;
+}
+
+/* État ouvert de la sidebar */
+body.sidebar-open .conversations {
+  left: 8px;
+}
+
+/* Bouton hamburger fixe */
+.sidebar-toggle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000; /* Au-dessus de la sidebar mais sous les modals */
+  width: 48px;
+  height: 48px;
+  background: var(--light-gray);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-toggle:hover {
+  background: var(--light-gray-hover);
+  transform: scale(1.02);
+}
+
+/* Animation hamburger vers X */
+.sidebar-toggle span {
+  width: 18px;
+  height: 2px;
+  background-color: var(--colour-3);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border-radius: 1px;
+}
+
+body.sidebar-open .sidebar-toggle span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+body.sidebar-open .sidebar-toggle span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+body.sidebar-open .sidebar-toggle span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Overlay for when sidebar is open */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+body.sidebar-open .sidebar-overlay {
+  display: block;
+  opacity: 1;
+}
+
+/* Adjust main content when sidebar is open */
+body.sidebar-open {
+  overflow: hidden;
+}
+
+/* Show hamburger menu on mobile */
+@media screen and (max-width: 990px) {
+  .hamburger-menu {
+    display: flex;
+  }
+  
+  /* Push content when sidebar is open */
+  body.sidebar-open .main-content {
+    transform: translateX(280px);
+  }
+}
+
+/* Mobile - Overlay au lieu de push */
+@media (max-width: 990px) {
+  .conversations {
+    width: 100vw;
+    left: -100vw;
+    top: 0;
+    height: 100vh;
+    border-radius: 0;
+  }
+  
+  body.sidebar-open .conversations {
+    left: 0;
+  }
+  
+  /* Pas de push sur mobile */
+  body.sidebar-open .chat-main-container {
+    margin-left: 0;
+  }
+  
+  body.sidebar-open .user-input-container {
+    left: 0;
+  }
+  
+  body.sidebar-open .stop_generating {
+    left: 50%;
+  }
+  
+  body.sidebar-open #librarySideNav,
+  body.sidebar-open #LinksSideNav {
+    margin-left: 0;
+    width: 100vw !important;
+  }
+  
+  /* Overlay sombre sur mobile */
+  body.sidebar-open::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 998;
+    backdrop-filter: blur(2px);
+  }
+}
+
 .modal-overlay {
   position: absolute;
   right: 5px;
