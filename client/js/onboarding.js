@@ -291,21 +291,18 @@ function handleWindowResize() {
 function closeOnboarding() {
     if (isTransitioning) return;
     
-    console.log('Fermeture de la page agents avec redirection');
+    console.log('Fermeture instantanée de la page agents');
     isTransitioning = true;
     
     const container = document.querySelector('.onboarding-container');
     if (container) {
-        // Animation de sortie vers la droite
+        // Démarrer l'animation ET la redirection en même temps
         container.classList.add('exiting');
         container.classList.remove('visible');
         
-        // Redirection vers la page principale après l'animation
-        setTimeout(() => {
-            window.location.href = '/';
-        }, 400); // Même durée que l'animation CSS
+        // Redirection immédiate - pas de setTimeout !
+        window.location.href = '/';
     } else {
-        // Fallback si le container n'existe pas
         window.location.href = '/';
     }
 }
