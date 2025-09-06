@@ -224,6 +224,12 @@ function handleAgentSelection(key, agent, cardElement) {
 
 // Configuration des événements globaux
 function setupGlobalEventListeners() {
+    // Événement pour le bouton retour
+    const backBtn = document.querySelector('.back-button');
+    if (backBtn) {
+        backBtn.addEventListener('click', closeOnboarding);
+    }
+    
     // Événement pour le bouton de fermeture
     const closeBtn = document.querySelector('.close-onboarding');
     if (closeBtn) {
