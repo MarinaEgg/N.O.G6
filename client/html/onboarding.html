@@ -1,2 +1,137 @@
 <!DOCTYPE html>
-<html><head><title>Onboarding</title></head><body><h1>Onboarding</h1></body></html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0">
+    <meta name="description" content="EggOn nOg Onboarding">
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/nog_logo_no_text.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/nog_logo_no_text.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+    
+    <!-- CSS propres à l'onboarding -->
+    <link rel="stylesheet" href="/assets/css/onboarding.css">
+    
+    <title>nOg - Onboarding</title>
+</head>
+<body>
+    <!-- Masquer tous les éléments de la page principale -->
+    <style>
+        .conversations, 
+        #conversations,
+        .sidebar-toggle,
+        .user-input-container,
+        .sidenav,
+        #librarySideNav,
+        #LinksSideNav,
+        .chat-main-container {
+            display: none !important;
+        }
+    </style>
+    
+    <div class="onboarding-container">
+        <header class="onboarding-header">
+            <div class="logo-container">
+                <img src="/assets/img/nog_logo_no_text.png" alt="nOg Logo" class="onboarding-logo">
+                <h1>Bienvenue sur nOg</h1>
+            </div>
+            <button class="close-onboarding" onclick="closeOnboarding()">
+                <span>&times;</span>
+            </button>
+        </header>
+        
+        <main class="onboarding-content">
+            <div class="onboarding-steps">
+                <div class="step active" data-step="1">
+                    <div class="step-content">
+                        <h2>Découvrez nOg</h2>
+                        <p>Votre assistant juridique intelligent pour vous accompagner dans vos démarches légales.</p>
+                        <div class="features-grid">
+                            <div class="feature-card">
+                                <div class="feature-icon">⚖️</div>
+                                <h3>Conseil Juridique</h3>
+                                <p>Obtenez des réponses précises à vos questions légales</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">📄</div>
+                                <h3>Documents</h3>
+                                <p>Analysez et générez des documents juridiques</p>
+                            </div>
+                            <div class="feature-card">
+                                <div class="feature-icon">🔍</div>
+                                <h3>Recherche</h3>
+                                <p>Trouvez rapidement les informations dont vous avez besoin</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step" data-step="2">
+                    <div class="step-content">
+                        <h2>Comment utiliser nOg</h2>
+                        <div class="usage-steps">
+                            <div class="usage-step">
+                                <span class="step-number">1</span>
+                                <div>
+                                    <h3>Posez votre question</h3>
+                                    <p>Décrivez votre situation ou votre problème juridique</p>
+                                </div>
+                            </div>
+                            <div class="usage-step">
+                                <span class="step-number">2</span>
+                                <div>
+                                    <h3>Recevez des conseils</h3>
+                                    <p>nOg analyse votre demande et vous fournit une réponse adaptée</p>
+                                </div>
+                            </div>
+                            <div class="usage-step">
+                                <span class="step-number">3</span>
+                                <div>
+                                    <h3>Approfondissez</h3>
+                                    <p>Posez des questions complémentaires pour plus de précisions</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step" data-step="3">
+                    <div class="step-content">
+                        <h2>Prêt à commencer ?</h2>
+                        <p>Vous êtes maintenant prêt à utiliser nOg pour vos besoins juridiques.</p>
+                        <div class="cta-container">
+                            <button class="cta-button primary" onclick="startChat()">
+                                Commencer à utiliser nOg
+                            </button>
+                            <button class="cta-button secondary" onclick="skipOnboarding()">
+                                Passer l'introduction
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="onboarding-navigation">
+                <button class="nav-btn prev-btn" onclick="prevStep()" disabled>
+                    Précédent
+                </button>
+                <div class="steps-indicator">
+                    <span class="dot active" data-step="1"></span>
+                    <span class="dot" data-step="2"></span>
+                    <span class="dot" data-step="3"></span>
+                </div>
+                <button class="nav-btn next-btn" onclick="nextStep()">
+                    Suivant
+                </button>
+            </div>
+        </main>
+    </div>
+    
+    <!-- JavaScript propre à l'onboarding -->
+    <script src="/assets/js/onboarding.js"></script>
+</body>
+</html>
