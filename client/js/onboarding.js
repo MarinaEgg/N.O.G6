@@ -289,34 +289,8 @@ function handleWindowResize() {
     console.log('Fenêtre redimensionnée');
 }
 function closeOnboarding() {
-    if (isTransitioning) return;
-    
-    console.log('Fermeture de la page agents avec transition directe');
-    isTransitioning = true;
-    
-    const container = document.querySelector('.onboarding-container');
-    if (container) {
-        // Animation de sortie vers la droite
-        container.classList.add('exiting');
-        container.classList.remove('visible');
-        
-        // Au lieu de rediriger, on révèle les éléments principaux après l'animation
-        setTimeout(() => {
-            // Masquer complètement l'overlay onboarding
-            container.style.display = 'none';
-            
-            // Révéler les éléments de la page principale
-            showMainPageElements();
-            
-            // Réinitialiser l'état
-            isTransitioning = false;
-            
-            console.log('Transition vers page principale terminée');
-        }, 400);
-    } else {
-        showMainPageElements();
-        isTransitioning = false;
-    }
+    // Marquer le body comme étant en mode onboarding
+    document.body.classList.add('onboarding-active');
 }
 
 // Masquer les éléments de la page principale
@@ -342,9 +316,6 @@ function hideMainPageElements() {
             }
         });
     });
-    
-    // Marquer le body comme étant en mode onboarding
-    document.body.classList.add('onboarding-active');
 }
 
 // Restaurer les éléments de la page principale
