@@ -289,8 +289,25 @@ function handleWindowResize() {
     console.log('Fenêtre redimensionnée');
 }
 function closeOnboarding() {
-    // Marquer le body comme étant en mode onboarding
-    document.body.classList.add('onboarding-active');
+    if (isTransitioning) return;
+    
+    console.log('Fermeture de la page agents avec redirection');
+    isTransitioning = true;
+    
+    const container = document.querySelector('.onboarding-container');
+    if (container) {
+        // Animation de sortie vers la droite
+        container.classList.add('exiting');
+        container.classList.remove('visible');
+        
+        // Redirection vers la page principale après l'animation
+        setTimeout(() => {
+            window.location.href = '/';
+        }, 400); // Même durée que l'animation CSS
+    } else {
+        // Fallback si le container n'existe pas
+        window.location.href = '/';
+    }
 }
 
 // Masquer les éléments de la page principale
