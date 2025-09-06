@@ -30,21 +30,23 @@ body {
     visibility: hidden !important;
 }
 
-/* Container principal - RÉDUIRE le blur */
+/* Container principal de l'onboarding avec transitions */
 .onboarding-container {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100vh;
+    /* Fond avec motif de points seulement dans le conteneur */
     background: var(--colour-2);
     background-image: radial-gradient(circle, rgba(47, 47, 46, 0.05) 1px, transparent 1px);
     background-size: 20px 20px;
-    /* RÉDUIRE le blur de 10px à 5px */
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
     z-index: 9999;
     display: flex;
     flex-direction: column;
+    
+    /* Animation d'entrée depuis la droite */
     transform: translateX(100%);
     transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
@@ -61,15 +63,13 @@ body {
 }
 
 /* Header */
-/* Header - RÉDUIRE le blur */
 .onboarding-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 2rem 3rem;
     background: rgba(255, 255, 255, 0.9);
-    /* RÉDUIRE le blur de 15px à 8px */
-    backdrop-filter: blur(8px);
+    backdrop-filter: blur(15px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     flex-shrink: 0;
 }
@@ -174,13 +174,10 @@ body {
 }
 
 /* Cartes d'agents avec effet glass */
-/* Cartes d'agents - SUPPRIMER complètement le backdrop-filter */
 .agent-card {
-    background: rgba(255, 255, 255, 0.98);
-    /* SUPPRIMER ces lignes qui causent le blur :
+    background: var(--colour-1);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    */
     
     border: 1px solid var(--gray);
     box-shadow: 
@@ -193,7 +190,7 @@ body {
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
-    min-height: 240px;
+    min-height: 200px;
     
     display: flex;
     flex-direction: column;
@@ -207,12 +204,11 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    /* Gradient plus subtil */
     background: linear-gradient(
         135deg, 
-        rgba(255, 255, 255, 0.1) 0%, 
-        rgba(255, 255, 255, 0.02) 50%,
-        rgba(255, 255, 255, 0.05) 100%
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
     );
     border-radius: 16px;
     pointer-events: none;
@@ -236,18 +232,15 @@ body {
 }
 
 .agent-card:hover {
-    /* Background encore plus opaque au hover */
-    background: rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.98);
     transform: translateY(-6px) scale(1.02);
     box-shadow: 
         0 20px 60px rgba(0, 0, 0, 0.15),
         0 8px 24px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
     border-color: rgba(255, 255, 255, 0.6);
-    /* SUPPRIMER ces lignes :
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
-    */
 }
 
 /* Contenu des cartes */
@@ -313,13 +306,11 @@ body {
 
 /* Conteneur de recherche */
 .search-container {
-    position: relative;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto 30px;
+    flex: 1;
+    max-width: 500px;
+    margin: 0 2rem;
 }
 
-/* Input de recherche - RÉDUIRE le blur */
 .search-input {
     width: 100%;
     padding: 12px 20px;
@@ -328,21 +319,20 @@ body {
     border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 25px;
     background: rgba(255, 255, 255, 0.95);
-    /* RÉDUIRE le blur de 10px à 5px */
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(10px);
     transition: all 0.3s ease;
     color: var(--colour-3);
 }
 
 .search-input:focus {
     outline: none;
-    border-color: var(--yellow);
-    box-shadow: 0 0 0 3px rgba(255, 214, 10, 0.2);
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    background: white;
 }
 
 .search-input::placeholder {
-    color: var(--gray);
-    opacity: 0.8;
+    color: rgba(44, 62, 80, 0.6);
 }
 
 /* Préfixe @ pour les titres */
@@ -456,10 +446,9 @@ body {
 /* Dark mode pour la recherche */
 @media (prefers-color-scheme: dark) {
     .search-input {
-        background: rgba(30, 30, 30, 0.9);
+        background: rgba(0, 0, 0, 0.8);
         border-color: rgba(255, 255, 255, 0.2);
         color: #e2e8f0;
-        backdrop-filter: blur(3px); /* Blur minimal pour le dark mode */
     }
 }
 
@@ -589,8 +578,7 @@ body {
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
     .agent-card {
-        /* Background solide pour le dark mode */
-        background: rgba(30, 30, 30, 0.95);
+        background: rgba(0, 0, 0, 0.8);
         border-color: rgba(255, 255, 255, 0.1);
     }
     
