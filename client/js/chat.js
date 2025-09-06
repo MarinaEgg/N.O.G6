@@ -1,3 +1,46 @@
+// ========== SIDEBAR TOGGLE ========== 
+function toggleSidebar() {
+  const body = document.body;
+  const isOpen = body.classList.contains('sidebar-open');
+  
+  if (isOpen) {
+    body.classList.remove('sidebar-open');
+    localStorage.setItem('sidebarOpen', 'false');
+  } else {
+    body.classList.add('sidebar-open');
+    localStorage.setItem('sidebarOpen', 'true');
+  }
+}
+
+// Initialiser l'état de la sidebar au chargement
+function initSidebar() {
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', toggleSidebar);
+  }
+  
+  // Restaurer l'état depuis localStorage
+  const savedState = localStorage.getItem('sidebarOpen');
+  if (savedState === 'true') {
+    document.body.classList.add('sidebar-open');
+  }
+}
+
+// Fermer la sidebar en cliquant sur l'overlay (mobile)
+function handleOverlayClick(e) {
+  if (window.innerWidth <= 990 && e.target === document.body.querySelector('::before')) {
+    document.body.classList.remove('sidebar-open');
+  }
+}
+
+// Initialize sidebar when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+  initSidebar();
+  document.body.addEventListener('click', handleOverlayClick);
+});
+
+// ========== END SIDEBAR TOGGLE ==========
+
 const query = (obj) =>
   Object.keys(obj)
     .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(obj[k]))
@@ -1108,3 +1151,11 @@ for (i = 0; i < coll.length; i++) {
 // const videoPlayer = document.getElementById(`video-iframe`);
 
 // Function to fetch video title from YouTube oEmbed API
+
+// Initialize sidebar when window loads
+window.onload = async () => {
+  // Initialize sidebar
+  initSidebar();
+  
+  // Any other initialization code can go here
+};
