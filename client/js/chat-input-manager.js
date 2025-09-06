@@ -196,39 +196,68 @@ class ChatInputManager {
     this.dispatchCustomEvent('chatInputReset');
   }
 
-  sendMessage() { 
-    const message = this.textarea.value.trim(); 
-    if (message.length === 0) return; 
- 
-    // Vérifier si handle_ask est disponible, sinon attendre 
-    if (typeof window.handle_ask === 'function') { 
-      window.handle_ask(); 
-      this.resetHeight(); 
-    } else { 
-      // Attendre que handle_ask soit chargée avec retry intelligent 
-      let attempts = 0; 
-      const maxAttempts = 50; // 5 secondes maximum 
+  sendMessage() {
+    const message = this.textarea.value.trim();
+    if (message.length === 0) return;
+
+    console.log('=== DIAGNOSTIC sendMessage ===');
+    console.log('typeof window.handle_ask:', typeof window.handle_ask);
+    console.log('window.handle_ask existe:', !!window.handle_ask);
+    console.log('handle_ask dans window:', 'handle_ask' in window);
+    console.log('Toutes les propriétés window contenant handle:', Object.keys(window).filter(key => key.includes('handle')));
+    
+    // Essayer différentes façons d'accéder à handle_ask
+    const handleAskVariants = [
+      window.handle_ask,
+      window['handle_ask'],
+      globalThis.handle_ask,
+      handle_ask // Si accessible globalement
+    ];
+    
+    console.log('Variantes handle_ask:', handleAskVariants.map((fn, i) => ({
+      variant: i,
+      type: typeof fn,
+      exists: !!fn
+    })));
+
+    // Vérifier si handle_ask est disponible, sinon attendre
+    if (typeof window.handle_ask === 'function') {
+      console.log('handle_ask trouvée via window');
+      window.handle_ask();
+      this.resetHeight();
+    } else {
+      console.log('handle_ask non trouvée via window, tentative alternatives...');
       
-      const checkAndCall = () => { 
-        attempts++; 
-        if (typeof window.handle_ask === 'function') { 
-          console.log(`handle_ask trouvée après ${attempts} tentatives`); 
-          window.handle_ask(); 
-          this.resetHeight(); 
-        } else if (attempts < maxAttempts) { 
-          setTimeout(checkAndCall, 100); 
-        } else { 
-          console.error('handle_ask non disponible après 5 secondes'); 
-          // Fallback : déclencher l'événement click sur le bouton send 
-          const sendButton = document.querySelector('#send-button'); 
-          if (sendButton) { 
-            sendButton.click(); 
-            this.resetHeight(); 
-          } 
-        } 
-      }; 
-      checkAndCall(); 
-    } 
+      // Essayer les alternatives
+      let foundFunction = null;
+      
+      // Vérifier si accessible globalement (sans window)
+      try {
+        if (typeof handle_ask === 'function') {
+          console.log('handle_ask trouvée globalement (sans window)');
+          foundFunction = handle_ask;
+        }
+      } catch(e) {
+        console.log('handle_ask non accessible globalement');
+      }
+      
+      if (foundFunction) {
+        foundFunction();
+        this.resetHeight();
+        return;
+      }
+      
+      // Fallback : utiliser le bouton send
+      console.log('Utilisation du fallback : bouton send');
+      const sendButton = document.querySelector('#send-button');
+      if (sendButton) {
+        console.log('Bouton send trouvé, déclenchement du click');
+        sendButton.click();
+        this.resetHeight();
+      } else {
+        console.error('Aucune méthode d\'envoi disponible');
+      }
+    }
   }
 
   setValue(value) {
