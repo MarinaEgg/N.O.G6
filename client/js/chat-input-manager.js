@@ -196,14 +196,21 @@ class ChatInputManager {
     const message = this.textarea.value.trim();
     if (message.length === 0) return;
 
-    // Appeler directement la fonction d'envoi existante
+    // Vérifier si handle_ask est disponible, sinon attendre
     if (typeof window.handle_ask === 'function') {
-      // NE PAS vider l'input ici - handle_ask() va le faire
-      // Appeler directement handle_ask() qui va lire le message et vider l'input
       window.handle_ask();
-      
-      // Réinitialiser la hauteur après l'envoi
       this.resetHeight();
+    } else {
+      // Attendre que handle_ask soit chargée
+      const checkAndCall = () => {
+        if (typeof window.handle_ask === 'function') {
+          window.handle_ask();
+          this.resetHeight();
+        } else {
+          setTimeout(checkAndCall, 100);
+        }
+      };
+      checkAndCall();
     }
   }
 
