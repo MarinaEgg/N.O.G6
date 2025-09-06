@@ -288,12 +288,10 @@ function handleGlobalKeyPress(event) {
 function handleWindowResize() {
     console.log('Fenêtre redimensionnée');
 }
-
-// Fermer la page onboarding/agents avec transition
 function closeOnboarding() {
     if (isTransitioning) return;
     
-    console.log('Fermeture de la page agents avec transition');
+    console.log('Fermeture de la page agents avec transition directe');
     isTransitioning = true;
     
     const container = document.querySelector('.onboarding-container');
@@ -302,12 +300,22 @@ function closeOnboarding() {
         container.classList.add('exiting');
         container.classList.remove('visible');
         
-        // Redirection après l'animation
+        // Au lieu de rediriger, on révèle les éléments principaux après l'animation
         setTimeout(() => {
-            window.location.href = '/';
+            // Masquer complètement l'overlay onboarding
+            container.style.display = 'none';
+            
+            // Révéler les éléments de la page principale
+            showMainPageElements();
+            
+            // Réinitialiser l'état
+            isTransitioning = false;
+            
+            console.log('Transition vers page principale terminée');
         }, 400);
     } else {
-        window.location.href = '/';
+        showMainPageElements();
+        isTransitioning = false;
     }
 }
 
@@ -334,6 +342,9 @@ function hideMainPageElements() {
             }
         });
     });
+    
+    // Marquer le body comme étant en mode onboarding
+    document.body.classList.add('onboarding-active');
 }
 
 // Restaurer les éléments de la page principale
@@ -356,25 +367,13 @@ function showMainPageElements() {
             if (element) {
                 element.style.display = '';
                 element.style.visibility = '';
+                element.classList.remove('hidden');
             }
         });
     });
-}
-
-// Afficher un message d'erreur
-function showErrorMessage(message) {
-    const agentsGrid = document.querySelector('.agents-grid');
-    if (agentsGrid) {
-        agentsGrid.innerHTML = `
-            <div class="error-message">
-                <h3>Erreur</h3>
-                <p>${message}</p>
-                <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; border: none; background: #e74c3c; color: white; border-radius: 4px; cursor: pointer;">
-                    Recharger la page
-                </button>
-            </div>
-        `;
-    }
+    
+    // Supprimer le mode onboarding
+    document.body.classList.remove('onboarding-active');
 }
 
 // Vérification de compatibilité du navigateur
