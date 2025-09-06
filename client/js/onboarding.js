@@ -1,3 +1,6 @@
+// État des agents (actif/inactif)
+let agentStates = {};
+
 // Données des agents IA
 const agentsData = {
     contractAnalysis: {
@@ -106,7 +109,10 @@ function initializeAgentsPage() {
     try {
         // Générer les cartes d'agents
         generateAgentCards();
-        
+        // Ajouter la fonctionnalité de recherche
+        setupSearchFunctionality();
+        // Charger les états des agents
+        loadAgentStates();
         // Gérer les événements globaux
         setupGlobalEventListeners();
         
@@ -174,9 +180,12 @@ function createAgentsGridContainer() {
 // Créer une carte d'agent
 function createAgentCard(key, agent, index) {
     const card = document.createElement('div');
-    card.className = 'agent-card';
+    card.className = 'agent-card is-visible'; // Ajout de is-visible pour la recherche
     card.dataset.agentId = key;
     card.dataset.index = index;
+    
+    // Vérifier l'état actif/inactif de l'agent
+    const isActive = agentStates[key] || false;
     
     card.innerHTML = `
         <div class="agent-header">
@@ -184,6 +193,12 @@ function createAgentCard(key, agent, index) {
             <span class="agent-context">${agent.context}</span>
         </div>
         <p class="agent-description">${agent.body}</p>
+        <div class="agent-controls">
+            <div class="agent-status">
+                <div class="status-checkbox ${isActive ? 'checked' : ''}" data-agent-id="${key}"></div>
+                <span class="status-label ${isActive ? 'active' : 'inactive'}">${isActive ? 'Actif' : 'Inactif'}</span>
+            </div>
+        </div>
     `;
     
     // Ajouter les événements
@@ -194,17 +209,35 @@ function createAgentCard(key, agent, index) {
 
 // Ajouter les événements aux cartes
 function addCardEventListeners(card, key, agent) {
-    // Événement de clic
+    // Événement de clic sur la carte (sauf sur la checkbox)
     card.addEventListener('click', (e) => {
-        e.preventDefault();
-        handleAgentSelection(key, agent, card);
+        if (!e.target.closest('.status-checkbox')) {
+            e.preventDefault();
+            handleAgentSelection(key, agent, card);
+        }
     });
+    
+    // Récupérer les éléments de contrôle d'état
+    const checkbox = card.querySelector('.status-checkbox');
+    const statusLabel = card.querySelector('.status-label');
+    
+    // Événement pour la checkbox
+    if (checkbox && statusLabel) {
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAgentStatus(key, checkbox, statusLabel);
+        });
+    }
     
     // Événements clavier pour l'accessibilité
     card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            handleAgentSelection(key, agent, card);
+            if (e.target.classList.contains('status-checkbox')) {
+                toggleAgentStatus(key, checkbox, statusLabel);
+            } else {
+                handleAgentSelection(key, agent, card);
+            }
         }
     });
     
@@ -429,14 +462,176 @@ function trackAgentSelection(agentKey, agentTitle) {
 
 // Fonction utilitaire pour obtenir les statistiques des agents
 function getAgentSelectionStats() {
-    const selections = JSON.parse(localStorage.getItem('agentSelections') || '[]');
-    const stats = {};
+    const stats = {
+        total: Object.keys(agentsData).length,
+        selected: 0,
+        unselected: 0,
+        active: Object.values(agentStates).filter(state => state).length,
+        inactive: Object.values(agentStates).filter(state => !state).length
+    };
     
-    selections.forEach(selection => {
-        stats[selection.agentKey] = (stats[selection.agentKey] || 0) + 1;
+    // Compter les agents sélectionnés
+    Object.values(agentsData).forEach(agent => {
+        if (agent.isSelected) {
+            stats.selected++;
+        } else {
+            stats.unselected++;
+        }
     });
     
     return stats;
+}
+
+// Basculer l'état actif/inactif d'un agent
+function toggleAgentStatus(agentId, checkbox, statusLabel) {
+    // Basculer l'état
+    agentStates[agentId] = !agentStates[agentId];
+    const isActive = agentStates[agentId];
+    
+    // Mettre à jour l'interface
+    if (checkbox) {
+        checkbox.classList.toggle('checked', isActive);
+    }
+    
+    if (statusLabel) {
+        statusLabel.textContent = isActive ? 'Actif' : 'Inactif';
+        statusLabel.classList.toggle('active', isActive);
+        statusLabel.classList.toggle('inactive', !isActive);
+    }
+    
+    // Sauvegarder l'état
+    saveAgentStates();
+    
+    // Mettre à jour le compteur d'agents actifs
+    updateActiveAgentsCount();
+}
+
+// Sauvegarder les états des agents dans le localStorage
+function saveAgentStates() {
+    try {
+        localStorage.setItem('agentStates', JSON.stringify(agentStates));
+    } catch (e) {
+        console.error('Erreur lors de la sauvegarde des états des agents:', e);
+    }
+}
+
+// Charger les états des agents depuis le localStorage
+function loadAgentStates() {
+    try {
+        const savedStates = localStorage.getItem('agentStates');
+        if (savedStates) {
+            agentStates = JSON.parse(savedStates);
+            // S'assurer que tous les agents ont un état défini
+            Object.keys(agentsData).forEach(key => {
+                if (agentStates[key] === undefined) {
+                    agentStates[key] = false; // Valeur par défaut
+                }
+            });
+        } else {
+            // Initialiser tous les agents comme inactifs par défaut
+            Object.keys(agentsData).forEach(key => {
+                agentStates[key] = false;
+            });
+        }
+    } catch (e) {
+        console.error('Erreur lors du chargement des états des agents:', e);
+        // Initialiser avec des valeurs par défaut en cas d'erreur
+        Object.keys(agentsData).forEach(key => {
+            agentStates[key] = false;
+        });
+    }
+}
+
+// Mettre à jour le compteur d'agents actifs
+function updateActiveAgentsCount() {
+    const count = Object.values(agentStates).filter(state => state).length;
+    const counter = document.querySelector('.active-agents-count');
+    if (counter) {
+        counter.textContent = `${count} ${count === 1 ? 'agent actif' : 'agents actifs'}`;
+    }
+}
+
+// Configurer la fonctionnalité de recherche
+function setupSearchFunctionality() {
+    const searchInput = document.getElementById('agent-search');
+    const noResultsMessage = document.querySelector('.no-results-message');
+    
+    if (!searchInput) return;
+    
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.trim().toLowerCase();
+        filterAgents(searchTerm);
+    });
+    
+    // Ajouter un bouton pour effacer la recherche
+    const clearButton = document.createElement('button');
+    clearButton.className = 'clear-search';
+    clearButton.innerHTML = '&times;';
+    clearButton.setAttribute('aria-label', 'Effacer la recherche');
+    clearButton.addEventListener('click', () => {
+        searchInput.value = '';
+        showAllAgents();
+        searchInput.focus();
+    });
+    
+    const searchContainer = searchInput.parentElement;
+    searchContainer.appendChild(clearButton);
+    
+    // Gérer la visibilité du bouton d'effacement
+    searchInput.addEventListener('input', () => {
+        clearButton.style.display = searchInput.value ? 'block' : 'none';
+    });
+    
+    // Initialiser l'état du bouton d'effacement
+    clearButton.style.display = 'none';
+}
+
+// Filtrer les agents en fonction du terme de recherche
+function filterAgents(searchTerm) {
+    const agentCards = document.querySelectorAll('.agent-card');
+    const noResultsMessage = document.querySelector('.no-results-message');
+    let visibleCount = 0;
+    
+    if (!searchTerm) {
+        showAllAgents();
+        return;
+    }
+    
+    agentCards.forEach(card => {
+        const title = card.querySelector('.agent-title')?.textContent.toLowerCase() || '';
+        const description = card.querySelector('.agent-description')?.textContent.toLowerCase() || '';
+        const context = card.querySelector('.agent-context')?.textContent.toLowerCase() || '';
+        
+        const isMatch = title.includes(searchTerm) || 
+                        description.includes(searchTerm) || 
+                        context.includes(searchTerm);
+        
+        if (isMatch) {
+            card.classList.add('is-visible');
+            visibleCount++;
+        } else {
+            card.classList.remove('is-visible');
+        }
+    });
+    
+    // Afficher/masquer le message "Aucun résultat"
+    if (noResultsMessage) {
+        noResultsMessage.style.display = visibleCount > 0 ? 'none' : 'block';
+    }
+}
+
+// Afficher tous les agents
+function showAllAgents() {
+    const agentCards = document.querySelectorAll('.agent-card');
+    const noResultsMessage = document.querySelector('.no-results-message');
+    
+    agentCards.forEach(card => {
+        card.classList.add('is-visible');
+    });
+    
+    if (noResultsMessage) {
+        noResultsMessage.style.display = 'none';
+    }
 }
 
 // Nettoyage lors de la fermeture de la page
