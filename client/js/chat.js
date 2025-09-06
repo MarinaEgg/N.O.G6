@@ -46,97 +46,25 @@ document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
 
 // FONCTION CORRIGÉE pour redimensionner dynamiquement le textarea et la barre de chat
 function resizeTextarea(textarea) {
-  // Sauvegarder la position de scroll
-  const scrollTop = textarea.scrollTop;
-  
-  // Reset height pour calculer la nouvelle hauteur
-  textarea.style.height = 'auto';
-  
-  // Calculer la hauteur nécessaire basée sur le contenu
-  const scrollHeight = textarea.scrollHeight;
-  const minHeight = 40; // Hauteur pour une ligne
-  const maxHeight = 200; // Hauteur maximale avant scroll
-  const lineHeight = 20; // Hauteur approximative d'une ligne
-  
-  // Calculer la nouvelle hauteur ligne par ligne
-  let newHeight;
-  if (scrollHeight <= minHeight) {
-    newHeight = minHeight;
-  } else if (scrollHeight >= maxHeight) {
-    newHeight = maxHeight;
-    // Activer le scroll interne si nécessaire
-    textarea.classList.add('scrollable');
-  } else {
-    // Arrondir à la ligne la plus proche
-    const lines = Math.ceil((scrollHeight - minHeight) / lineHeight) + 1;
-    newHeight = minHeight + (lines - 1) * lineHeight;
-    textarea.classList.remove('scrollable');
-  }
-  
-  // Appliquer la nouvelle hauteur avec transition fluide
-  textarea.style.height = newHeight + 'px';
-  
-  // Ajuster la hauteur du conteneur input-box
-  const inputBox = textarea.closest('.input-box');
-  if (inputBox) {
-    const boxHeight = Math.max(newHeight + 20, 60);
-    inputBox.style.height = boxHeight + 'px';
-    
-    // Calculer l'offset pour le bouton "Arrêtez la génération"
-    const heightDifference = boxHeight - 60; // 60 est la hauteur minimale
-    document.documentElement.style.setProperty('--chat-height-offset', `${heightDifference}px`);
-    
-    // Ajuster la zone de messages pour éviter le chevauchement
-    const messagesContainer = document.getElementById('messages');
-    if (messagesContainer) {
-      if (heightDifference > 0) {
-        messagesContainer.classList.add('expanded-input');
-        messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
-      } else {
-        messagesContainer.classList.remove('expanded-input');
-        messagesContainer.style.paddingBottom = '120px';
-      }
-    }
-  }
-  
-  // Restaurer la position de scroll si nécessaire
-  if (textarea.classList.contains('scrollable')) {
-    textarea.scrollTop = scrollTop;
+  // Cette fonction est maintenant gérée par ChatInputManager
+  if (window.chatInputManager && window.chatInputManager.isInitialized) {
+    window.chatInputManager.forceResize();
   }
 }
 
 // Fonction pour réinitialiser la hauteur de la barre de chat
 function resetChatBarHeight() {
-  const textarea = document.getElementById('message-input');
-  const inputBox = document.querySelector('.input-box');
-  const messagesContainer = document.getElementById('messages');
-  
-  if (textarea) {
-    textarea.style.height = '40px';
-    textarea.classList.remove('scrollable');
-  }
-  
-  if (inputBox) {
-    inputBox.style.height = '60px';
-  }
-  
-  // Reset de l'offset pour le bouton "Arrêtez la génération"
-  document.documentElement.style.setProperty('--chat-height-offset', '0px');
-  
-  if (messagesContainer) {
-    messagesContainer.classList.remove('expanded-input');
-    messagesContainer.style.paddingBottom = '120px';
+  // Cette fonction est maintenant gérée par ChatInputManager
+  if (window.chatInputManager && window.chatInputManager.isInitialized) {
+    window.chatInputManager.resetHeight();
   }
 }
 
 // Fonction pour ajuster automatiquement la hauteur lors de la suppression de texte
 function handleTextDeletion(textarea) {
-  // Vérifier si le contenu a diminué
-  const currentHeight = parseInt(textarea.style.height);
-  const scrollHeight = textarea.scrollHeight;
-  
-  if (scrollHeight < currentHeight) {
-    resizeTextarea(textarea);
+  // Cette fonction est maintenant gérée par ChatInputManager
+  if (window.chatInputManager && window.chatInputManager.isInitialized) {
+    window.chatInputManager.forceResize();
   }
 }
 
@@ -202,7 +130,9 @@ const delete_conversations = async () => {
 
 const handle_ask = async () => {
   // Réinitialiser la hauteur de la barre de chat
-  resetChatBarHeight();
+  if (window.chatInputManager && window.chatInputManager.isInitialized) {
+    window.chatInputManager.resetHeight();
+  }
   message_input.focus();
 
   window.scrollTo(0, 0);
@@ -210,8 +140,7 @@ const handle_ask = async () => {
 
   if (message.length > 0) {
     message_input.value = ``;
-    // Reset textarea height after clearing
-    resizeTextarea(message_input);
+    // Le reset est maintenant géré par ChatInputManager
     await ask_gpt(message);
   }
 };
@@ -908,36 +837,8 @@ window.onload = async () => {
     }
   }
 
-  // CORRECTION : Gestion améliorée des événements pour le redimensionnement progressif
-  message_input.addEventListener(`keydown`, async (evt) => {
-    if (prompt_lock) return;
-    if (evt.keyCode === 13 && !evt.shiftKey) {
-      evt.preventDefault();
-      await handle_ask();
-    } else {
-      // Auto-resize on keydown avec délai pour assurer le calcul correct
-      setTimeout(() => resizeTextarea(message_input), 0);
-    }
-  });
-
-  // Auto-resize en temps réel sur input
-  message_input.addEventListener(`input`, (evt) => {
-    resizeTextarea(message_input);
-  });
-
-  // Auto-resize sur paste
-  message_input.addEventListener(`paste`, () => {
-    setTimeout(() => resizeTextarea(message_input), 0);
-  });
-
-  // NOUVEAU : Gestion de la suppression de texte
-  message_input.addEventListener(`keyup`, (evt) => {
-    // Vérifier si c'est une touche de suppression
-    if (evt.keyCode === 8 || evt.keyCode === 46) { // Backspace ou Delete
-      handleTextDeletion(message_input);
-    }
-  });
-
+  // Les événements de redimensionnement sont maintenant gérés par ChatInputManager
+  // Garder seulement les événements d'envoi
   send_button.addEventListener(`click`, async () => {
     if (prompt_lock) return;
     await handle_ask();
