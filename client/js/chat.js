@@ -84,8 +84,7 @@ const greetingMessages = {
 };
 
 hljs.addPlugin(new CopyButtonPlugin());
-document.getElementsByClassName("library-side-nav-content")[0].innerHTML =
-  onBoardingContent();
+document.getElementsByClassName("library-side-nav-content")[0].innerHTML = '';
 
 // FONCTION CORRIGÉE pour redimensionner dynamiquement le textarea et la barre de chat
 function resizeTextarea(textarea) {
@@ -112,8 +111,8 @@ function handleTextDeletion(textarea) {
 }
 
 function openLibrary() {
-  document.getElementById("librarySideNav").style.width = "100vw";
-  document.getElementById("menu").style.visibility = "visible";
+  // Rediriger vers la page d'onboarding
+  window.location.href = '/assets/html/onboarding.html';
 }
 
 function closeLibrary() {
@@ -888,6 +887,15 @@ window.onload = async () => {
   });
 
   register_settings_localstorage();
+
+  // Add Enter key handler for message input
+  message_input.addEventListener(`keydown`, async (event) => {
+    if (event.key === `Enter` && !event.shiftKey) {
+      event.preventDefault();
+      if (prompt_lock) return;
+      await handle_ask();
+    }
+  });
 };
 
 document.querySelector(".mobile-sidebar").addEventListener("click", (event) => {
