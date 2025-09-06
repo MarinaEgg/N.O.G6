@@ -128,7 +128,9 @@ const delete_conversations = async () => {
   await new_conversation();
 };
 
+console.log('handle_ask définie dans chat.js');
 const handle_ask = async () => {
+  console.log('handle_ask appelée');
   // Réinitialiser la hauteur de la barre de chat
   if (window.chatInputManager && window.chatInputManager.isInitialized) {
     window.chatInputManager.resetHeight();
