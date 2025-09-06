@@ -2017,73 +2017,117 @@ a:-webkit-any-link {
   line-height: 1.3;
 }
 
-/* NOUVELLE BARRE DE CHAT RESPONSIVE - CORRECTION COMPLÈTE */
+/* ========== STYLES POUR LA BARRE DE CHAT RESPONSIVE ========== */
+
+/* Variables CSS pour la barre de chat */
+:root {
+  --chat-input-min-height: 40px;
+  --chat-input-max-height: 200px;
+  --chat-container-min-height: 60px;
+  --chat-height-offset: 0px;
+  --chat-transition: all 0.2s ease;
+}
+
+/* Conteneur principal de l'input utilisateur */
 .user-input-container {
   position: fixed;
   bottom: 0;
-  left: 285px;
+  left: 0;
   right: 0;
   z-index: 1000;
+  padding: 20px;
+  background: transparent;
+  pointer-events: none;
+}
+
+.user-input {
+  width: 100%;
+  max-width: 744px;
+  margin: 0 auto;
+  border-radius: 8px;
+  pointer-events: auto;
+  position: relative;
+  
+  /* Masquer les points derrière la zone de chat */
   background: var(--colour-1);
-  padding: 10px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  transition: all 0.2s ease;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
-/* Masquer la barre de chat dans les pages media/library */
-.sidenav .user-input-container {
-  display: none !important;
+/* Créer les points sur les côtés de la barre de chat */
+.user-input::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  left: -100vw;
+  right: -100vw;
+  bottom: -40px;
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+  background-size: 30px 30px;
+  background-position: 0 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
+/* Masquer les points dans la zone centrale de la barre de chat */
+.user-input::after {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: var(--colour-1);
+  border-radius: 18px;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Conteneur de la boîte d'input */
 .input-box {
   display: flex;
   align-items: flex-end;
-  width: 100%;
-  max-width: 744px;
-  background-color: var(--light-gray);
-  border: none;
-  border-radius: 25px;
+  gap: 12px;
   padding: 10px 15px;
-  box-sizing: border-box;
-  overflow: visible;
-  min-height: 60px;
-  transition: all 0.2s ease;
+  background-color: var(--light-gray);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  min-height: var(--chat-container-min-height);
+  height: var(--chat-container-min-height);
+  transition: var(--chat-transition);
   position: relative;
 }
 
-/* CORRECTION CRITIQUE : Suppression des contraintes de hauteur sur le textarea */
+/* Textarea principal */
 #message-input {
   flex: 1;
+  min-height: var(--chat-input-min-height);
+  height: var(--chat-input-min-height);
+  max-height: var(--chat-input-max-height);
+  padding: 10px 0;
+  background: transparent;
   border: none;
   outline: none;
   resize: none;
-  overflow-y: auto;
-  /* SUPPRESSION des contraintes max-height et min-height qui bloquaient l'agrandissement */
-  width: calc(100% - 50px);
-  padding: 10px;
-  border-radius: 25px;
-  font-family: "Inter";
-  margin-right: 10px;
-  background: transparent;
+  font-family: var(--font-1);
+  font-size: 15px;
+  color: var(--colour-3);
   line-height: 1.4;
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 transparent;
+  overflow-y: hidden;
+  transition: var(--chat-transition);
   word-wrap: break-word;
   white-space: pre-wrap;
-  /* Hauteur dynamique contrôlée par JavaScript uniquement */
-  height: 40px; /* Hauteur initiale seulement */
-  transition: height 0.1s ease;
-  /* Permettre l'agrandissement sans limite CSS */
-  max-height: none !important;
-  min-height: 40px !important;
+}
+
+#message-input::placeholder {
+  color: #888;
+}
+
+/* Scrollbar pour le textarea quand nécessaire */
+#message-input.scrollable {
+  overflow-y: auto;
 }
 
 #message-input::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 #message-input::-webkit-scrollbar-track {
@@ -2091,168 +2135,127 @@ a:-webkit-any-link {
 }
 
 #message-input::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
+  background: #c7a2ff;
   border-radius: 3px;
 }
 
 #message-input::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #8b3dff;
 }
 
+/* Contrôles d'input (bouton d'envoi) */
 .input-controls {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
+  align-items: flex-end;
   gap: 8px;
-  flex-shrink: 0;
 }
 
-/* SUPPRESSION DES ANCIENS STYLES POUR LE BOUTON D'ENVOI GLASS */
 #send-button {
-  width: 40px;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  background-color: var(--colour-3);
+  color: white;
+  border-radius: 6px;
   cursor: pointer;
-  margin-left: 10px;
-  transition: all 0.2s ease;
-  overflow: hidden;
+  transition: background-color 0.2s ease;
   flex-shrink: 0;
-  color: #2f2f2e;
-  align-self: flex-end;
-  margin-bottom: 5px;
+}
+
+#send-button:hover {
+  background-color: #1a1a1a;
 }
 
 #send-button i {
-  display: block;
-  margin: auto;
-  font-size: 18px;
-  color: #000000;
-  font-weight: 900;
+  font-size: 14px;
 }
 
-/* Responsive pour mobile */
-@media (max-width: 990px) {
+/* Ajustement du conteneur de messages quand l'input s'agrandit */
+#messages {
+  transition: padding-bottom 0.2s ease;
+}
+
+#messages.expanded-input {
+  padding-bottom: calc(120px + var(--chat-height-offset));
+}
+
+/* Ajustement du bouton "Arrêter la génération" */
+.stop_generating {
+  bottom: calc(80px + var(--chat-height-offset));
+  transition: bottom 0.2s ease;
+}
+
+/* Styles responsive */
+@media screen and (max-width: 768px) {
   .user-input-container {
-    left: 0;
-    right: 0;
-    padding: 8px 10px;
-    max-width: 100vw;
+    padding: 15px;
   }
   
-  .conversations {
-    height: calc(100vh - 16px);
-  }
-  
-  .conversation #messages {
-    height: calc(100vh - 156px);
-    padding-bottom: 140px;
-  }
-  
-  #send-button {
-    width: 35px;
-    height: 35px;
-    margin-bottom: 3px;
-  }
-
-  #send-button i {
-    font-size: 16px;
-  }
-
-  .stop_generating {
-    bottom: 100px;
-  }
-  
-  #message-input {
-    margin-right: 5px;
-    font-size: 14px;
-    /* Suppression des contraintes mobiles aussi */
-    max-height: none !important;
+  .user-input {
+    max-width: 100%;
   }
   
   .input-box {
     padding: 8px 12px;
-    min-height: 50px;
   }
   
-  .user-input {
-    width: calc(100vw - 20px);
+  #message-input {
+    font-size: 16px; /* Évite le zoom sur iOS */
   }
 }
 
-/* Responsive pour écrans très petits */
-@media (max-width: 480px) {
+@media screen and (max-width: 480px) {
   .user-input-container {
-    padding: 5px 8px;
+    padding: 10px;
   }
   
   .input-box {
     padding: 6px 10px;
-    min-height: 45px;
-  }
-  
-  #message-input {
-    font-size: 13px;
-    /* Suppression des contraintes sur petits écrans */
-    max-height: none !important;
-    min-height: 35px !important;
-  }
-  
-  #send-button {
-    width: 32px;
-    height: 32px;
-    margin-left: 8px;
-  }
-
-  #send-button i {
-    font-size: 14px;
   }
 }
 
-/* Ajustement de la zone de messages pour éviter le chevauchement */
-.conversation #messages.expanded-input {
-  padding-bottom: 200px;
-}
-
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
-}
-
-font {
-  font-family: "Inter" !important;
-}
-
-@keyframes bounce {
-  0%,
-  100% {
+/* Animation d'apparition */
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
     transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
+    opacity: 1;
   }
 }
 
-.conversations .bottom-section {
-  display: none;
+.user-input-container {
+  animation: slideUp 0.3s ease-out;
 }
 
-.conversations .subtitles:last-child {
-  display: none;
+/* États de focus */
+#message-input:focus {
+  outline: none;
+}
+
+.input-box:focus-within {
+  border-color: var(--colour-3);
+  box-shadow: 0 0 0 2px rgba(47, 47, 46, 0.2);
+  outline: none;
+}
+
+/* Styles pour les états désactivés */
+.input-box.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.input-box.disabled #message-input {
+  cursor: not-allowed;
+}
+
+.input-box.disabled #send-button {
+  cursor: not-allowed;
+  background-color: #ccc;
 }
 
 /* Styles pour les bulles vidéo YouTube avec effet frosted glass */
