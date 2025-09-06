@@ -64,6 +64,7 @@ const agentsData = {
 
 // État de l'application
 let isInitialized = false;
+let isTransitioning = false;
 
 // Initialisation au chargement de la page
 document.addEventListener('DOMContentLoaded', function() {
@@ -78,9 +79,27 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
+    // Déclencher l'animation d'entrée après un court délai
+    setTimeout(() => {
+        showOnboardingPage();
+    }, 100);
+    
     isInitialized = true;
     console.log('Page agents initialisée avec succès');
 });
+
+// Fonction pour afficher la page avec transition
+function showOnboardingPage() {
+    const container = document.querySelector('.onboarding-container');
+    if (container) {
+        container.classList.add('visible');
+        
+        // Animer les cartes après que le container soit visible
+        setTimeout(() => {
+            animateCardsEntrance();
+        }, 200);
+    }
+}
 
 // Fonction d'initialisation principale
 function initializeAgentsPage() {
@@ -91,13 +110,19 @@ function initializeAgentsPage() {
         // Gérer les événements globaux
         setupGlobalEventListeners();
         
-        // Animation d'entrée
-        animatePageEntry();
-        
     } catch (error) {
         console.error('Erreur lors de l\'initialisation:', error);
         showErrorMessage('Erreur lors du chargement des agents');
     }
+}
+
+// Animation d'entrée des cartes
+function animateCardsEntrance() {
+    const cards = document.querySelectorAll('.agent-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${0.1 * (index + 1)}s`;
+        card.classList.add('animate-in');
+    });
 }
 
 // Génération des cartes d'agents
@@ -152,9 +177,6 @@ function createAgentCard(key, agent, index) {
     card.className = 'agent-card';
     card.dataset.agentId = key;
     card.dataset.index = index;
-    
-    // Définir le délai d'animation
-    card.style.animationDelay = `${0.1 * (index + 1)}s`;
     
     card.innerHTML = `
         <div class="agent-header">
@@ -215,9 +237,6 @@ function handleAgentSelection(key, agent, cardElement) {
         cardElement.style.boxShadow = '';
     }, 200);
     
-    // TODO: Ici on ajoutera l'action spécifique plus tard
-    // Pour l'instant, juste un feedback console
-    
     // Analytics optionnel
     trackAgentSelection(key, agent.title);
 }
@@ -227,13 +246,19 @@ function setupGlobalEventListeners() {
     // Événement pour le bouton retour
     const backBtn = document.querySelector('.back-button');
     if (backBtn) {
-        backBtn.addEventListener('click', closeOnboarding);
+        backBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeOnboarding();
+        });
     }
     
     // Événement pour le bouton de fermeture
     const closeBtn = document.querySelector('.close-onboarding');
     if (closeBtn) {
-        closeBtn.addEventListener('click', closeOnboarding);
+        closeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeOnboarding();
+        });
     }
     
     // Événements clavier globaux
@@ -261,38 +286,23 @@ function handleGlobalKeyPress(event) {
 
 // Gestion du redimensionnement de fenêtre
 function handleWindowResize() {
-    // Optionnel: recalculer les animations ou layouts si nécessaire
     console.log('Fenêtre redimensionnée');
 }
 
-// Animation d'entrée de la page
-function animatePageEntry() {
-    const container = document.querySelector('.onboarding-container');
-    if (container) {
-        container.style.opacity = '0';
-        container.style.transform = 'translateY(20px)';
-        
-        // Forcer le reflow
-        container.offsetHeight;
-        
-        // Animer l'entrée
-        container.style.transition = 'all 0.6s ease-out';
-        container.style.opacity = '1';
-        container.style.transform = 'translateY(0)';
-    }
-}
-
-// Fermer la page onboarding/agents
+// Fermer la page onboarding/agents avec transition
 function closeOnboarding() {
-    console.log('Fermeture de la page agents');
+    if (isTransitioning) return;
     
-    // Animation de sortie
+    console.log('Fermeture de la page agents avec transition');
+    isTransitioning = true;
+    
     const container = document.querySelector('.onboarding-container');
     if (container) {
-        container.style.transition = 'all 0.4s ease-in';
-        container.style.opacity = '0';
-        container.style.transform = 'translateY(-20px)';
+        // Animation de sortie vers la droite
+        container.classList.add('exiting');
+        container.classList.remove('visible');
         
+        // Redirection après l'animation
         setTimeout(() => {
             window.location.href = '/';
         }, 400);
@@ -321,6 +331,31 @@ function hideMainPageElements() {
             if (element) {
                 element.style.display = 'none';
                 element.style.visibility = 'hidden';
+            }
+        });
+    });
+}
+
+// Restaurer les éléments de la page principale
+function showMainPageElements() {
+    const elementsToShow = [
+        '.conversations',
+        '#conversations',
+        '.sidebar-toggle',
+        '.user-input-container',
+        '.sidenav',
+        '#librarySideNav',
+        '#LinksSideNav',
+        '.chat-main-container',
+        '.gradient'
+    ];
+    
+    elementsToShow.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            if (element) {
+                element.style.display = '';
+                element.style.visibility = '';
             }
         });
     });
@@ -404,9 +439,6 @@ function trackAgentSelection(agentKey, agentTitle) {
     }
     
     localStorage.setItem('agentSelections', JSON.stringify(selections));
-    
-    // TODO: Intégrer avec un vrai système d'analytics
-    // Par exemple: gtag('event', 'agent_selection', { agent_key: agentKey });
 }
 
 // Fonction utilitaire pour obtenir les statistiques des agents
