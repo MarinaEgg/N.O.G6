@@ -14,23 +14,7 @@ body {
     position: relative;
 }
 
-/* Fond avec pattern seulement quand onboarding est actif */
-body.onboarding-active {
-    background: var(--colour-2);
-}
 
-body.onboarding-active::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: radial-gradient(circle, rgba(47, 47, 46, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    pointer-events: none;
-    z-index: -1;
-}
 
 /* Masquer complètement les éléments de la page principale */
 .conversations, 
@@ -53,7 +37,10 @@ body.onboarding-active::before {
     left: 0;
     width: 100%;
     height: 100vh;
-    background: rgba(255, 255, 255, 0.95);
+    /* Fond avec motif de points seulement dans le conteneur */
+    background: var(--colour-2);
+    background-image: radial-gradient(circle, rgba(47, 47, 46, 0.05) 1px, transparent 1px);
+    background-size: 20px 20px;
     backdrop-filter: blur(10px);
     z-index: 9999;
     display: flex;
