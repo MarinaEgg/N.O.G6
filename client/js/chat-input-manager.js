@@ -74,11 +74,8 @@ class ChatInputManager {
   }
 
   handleKeyDown(event) {
-    console.log('Touche pressée:', event.key, 'shiftKey:', event.shiftKey);
-    
     // Gérer Entrée pour envoyer (si pas Shift+Entrée)
     if (event.key === 'Enter' && !event.shiftKey) {
-      console.log('Entrée détectée - tentative d\'envoi');
       event.preventDefault();
       this.sendMessage();
       return;
@@ -86,7 +83,6 @@ class ChatInputManager {
 
     // Gérer Shift+Entrée pour nouvelle ligne
     if (event.key === 'Enter' && event.shiftKey) {
-      console.log('Shift+Entrée détecté - nouvelle ligne');
       // Laisser le comportement par défaut, puis redimensionner
       setTimeout(() => this.resizeTextarea(), 0);
     }
@@ -200,62 +196,29 @@ class ChatInputManager {
     const message = this.textarea.value.trim();
     if (message.length === 0) return;
 
-    console.log('=== DIAGNOSTIC sendMessage ===');
-    console.log('typeof window.handle_ask:', typeof window.handle_ask);
-    console.log('window.handle_ask existe:', !!window.handle_ask);
-    console.log('handle_ask dans window:', 'handle_ask' in window);
-    console.log('Toutes les propriétés window contenant handle:', Object.keys(window).filter(key => key.includes('handle')));
-    
-    // Essayer différentes façons d'accéder à handle_ask
-    const handleAskVariants = [
-      window.handle_ask,
-      window['handle_ask'],
-      globalThis.handle_ask,
-      handle_ask // Si accessible globalement
-    ];
-    
-    console.log('Variantes handle_ask:', handleAskVariants.map((fn, i) => ({
-      variant: i,
-      type: typeof fn,
-      exists: !!fn
-    })));
-
-    // Vérifier si handle_ask est disponible, sinon attendre
+    // Essayer d'abord via window (pour compatibilité future)
     if (typeof window.handle_ask === 'function') {
-      console.log('handle_ask trouvée via window');
       window.handle_ask();
       this.resetHeight();
     } else {
-      console.log('handle_ask non trouvée via window, tentative alternatives...');
-      
-      // Essayer les alternatives
-      let foundFunction = null;
-      
-      // Vérifier si accessible globalement (sans window)
+      // Utiliser la référence globale directe (solution principale)
       try {
         if (typeof handle_ask === 'function') {
-          console.log('handle_ask trouvée globalement (sans window)');
-          foundFunction = handle_ask;
+          handle_ask();
+          this.resetHeight();
+        } else {
+          throw new Error('handle_ask non disponible');
         }
       } catch(e) {
-        console.log('handle_ask non accessible globalement');
-      }
-      
-      if (foundFunction) {
-        foundFunction();
-        this.resetHeight();
-        return;
-      }
-      
-      // Fallback : utiliser le bouton send
-      console.log('Utilisation du fallback : bouton send');
-      const sendButton = document.querySelector('#send-button');
-      if (sendButton) {
-        console.log('Bouton send trouvé, déclenchement du click');
-        sendButton.click();
-        this.resetHeight();
-      } else {
-        console.error('Aucune méthode d\'envoi disponible');
+        // Fallback ultime : utiliser le bouton send
+        console.warn('Fallback: utilisation du bouton send');
+        const sendButton = document.querySelector('#send-button');
+        if (sendButton) {
+          sendButton.click();
+          this.resetHeight();
+        } else {
+          console.error('Impossible d\'envoyer le message');
+        }
       }
     }
   }
