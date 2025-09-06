@@ -914,26 +914,7 @@ body.sidebar-open {
   left: 5px;
   background: var(--light-gray);
   display: none;
-  justify-content: center;
-  align-items: center;
   z-index: 9999;
-}
-
-.video-modal {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: #eeebeb;
-  padding: 20px;
-  border-radius: 8px;
-  z-index: 99999;
-  width: 90%;
-  height: 70vh;
-  overflow-y: auto;
-  gap: 20px;
-  align-items: center;
 }
 
 .nav-element {
@@ -1809,19 +1790,7 @@ a:-webkit-any-link {
   min-height: 80px;
 }
 
-/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
-.onboarding-section {
-  cursor: pointer;
-  width: var(--menu-percentage);
-  padding: 10px;
-  margin-bottom: 10px;
-  border-radius: var(--border-radius-1);
-  display: inline-block;
-  color: #2f2f2e;
-  text-align: left;
-  font-size: 15px;
-}
-
+/* Loading stream indicator */
 .loading-stream {
   display: inline-block;
   height: 10px;
@@ -1830,56 +1799,9 @@ a:-webkit-any-link {
   background-color: #2f2f2e;
 }
 
-/* SUPPRESSION DES ANCIENS STYLES POUR LES BOUTONS GLASS */
-.onboarding-subsection {
-  width: 100%;
-  padding: 10px;
-  font-size: 16px;
-  margin-bottom: 10px;
-  text-align: left;
-  font-size: small;
-  border-radius: var(--border-radius-1);
-}
+/* Onboarding styles have been moved to the onboarding-specific stylesheet */
 
-.collapsible.onboarding-section {
-  display: flex;
-  align-items: center;
-}
-
-.onboard-collapsible-content {
-  width: var(--menu-percentage);
-  padding: 0 18px;
-  display: none;
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.video-buttons button,
-.video-buttons a {
-  width: 100%;
-  padding: 12px 20px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: left;
-  color: var(--colour-3);
-  background: var(--light-gray);
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  margin-bottom: 10px;
-}
-
-.video-buttons button:hover,
-.video-buttons a:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.video-buttons button:focus,
-.video-buttons a:focus {
-  outline: none;
-}
+/* Video buttons styles have been moved to the onboarding-specific stylesheet */
 
 /* Styles améliorés pour les blocs de code avec effet frosted glass */
 .hljs-copy-wrapper {
