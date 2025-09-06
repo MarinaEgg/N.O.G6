@@ -113,82 +113,87 @@
   </head>
   <body>
     <div class="gradient"></div>
-    <div class="row">
-      <div class="conversations shadow" id="conversations">
-        <div>
-          <div style="text-align: center" class="subtitles">
-            <a onclick="openLibrary()" id="onboardingButton" class="media-title"
-              >Media</a
-            >
-            <div class="separator"></div>
-          </div>
-          <div class="top">
-            <button class="new_convo soft-shadow" onclick="new_conversation()">
-              <i class="fa-regular fa-plus"></i>
-              <div style="color: #2f2f2e">Nouvelle conversation</div>
-            </button>
-            <div class="spinner"></div>
-          </div>
+    
+    <!-- Bouton hamburger -->
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    
+    <!-- Wrapper pour l'effet push -->
+    <div class="chat-main-container" id="chatMainContainer">
+      <div class="row">
+        <!-- Conversations sidebar reste ici mais sera positionnée en fixed -->
+        <div class="conversations shadow" id="conversations">
           <div>
-            <button
-              onclick="delete_conversations()"
-              class="new_convo soft-shadow"
-            >
-              <i class="fa-regular fa-trash"></i>
-              <span>Supprimer les conversations</span>
-            </button>
+            <div style="text-align: center" class="subtitles">
+              <a onclick="openLibrary()" id="onboardingButton" class="media-title">Media</a>
+              <div class="separator"></div>
+            </div>
+            <div class="top">
+              <button class="new_convo soft-shadow" onclick="new_conversation()">
+                <i class="fa-regular fa-plus"></i>
+                <div style="color: #2f2f2e">Nouvelle conversation</div>
+              </button>
+              <div class="spinner"></div>
+            </div>
+            <div>
+              <button onclick="delete_conversations()" class="new_convo soft-shadow">
+                <i class="fa-regular fa-trash"></i>
+                <span>Supprimer les conversations</span>
+              </button>
+            </div>
           </div>
         </div>
-        <!-- SUPPRESSION DU LOGO ET DES LIENS FAQ/DOCUMENTATION -->
-      </div>
 
-      <div class="conversation disable-scrollbars">
-        <div class="top-navigation-container"></div>
+        <div class="conversation disable-scrollbars">
+          <div class="top-navigation-container"></div>
 
-        <div class="stop_generating stop_generating-hidden">
-          <button id="cancelButton">
-            <span>Arrêter la génération</span>
-            <i class="fa-regular fa-stop"></i>
-          </button>
-        </div>
+          <div class="stop_generating stop_generating-hidden">
+            <button id="cancelButton">
+              <span>Arrêter la génération</span>
+              <i class="fa-regular fa-stop"></i>
+            </button>
+          </div>
 
-        <div>
-          <div id="messages"></div>
-        </div>
+          <div>
+            <div id="messages"></div>
+          </div>
 
-        <div>
-          <div class="user-input-container">
-            <div class="user-input shadow">
-              <div id="box-input" class="box input-box">
-                <textarea
-                  id="message-input"
-                  placeholder="Posez votre question à nOg"
-                  rows="1"
-                ></textarea>
-                <div class="input-controls">
-                  <div></div>
-                  <div id="send-button">
-                    <i class="fa-solid fa-arrow-up"></i>
+          <div>
+            <div class="user-input-container">
+              <div class="user-input shadow">
+                <div id="box-input" class="box input-box">
+                  <textarea
+                    id="message-input"
+                    placeholder="Posez votre question à nOg"
+                    rows="1"
+                  ></textarea>
+                  <div class="input-controls">
+                    <div></div>
+                    <div id="send-button">
+                      <i class="fa-solid fa-arrow-up"></i>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <select hidden name="model" id="model">
-            <option value="Eggon-V1">Eggon-V1.6</option>
-          </select>
+            <select hidden name="model" id="model">
+              <option value="Eggon-V1">Eggon-V1.6</option>
+            </select>
+          </div>
         </div>
       </div>
-      <div class="mobile-sidebar">
-        <i class="fa-solid fa-bars"></i>
-      </div>
-      <div id="librarySideNav" class="sidenav">
-        <div class="library-side-nav-content"></div>
-      </div>
-      <div id="LinksSideNav" class="sidenav">
-        <div class="links-side-nav-content"></div>
-      </div>
+    </div>
+    
+    <!-- Les sidNav restent en dehors du wrapper -->
+    <div id="librarySideNav" class="sidenav">
+      <div class="library-side-nav-content"></div>
+    </div>
+    <div id="LinksSideNav" class="sidenav">
+      <div class="links-side-nav-content"></div>
     </div>
     <script src="/assets/js/chat-input-manager.js"></script>
   </body>
