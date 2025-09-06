@@ -40,7 +40,9 @@
             </button>
             <div class="logo-container">
                 <img src="/assets/img/nog_logo_no_text.png" alt="nOg Logo" class="onboarding-logo">
-                <h1>Nos Agents Spécialisés</h1>
+            </div>
+            <div class="search-container">
+                <input type="search" id="agent-search" class="search-input" placeholder="Rechercher un agent spécialisé...">
             </div>
             <button class="close-onboarding" onclick="closeOnboarding()">
                 <span>&times;</span>
@@ -132,6 +134,14 @@
                 </button>
             </div>
         </main>
+    </div>
+    
+    <!-- Agents Grid Container -->
+    <div class="agents-grid" id="agents-grid">
+        <!-- Les cartes seront générées ici -->
+    </div>
+    <div class="no-results-message" id="no-results" style="display: none;">
+        Aucun agent ne correspond à votre recherche.
     </div>
     
     <!-- JavaScript propre à l'onboarding -->
