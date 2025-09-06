@@ -196,13 +196,19 @@ class ChatInputManager {
     const message = this.textarea.value.trim();
     if (message.length === 0) return;
 
-    // Déclencher l'événement d'envoi
-    this.dispatchCustomEvent('chatSendMessage', { message });
-
-    // Vider et réinitialiser
-    this.textarea.value = '';
-    this.resetHeight();
-    this.textarea.focus();
+    // Appeler directement la fonction d'envoi existante
+    if (typeof window.handle_ask === 'function') {
+      // Vider et réinitialiser avant d'envoyer pour éviter les doublons
+      this.textarea.value = '';
+      this.resetHeight();
+      
+      // Mettre temporairement le message dans l'input pour que handle_ask() puisse le lire
+      const messageInput = document.getElementById('message-input');
+      if (messageInput) {
+        messageInput.value = message;
+        window.handle_ask();
+      }
+    }
   }
 
   setValue(value) {
