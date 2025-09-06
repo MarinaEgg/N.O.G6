@@ -74,8 +74,11 @@ class ChatInputManager {
   }
 
   handleKeyDown(event) {
+    console.log('Touche pressée:', event.key, 'shiftKey:', event.shiftKey);
+    
     // Gérer Entrée pour envoyer (si pas Shift+Entrée)
     if (event.key === 'Enter' && !event.shiftKey) {
+      console.log('Entrée détectée - tentative d\'envoi');
       event.preventDefault();
       this.sendMessage();
       return;
@@ -83,6 +86,7 @@ class ChatInputManager {
 
     // Gérer Shift+Entrée pour nouvelle ligne
     if (event.key === 'Enter' && event.shiftKey) {
+      console.log('Shift+Entrée détecté - nouvelle ligne');
       // Laisser le comportement par défaut, puis redimensionner
       setTimeout(() => this.resizeTextarea(), 0);
     }
@@ -192,26 +196,39 @@ class ChatInputManager {
     this.dispatchCustomEvent('chatInputReset');
   }
 
-  sendMessage() {
-    const message = this.textarea.value.trim();
-    if (message.length === 0) return;
-
-    // Vérifier si handle_ask est disponible, sinon attendre
-    if (typeof window.handle_ask === 'function') {
-      window.handle_ask();
-      this.resetHeight();
-    } else {
-      // Attendre que handle_ask soit chargée
-      const checkAndCall = () => {
-        if (typeof window.handle_ask === 'function') {
-          window.handle_ask();
-          this.resetHeight();
-        } else {
-          setTimeout(checkAndCall, 100);
-        }
-      };
-      checkAndCall();
-    }
+  sendMessage() { 
+    const message = this.textarea.value.trim(); 
+    if (message.length === 0) return; 
+ 
+    // Vérifier si handle_ask est disponible, sinon attendre 
+    if (typeof window.handle_ask === 'function') { 
+      window.handle_ask(); 
+      this.resetHeight(); 
+    } else { 
+      // Attendre que handle_ask soit chargée avec retry intelligent 
+      let attempts = 0; 
+      const maxAttempts = 50; // 5 secondes maximum 
+      
+      const checkAndCall = () => { 
+        attempts++; 
+        if (typeof window.handle_ask === 'function') { 
+          console.log(`handle_ask trouvée après ${attempts} tentatives`); 
+          window.handle_ask(); 
+          this.resetHeight(); 
+        } else if (attempts < maxAttempts) { 
+          setTimeout(checkAndCall, 100); 
+        } else { 
+          console.error('handle_ask non disponible après 5 secondes'); 
+          // Fallback : déclencher l'événement click sur le bouton send 
+          const sendButton = document.querySelector('#send-button'); 
+          if (sendButton) { 
+            sendButton.click(); 
+            this.resetHeight(); 
+          } 
+        } 
+      }; 
+      checkAndCall(); 
+    } 
   }
 
   setValue(value) {
