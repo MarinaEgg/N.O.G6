@@ -231,6 +231,7 @@ body {
     position: relative;
     z-index: 2;
     margin: 0;
+    font-family: 'Inter', sans-serif;
 }
 
 /* Animations d'apparition */
