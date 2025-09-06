@@ -111,7 +111,7 @@ function handleTextDeletion(textarea) {
 }
 
 function openLibrary() {
-  window.location.href = 'onboarding.html';
+  window.location.href = '/onboarding/';
 }
 
 function closeLibrary() {
