@@ -20,7 +20,8 @@ class ModernChatBar {
     }
 
     setupElements() {
-        this.textarea = document.getElementById('modernChatInput');
+        // Utiliser le même textarea que l'ancien système
+        this.textarea = document.getElementById('message-input');
         this.plusButton = document.getElementById('plusButton');
         this.connectorButton = document.getElementById('connectorButton');
         this.plusMenu = document.getElementById('plusMenu');
@@ -51,59 +52,69 @@ class ModernChatBar {
             this.resizeTextarea();
         });
 
-        this.textarea.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.sendMessage();
-            }
-        });
+        // Ne pas redéfinir l'événement Enter car il est géré dans chat.js
     }
 
     resizeTextarea() {
+        if (!this.textarea) return;
+        
         this.textarea.style.height = 'auto';
         const scrollHeight = this.textarea.scrollHeight;
         const maxHeight = 200;
+        const minHeight = 40;
         
         if (scrollHeight > maxHeight) {
             this.textarea.style.height = maxHeight + 'px';
             this.textarea.classList.add('scrollable');
         } else {
-            this.textarea.style.height = Math.max(scrollHeight, 36) + 'px';
+            this.textarea.style.height = Math.max(scrollHeight, minHeight) + 'px';
             this.textarea.classList.remove('scrollable');
         }
     }
 
-    setupMenuToggles() {
-        this.plusButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleMenu('plus');
-        });
+    resetTextareaHeight() {
+        if (!this.textarea) return;
+        
+        this.textarea.style.height = 'auto';
+        this.textarea.style.height = '40px';
+        this.textarea.classList.remove('scrollable');
+    }
 
-        this.connectorButton.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleMenu('connector');
-        });
+    setupMenuToggles() {
+        if (this.plusButton) {
+            this.plusButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMenu('plus');
+            });
+        }
+
+        if (this.connectorButton) {
+            this.connectorButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.toggleMenu('connector');
+            });
+        }
     }
 
     toggleMenu(type) {
-        if (type === 'plus') {
+        if (type === 'plus' && this.plusMenu && this.connectorMenu) {
             this.connectorMenu.classList.remove('show');
-            this.connectorButton.classList.remove('active');
+            this.connectorButton?.classList.remove('active');
             this.plusMenu.classList.toggle('show');
-            this.plusButton.classList.toggle('active');
-        } else {
+            this.plusButton?.classList.toggle('active');
+        } else if (this.connectorMenu && this.plusMenu) {
             this.plusMenu.classList.remove('show');
-            this.plusButton.classList.remove('active');
+            this.plusButton?.classList.remove('active');
             this.connectorMenu.classList.toggle('show');
-            this.connectorButton.classList.toggle('active');
+            this.connectorButton?.classList.toggle('active');
         }
     }
 
     closeAllMenus() {
-        this.plusMenu.classList.remove('show');
-        this.connectorMenu.classList.remove('show');
-        this.plusButton.classList.remove('active');
-        this.connectorButton.classList.remove('active');
+        this.plusMenu?.classList.remove('show');
+        this.connectorMenu?.classList.remove('show');
+        this.plusButton?.classList.remove('active');
+        this.connectorButton?.classList.remove('active');
     }
 
     setupClickOutside() {
@@ -115,6 +126,8 @@ class ModernChatBar {
     }
 
     setupDragAndDrop() {
+        if (!this.dragDropOverlay) return;
+        
         let dragCounter = 0;
 
         document.addEventListener('dragenter', (e) => {
@@ -153,7 +166,7 @@ class ModernChatBar {
                         break;
                     case 'k':
                         e.preventDefault();
-                        this.textarea.focus();
+                        this.focus();
                         break;
                 }
             }
@@ -190,102 +203,82 @@ class ModernChatBar {
         });
     }
 
-    sendMessage() {
-        const message = this.textarea.value.trim();
-        if (message) {
-            // Intégration avec ton système existant
-            const oldInput = document.getElementById('message-input');
-            if (oldInput) {
-                oldInput.value = message;
-            }
-            
-            // Utiliser handle_ask de ton chat.js existant
-            if (typeof handle_ask === 'function') {
-                handle_ask();
-            }
-            
-            this.textarea.value = '';
-            this.resizeTextarea();
+    showError(message) {
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            backdrop-filter: blur(10px);
+            font-family: Inter, sans-serif;
+            font-size: 14px;
+        `;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    // Méthodes pour les actions des menus
+    handleFileUpload() {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
+        input.multiple = true;
+        input.onchange = (e) => {
+            const files = Array.from(e.target.files);
+            this.processFiles(files);
             this.closeAllMenus();
-       }
-   }
+        };
+        input.click();
+    }
 
-   showError(message) {
-       const notification = document.createElement('div');
-       notification.style.cssText = `
-           position: fixed;
-           top: 20px;
-           right: 20px;
-           background: rgba(220, 38, 38, 0.9);
-           color: white;
-           padding: 12px 20px;
-           border-radius: 8px;
-           z-index: 10000;
-           backdrop-filter: blur(10px);
-           font-family: Inter, sans-serif;
-           font-size: 14px;
-       `;
-       notification.textContent = message;
-       document.body.appendChild(notification);
-       
-       setTimeout(() => {
-           notification.remove();
-       }, 3000);
-   }
+    handleScreenshot() {
+        if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
+            navigator.mediaDevices.getDisplayMedia({ 
+                video: { 
+                    mediaSource: 'screen',
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                } 
+            })
+            .then(stream => {
+                console.log('Screenshot capture initiated');
+                // Ici tu ajouteras la logique de capture d'écran
+                // Pour l'instant on arrête juste le stream
+                stream.getTracks().forEach(track => track.stop());
+                this.closeAllMenus();
+            })
+            .catch(err => {
+                console.error('Screenshot error:', err);
+                this.showError('Erreur lors de la capture d\'écran');
+            });
+        } else {
+            this.showError('La capture d\'écran n\'est pas supportée par ce navigateur');
+        }
+        this.closeAllMenus();
+    }
 
-   // Méthodes pour les actions des menus
-   handleFileUpload() {
-       const input = document.createElement('input');
-       input.type = 'file';
-       input.accept = '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx';
-       input.multiple = true;
-       input.onchange = (e) => {
-           const files = Array.from(e.target.files);
-           this.processFiles(files);
-           this.closeAllMenus();
-       };
-       input.click();
-   }
+    handleFolderSelection() {
+        console.log('Opening iManage folder search');
+        // Ici tu intégreras avec l'API iManage
+        this.showError('Fonctionnalité iManage en cours de développement');
+        this.closeAllMenus();
+    }
 
-   handleScreenshot() {
-       if (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia) {
-           navigator.mediaDevices.getDisplayMedia({ 
-               video: { 
-                   mediaSource: 'screen',
-                   width: { ideal: 1920 },
-                   height: { ideal: 1080 }
-               } 
-           })
-           .then(stream => {
-               console.log('Screenshot capture initiated');
-               // Ici tu ajouteras la logique de capture d'écran
-               // Pour l'instant on arrête juste le stream
-               stream.getTracks().forEach(track => track.stop());
-               this.closeAllMenus();
-           })
-           .catch(err => {
-               console.error('Screenshot error:', err);
-               this.showError('Erreur lors de la capture d\'écran');
-           });
-       } else {
-           this.showError('La capture d\'écran n\'est pas supportée par ce navigateur');
-       }
-       this.closeAllMenus();
-   }
-
-   handleFolderSelection() {
-       console.log('Opening iManage folder search');
-       // Ici tu intégreras avec l'API iManage
-       this.showError('Fonctionnalité iManage en cours de développement');
-       this.closeAllMenus();
-   }
-
-   handleDeepSearch() {
-       console.log('Activating deep search with Jina.ai');
-       // Ici tu intégreras avec Jina.ai
-       this.showError('Recherche approfondie en cours de développement');
-       this.closeAllMenus();
-   }
+    handleDeepSearch() {
+        console.log('Activating deep search with Jina.ai');
+        // Ici tu intégreras avec Jina.ai
+        this.showError('Recherche approfondie en cours de développement');
+        this.closeAllMenus();
+    }
 
    handleAddConnectors() {
        console.log('Opening connector management');
