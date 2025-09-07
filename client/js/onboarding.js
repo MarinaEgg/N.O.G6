@@ -164,23 +164,32 @@ function generateAgentCards() {
 
 // Créer le conteneur de grille s'il n'existe pas
 function createAgentsGridContainer() {
-    const onboardingContent = document.querySelector('.onboarding-content');
+    // CORRECTION - Chercher le conteneur dans la nouvelle structure
+    let container = document.querySelector('.onboarding-container .agents-grid-container');
     
-    if (onboardingContent) {
-        onboardingContent.innerHTML = `
-            <main class="agents-grid-container">
-                <div class="agents-grid">
+    if (!container) {
+        // Créer la structure si elle n'existe pas
+        const onboardingContainer = document.querySelector('.onboarding-container');
+        if (onboardingContainer) {
+            const mainElement = document.createElement('main');
+            mainElement.className = 'agents-grid-container';
+            mainElement.innerHTML = `
+                <div class="agents-grid" id="agents-grid">
                     <!-- Les cartes seront générées ici -->
                 </div>
-            </main>
-        `;
+                <div class="no-results-message" id="no-results" style="display: none;">
+                    Aucun agent ne correspond à votre recherche.
+                </div>
+            `;
+            onboardingContainer.appendChild(mainElement);
+        }
     }
 }
 
-// Créer une carte d'agent
+// Créer une carte d'agent - VERSION CORRIGÉE
 function createAgentCard(key, agent, index) {
     const card = document.createElement('div');
-    card.className = 'agent-card is-visible'; // Ajout de is-visible pour la recherche
+    card.className = 'agent-card is-visible';
     card.dataset.agentId = key;
     card.dataset.index = index;
     
@@ -195,45 +204,56 @@ function createAgentCard(key, agent, index) {
         <p class="agent-description">${agent.body}</p>
         <div class="agent-controls">
             <div class="agent-status">
-                <div class="status-checkbox ${isActive ? 'checked' : ''}" data-agent-id="${key}"></div>
+                <div class="status-checkbox ${isActive ? 'checked' : ''}" data-agent-id="${key}" tabindex="0" role="checkbox" aria-checked="${isActive}"></div>
                 <span class="status-label ${isActive ? 'active' : 'inactive'}">${isActive ? 'Actif' : 'Inactif'}</span>
             </div>
         </div>
     `;
     
-    // Ajouter les événements
+    // Ajouter les événements - VERSION AMÉLIORÉE
     addCardEventListeners(card, key, agent);
     
     return card;
 }
 
-// Ajouter les événements aux cartes
+// CORRECTION - Ajouter les événements aux cartes - VERSION AMÉLIORÉE
 function addCardEventListeners(card, key, agent) {
-    // Événement de clic sur la carte (sauf sur la checkbox)
+    // Récupérer les éléments de contrôle d'état
+    const checkbox = card.querySelector('.status-checkbox');
+    const statusLabel = card.querySelector('.status-label');
+    
+    // CORRECTION - Événement spécifique pour la checkbox avec propagation stoppée
+    if (checkbox && statusLabel) {
+        checkbox.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('Checkbox clicked for:', key); // Debug
+            toggleAgentStatus(key, checkbox, statusLabel);
+        });
+        
+        // AJOUT - Événement pour le label aussi
+        statusLabel.addEventListener('click', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            console.log('Status label clicked for:', key); // Debug
+            toggleAgentStatus(key, checkbox, statusLabel);
+        });
+    }
+    
+    // Événement de clic sur la carte (sauf sur les contrôles)
     card.addEventListener('click', (e) => {
-        if (!e.target.closest('.status-checkbox')) {
+        // AMÉLIORATION - Vérifier plus précisément les zones de contrôle
+        if (!e.target.closest('.agent-controls')) {
             e.preventDefault();
             handleAgentSelection(key, agent, card);
         }
     });
     
-    // Récupérer les éléments de contrôle d'état
-    const checkbox = card.querySelector('.status-checkbox');
-    const statusLabel = card.querySelector('.status-label');
-    
-    // Événement pour la checkbox
-    if (checkbox && statusLabel) {
-        checkbox.addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleAgentStatus(key, checkbox, statusLabel);
-        });
-    }
-    
     // Événements clavier pour l'accessibilité
     card.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            if (e.target.classList.contains('status-checkbox')) {
+            if (e.target.classList.contains('status-checkbox') || e.target.classList.contains('status-label')) {
                 toggleAgentStatus(key, checkbox, statusLabel);
             } else {
                 handleAgentSelection(key, agent, card);
@@ -245,6 +265,13 @@ function addCardEventListeners(card, key, agent) {
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
     card.setAttribute('aria-label', `Sélectionner l'agent ${agent.title}`);
+    
+    // AJOUT - Rendre la checkbox focusable aussi
+    if (checkbox) {
+        checkbox.setAttribute('tabindex', '0');
+        checkbox.setAttribute('role', 'checkbox');
+        checkbox.setAttribute('aria-label', `Activer/désactiver l'agent ${agent.title}`);
+    }
     
     // Événements de survol pour améliorer l'UX
     card.addEventListener('mouseenter', () => {
@@ -500,13 +527,23 @@ function getAgentSelectionStats() {
 
 // Basculer l'état actif/inactif d'un agent
 function toggleAgentStatus(agentId, checkbox, statusLabel) {
+    console.log('Toggling agent status for:', agentId); // Debug
+    
     // Basculer l'état
     agentStates[agentId] = !agentStates[agentId];
     const isActive = agentStates[agentId];
     
+    console.log('New state:', isActive); // Debug
+    
     // Mettre à jour l'interface
     if (checkbox) {
-        checkbox.classList.toggle('checked', isActive);
+        if (isActive) {
+            checkbox.classList.add('checked');
+            checkbox.setAttribute('aria-checked', 'true');
+        } else {
+            checkbox.classList.remove('checked');
+            checkbox.setAttribute('aria-checked', 'false');
+        }
     }
     
     if (statusLabel) {
@@ -520,6 +557,11 @@ function toggleAgentStatus(agentId, checkbox, statusLabel) {
     
     // Mettre à jour le compteur d'agents actifs
     updateActiveAgentsCount();
+    
+    // Focus sur la checkbox pour l'accessibilité
+    if (checkbox) {
+        checkbox.focus();
+    }
 }
 
 // Sauvegarder les états des agents dans le localStorage
