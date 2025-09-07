@@ -329,20 +329,31 @@ function closeOnboarding() {
     
     const container = document.querySelector('.onboarding-container');
     if (container) {
+        // AJOUT - Masquer immédiatement tous les éléments de blur en arrière-plan
+        const gradientElements = document.querySelectorAll('.gradient');
+        gradientElements.forEach(el => {
+            if (el) {
+                el.style.display = 'none';
+                el.style.opacity = '0';
+            }
+        });
+        
         // Démarrer l'animation de sortie
         container.classList.add('exiting');
         container.classList.remove('visible');
         
-        // Redirection à mi-parcours de l'animation pour éviter l'interruption
+        // MODIFICATION - Réduire le délai pour éviter le flicker
         setTimeout(() => {
+            // Restaurer le overflow du body
+            document.body.style.overflow = '';
             window.location.href = '/';
-        }, 200); // 200ms = moitié de l'animation de 400ms
+        }, 150); // Réduit de 200ms à 150ms
     } else {
         window.location.href = '/';
     }
 }
 
-// Masquer les éléments de la page principale
+// Fonction modifiée pour masquer les éléments de la page principale
 function hideMainPageElements() {
     const elementsToHide = [
         '.conversations',
@@ -353,7 +364,7 @@ function hideMainPageElements() {
         '#librarySideNav',
         '#LinksSideNav',
         '.chat-main-container',
-        '.gradient'
+        '.gradient' // DÉJÀ PRÉSENT - BIEN
     ];
     
     elementsToHide.forEach(selector => {
@@ -362,9 +373,14 @@ function hideMainPageElements() {
             if (element) {
                 element.style.display = 'none';
                 element.style.visibility = 'hidden';
+                element.style.opacity = '0'; // AJOUT
+                element.style.zIndex = '-1'; // AJOUT pour forcer en arrière-plan
             }
         });
     });
+    
+    // AJOUT - Forcer le masquage du body overflow pendant l'onboarding
+    document.body.style.overflow = 'hidden';
 }
 
 // Restaurer les éléments de la page principale
@@ -633,6 +649,22 @@ function showAllAgents() {
         noResultsMessage.style.display = 'none';
     }
 }
+
+// AJOUT - Fonction d'initialisation immédiate au chargement
+(function immediateInit() {
+    // Masquer immédiatement les éléments problématiques avant le DOMContentLoaded
+    const style = document.createElement('style');
+    style.textContent = `
+        .gradient { 
+            display: none !important; 
+            opacity: 0 !important; 
+            visibility: hidden !important;
+            backdrop-filter: none !important;
+        }
+        body { overflow: hidden !important; }
+    `;
+    document.head.appendChild(style);
+})();
 
 // Nettoyage lors de la fermeture de la page
 window.addEventListener('beforeunload', function() {
