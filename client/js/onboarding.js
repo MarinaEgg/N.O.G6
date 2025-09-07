@@ -915,6 +915,17 @@ function setupAdvancedSearchFunctionality() {
         clearTimeout(searchTimeout);
         const searchTerm = e.target.value.trim();
         
+        // Si la recherche est vide, afficher tous les agents immédiatement
+        if (!searchTerm) {
+            showAllAgents();
+            // Masquer les suggestions
+            const suggestions = document.querySelector('.search-suggestions');
+            if (suggestions) {
+                suggestions.remove();
+            }
+            return;
+        }
+        
         // Recherche en temps réel avec un petit délai
         searchTimeout = setTimeout(() => {
             filterAgentsAdvanced(searchTerm);
@@ -931,7 +942,12 @@ function setupAdvancedSearchFunctionality() {
     searchInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             clearTimeout(searchTimeout);
-            filterAgentsAdvanced(e.target.value.trim());
+            const searchTerm = e.target.value.trim();
+            if (!searchTerm) {
+                showAllAgents();
+            } else {
+                filterAgentsAdvanced(searchTerm);
+            }
         }
     });
     
@@ -942,9 +958,13 @@ function setupAdvancedSearchFunctionality() {
     clearButton.setAttribute('aria-label', 'Effacer la recherche');
     clearButton.addEventListener('click', () => {
         searchInput.value = '';
+        showAllAgents(); // Afficher tous les agents immédiatement
         searchInput.focus();
-        // Déclencher l'événement input pour mettre à jour la recherche
-        searchInput.dispatchEvent(new Event('input'));
+        // Masquer les suggestions
+        const suggestions = document.querySelector('.search-suggestions');
+        if (suggestions) {
+            suggestions.remove();
+        }
     });
     
     const searchContainer = searchInput.parentElement;
