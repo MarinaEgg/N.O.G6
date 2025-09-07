@@ -1,3 +1,26 @@
+// ========== COMPATIBILITÉ NOUVELLE BARRE DE CHAT ==========
+// Fonction de compatibilité avec la nouvelle barre de chat
+function syncTextareas() {
+    const oldInput = document.getElementById('message-input');
+    const newInput = document.getElementById('modernChatInput');
+    
+    if (oldInput && newInput) {
+        // Synchroniser la valeur entre les deux textareas
+        if (oldInput.value !== newInput.value && newInput.value.trim() !== '') {
+            oldInput.value = newInput.value;
+        }
+    }
+}
+
+// Sauvegarder la fonction handle_ask originale
+const original_handle_ask = handle_ask;
+
+// Redéfinir handle_ask pour inclure la synchronisation
+handle_ask = async function() {
+    syncTextareas();
+    return await original_handle_ask();
+};
+
 // ========== SIDEBAR TOGGLE ========== 
 function toggleSidebar() {
   const body = document.body;
