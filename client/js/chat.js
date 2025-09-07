@@ -779,20 +779,41 @@ const load_conversations = async (limit, offset, loader) => {
     }
   }
 
-  await clear_conversations();
-
-  for (conversation of conversations) {
-    box_conversations.innerHTML += `
-    <div class="convo" id="convo-${conversation.id}">
-      <div class="left" onclick="set_conversation('${conversation.id}')">
-          <i class="fa-regular fa-comments"></i>
-          <span class="convo-title">${conversation.title}</span>
-      </div>
-      <i onclick="show_option('${conversation.id}')" class="fa-regular fa-trash" id="conv-${conversation.id}"></i>
-      <i onclick="delete_conversation('${conversation.id}')" class="fa-regular fa-check" id="yes-${conversation.id}" style="display:none;"></i>
-      <i onclick="hide_option('${conversation.id}')" class="fa-regular fa-x" id="not-${conversation.id}" style="display:none;"></i>
-    </div>
-    `;
+  // Vider la nouvelle liste des conversations
+  const conversationsList = document.getElementById('conversationsList');
+  if (conversationsList) {
+    conversationsList.innerHTML = '';
+    
+    // Ajouter chaque conversation avec la nouvelle structure
+    for (conversation of conversations) {
+      conversationsList.innerHTML += `
+        <div class="conversation-item" id="convo-${conversation.id}">
+          <div class="conversation-item-content" onclick="set_conversation('${conversation.id}')">
+            <span class="conversation-item-title">${conversation.title}</span>
+          </div>
+          <div class="conversation-item-actions">
+            <i class="fas fa-ellipsis-h" onclick="show_option('${conversation.id}')" title="Options"></i>
+          </div>
+        </div>
+      `;
+    }
+  } else {
+    // Fallback pour l'ancien système si le nouvel élément n'existe pas
+    console.warn('conversationsList non trouvé, utilisation de l\'ancien système');
+    await clear_conversations();
+    for (conversation of conversations) {
+      box_conversations.innerHTML += `
+        <div class="convo" id="convo-${conversation.id}">
+          <div class="left" onclick="set_conversation('${conversation.id}')">
+              <i class="fa-regular fa-comments"></i>
+              <span class="convo-title">${conversation.title}</span>
+          </div>
+          <i onclick="show_option('${conversation.id}')" class="fa-regular fa-trash" id="conv-${conversation.id}"></i>
+          <i onclick="delete_conversation('${conversation.id}')" class="fa-regular fa-check" id="yes-${conversation.id}" style="display:none;"></i>
+          <i onclick="hide_option('${conversation.id}')" class="fa-regular fa-x" id="not-${conversation.id}" style="display:none;"></i>
+        </div>
+      `;
+    }
   }
 
   document.querySelectorAll(`code`).forEach((el) => {
@@ -800,8 +821,91 @@ const load_conversations = async (limit, offset, loader) => {
   });
 };
 
-document.getElementById(`cancelButton`).addEventListener(`click`, async () => {
-  window.controller.abort();
+document.getElementById(`cancelButton`)?.addEventListener(`click`, async () => {
+  if (window.controller) {
+    window.controller.abort();
+  }
+});
+
+// ========== GESTION NOUVELLE SIDEBAR ========== 
+
+// Gestion du menu utilisateur
+document.addEventListener('DOMContentLoaded', () => {
+  const userProfile = document.getElementById('userProfile');
+  const userMenu = document.getElementById('userMenu');
+  
+  if (userProfile && userMenu) {
+    userProfile.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isShowing = userMenu.classList.toggle('show');
+      userProfile.classList.toggle('active', isShowing);
+    });
+    
+    // Fermer le menu en cliquant ailleurs
+    document.addEventListener('click', (e) => {
+      if (!userProfile.contains(e.target) && !userMenu.contains(e.target)) {
+        userMenu.classList.remove('show');
+        userProfile.classList.remove('active');
+      }
+    });
+  }
+});
+
+// Navigation entre sections
+function switchToDiscussions() {
+  setActiveNavItem('discussions');
+  // Logique pour afficher la section discussions
+  console.log('Switch to discussions');
+}
+
+function switchToWorkspace() {
+  setActiveNavItem('workspace');
+  // Logique pour afficher l'espace de travail
+  console.log('Switch to workspace');
+}
+
+function setActiveNavItem(section) {
+  const navItems = document.querySelectorAll('.nav-item');
+  navItems.forEach(item => {
+    item.classList.remove('active');
+    if (item.dataset.section === section) {
+      item.classList.add('active');
+    }
+  });
+}
+
+// Actions du menu utilisateur
+function openSettings() {
+  console.log('Opening settings');
+  // Implémenter l'ouverture des paramètres
+}
+
+function toggleLanguageSubmenu() {
+  console.log('Toggle language submenu');
+  // Implémenter le sous-menu langues
+}
+
+function toggleAboutSubmenu() {
+  console.log('Toggle about submenu');
+  // Implémenter le sous-menu "En savoir plus"
+}
+
+function logout() {
+  if (confirm('Êtes-vous sûr de vouloir vous déconnecter ?')) {
+    localStorage.clear();
+    window.location.href = '/login';
+  }
+}
+
+// Mise à jour de l'état actif des sections de navigation
+function updateNavigationState() {
+  // Par défaut, discussions est actif
+  setActiveNavItem('discussions');
+}
+
+// Initialiser l'état de navigation au chargement
+document.addEventListener('DOMContentLoaded', () => {
+  updateNavigationState();
 });
 
 function h2a(str1) {
