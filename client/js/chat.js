@@ -1,26 +1,3 @@
-// ========== COMPATIBILITÉ NOUVELLE BARRE DE CHAT ==========
-// Fonction de compatibilité avec la nouvelle barre de chat
-function syncTextareas() {
-    const oldInput = document.getElementById('message-input');
-    const newInput = document.getElementById('modernChatInput');
-    
-    if (oldInput && newInput) {
-        // Synchroniser la valeur entre les deux textareas
-        if (oldInput.value !== newInput.value && newInput.value.trim() !== '') {
-            oldInput.value = newInput.value;
-        }
-    }
-}
-
-// Sauvegarder la fonction handle_ask originale
-const original_handle_ask = handle_ask;
-
-// Redéfinir handle_ask pour inclure la synchronisation
-handle_ask = async function() {
-    syncTextareas();
-    return await original_handle_ask();
-};
-
 // ========== SIDEBAR TOGGLE ========== 
 function toggleSidebar() {
   const body = document.body;
@@ -109,29 +86,49 @@ const greetingMessages = {
 hljs.addPlugin(new CopyButtonPlugin());
 document.getElementsByClassName("library-side-nav-content")[0].innerHTML = '';
 
-// FONCTION CORRIGÉE pour redimensionner dynamiquement le textarea et la barre de chat
-function resizeTextarea(textarea) {
-  // Cette fonction est maintenant gérée par ChatInputManager
-  if (window.chatInputManager && window.chatInputManager.isInitialized) {
-    window.chatInputManager.forceResize();
-  }
-}
+class_last_message_assistant = "last-message-assistant";
 
-// Fonction pour réinitialiser la hauteur de la barre de chat
-function resetChatBarHeight() {
-  // Cette fonction est maintenant gérée par ChatInputManager
-  if (window.chatInputManager && window.chatInputManager.isInitialized) {
-    window.chatInputManager.resetHeight();
-  }
-}
+const format = (text) => {
+  return text.replace(/(?:\r\n|\r|\n)/g, "<br>");
+};
 
-// Fonction pour ajuster automatiquement la hauteur lors de la suppression de texte
-function handleTextDeletion(textarea) {
-  // Cette fonction est maintenant gérée par ChatInputManager
-  if (window.chatInputManager && window.chatInputManager.isInitialized) {
-    window.chatInputManager.forceResize();
+message_input.addEventListener("blur", () => {
+  window.scrollTo(0, 0);
+});
+
+const delete_conversations = async () => {
+  localStorage.clear();
+  await new_conversation();
+};
+
+const handle_ask = async () => {
+  // Réinitialiser la hauteur de la barre de chat via le modernChatBar
+  if (window.modernChatBar && window.modernChatBar.isInitialized) {
+    window.modernChatBar.resetTextareaHeight();
   }
-}
+  
+  message_input.focus();
+  window.scrollTo(0, 0);
+  let message = message_input.value;
+
+  if (message.length > 0) {
+    message_input.value = ``;
+    // Réinitialiser la hauteur du textarea
+    if (window.modernChatBar) {
+      window.modernChatBar.resizeTextarea();
+    }
+    await ask_gpt(message);
+  }
+};
+
+const remove_cancel_button = async () => {
+  stop_generating.classList.add(`stop_generating-hiding`);
+
+  setTimeout(() => {
+    stop_generating.classList.remove(`stop_generating-hiding`);
+    stop_generating.classList.add(`stop_generating-hidden`);
+  }, 300);
+};
 
 function openLibrary() {
   window.location.href = '/onboarding/';
@@ -176,47 +173,6 @@ function closeLinks() {
   document.getElementById("LinksSideNav").style.padding = "0px";
   document.getElementById("linksMenu").innerHTML = "";
 }
-
-class_last_message_assistant = "last-message-assistant";
-
-const format = (text) => {
-  return text.replace(/(?:\r\n|\r|\n)/g, "<br>");
-};
-
-message_input.addEventListener("blur", () => {
-  window.scrollTo(0, 0);
-});
-
-const delete_conversations = async () => {
-  localStorage.clear();
-  await new_conversation();
-};
-
-const handle_ask = async () => {
-  // Réinitialiser la hauteur de la barre de chat
-  if (window.chatInputManager && window.chatInputManager.isInitialized) {
-    window.chatInputManager.resetHeight();
-  }
-  message_input.focus();
-
-  window.scrollTo(0, 0);
-  let message = message_input.value;
-
-  if (message.length > 0) {
-    message_input.value = ``;
-    // Le reset est maintenant géré par ChatInputManager
-    await ask_gpt(message);
-  }
-};
-
-const remove_cancel_button = async () => {
-  stop_generating.classList.add(`stop_generating-hiding`);
-
-  setTimeout(() => {
-    stop_generating.classList.remove(`stop_generating-hiding`);
-    stop_generating.classList.add(`stop_generating-hidden`);
-  }, 300);
-};
 
 const ask_gpt = async (message) => {
   try {
@@ -901,26 +857,29 @@ window.onload = async () => {
     }
   }
 
-  // Les événements de redimensionnement sont maintenant gérés par ChatInputManager
-  // Garder seulement les événements d'envoi
-  send_button.addEventListener(`click`, async () => {
-    if (prompt_lock) return;
-    await handle_ask();
-  });
+  // Événement d'envoi via le bouton
+  if (send_button) {
+    send_button.addEventListener(`click`, async () => {
+      if (prompt_lock) return;
+      await handle_ask();
+    });
+  }
 
   register_settings_localstorage();
 
   // Add Enter key handler for message input
-  message_input.addEventListener(`keydown`, async (event) => {
-    if (event.key === `Enter` && !event.shiftKey) {
-      event.preventDefault();
-      if (prompt_lock) return;
-      await handle_ask();
-    }
-  });
+  if (message_input) {
+    message_input.addEventListener(`keydown`, async (event) => {
+      if (event.key === `Enter` && !event.shiftKey) {
+        event.preventDefault();
+        if (prompt_lock) return;
+        await handle_ask();
+      }
+    });
+  }
 };
 
-document.querySelector(".mobile-sidebar").addEventListener("click", (event) => {
+document.querySelector(".mobile-sidebar")?.addEventListener("click", (event) => {
   const sidebar = document.querySelector(".conversations");
 
   if (sidebar.classList.contains("shown")) {
