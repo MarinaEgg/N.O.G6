@@ -138,17 +138,60 @@ class ModernChatBar {
         }
     }
 
+    positionMenu(menu, button) {
+        if (!menu || !button) return;
+        
+        const buttonRect = button.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        
+        // Position verticale : au-dessus du bouton avec un petit gap
+        const menuHeight = menuRect.height || 200; // estimation si pas encore visible
+        let top = buttonRect.top - menuHeight - 10;
+        
+        // Vérifier si le menu sort du viewport en haut
+        if (top < 10) {
+            // Si pas de place en haut, le mettre en dessous
+            top = buttonRect.bottom + 10;
+        }
+        
+        // Position horizontale : centré sur le bouton
+        let left = buttonRect.left + (buttonRect.width / 2) - (280 / 2); // 280 = largeur du menu
+        
+        // Vérifier les limites du viewport
+        if (left < 10) {
+            left = 10;
+        } else if (left + 280 > viewportWidth - 10) {
+            left = viewportWidth - 290;
+        }
+        
+        // Appliquer les positions
+        menu.style.top = `${top}px`;
+        menu.style.left = `${left}px`;
+    }
+
     toggleMenu(type) {
         if (type === 'plus' && this.plusMenu && this.connectorMenu) {
             this.connectorMenu.classList.remove('show');
             this.connectorButton?.classList.remove('active');
-            this.plusMenu.classList.toggle('show');
+            
+            const isShowing = this.plusMenu.classList.toggle('show');
             this.plusButton?.classList.toggle('active');
+            
+            if (isShowing) {
+                this.positionMenu(this.plusMenu, this.plusButton);
+            }
         } else if (this.connectorMenu && this.plusMenu) {
             this.plusMenu.classList.remove('show');
             this.plusButton?.classList.remove('active');
-            this.connectorMenu.classList.toggle('show');
+            
+            const isShowing = this.connectorMenu.classList.toggle('show');
             this.connectorButton?.classList.toggle('active');
+            
+            if (isShowing) {
+                this.positionMenu(this.connectorMenu, this.connectorButton);
+            }
         }
     }
 
