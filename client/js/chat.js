@@ -12,12 +12,11 @@ function toggleSidebar() {
   }
 }
 
-// Initialiser l'état de la sidebar au chargement
 function initSidebar() {
   // Bouton hamburger externe (quand sidebar fermée)
-  const sidebarToggleExternal = document.getElementById('sidebarToggleExternal');
-  if (sidebarToggleExternal) {
-    sidebarToggleExternal.addEventListener('click', toggleSidebar);
+  const sidebarToggle = document.getElementById('sidebarToggle');
+  if (sidebarToggle) {
+    sidebarToggle.addEventListener('click', toggleSidebar);
   }
   
   // Bouton hamburger interne (dans la sidebar) - SOLUTION ROBUSTE
