@@ -27,10 +27,10 @@ class ChatInputManager {
     this.inputBox = document.querySelector('.input-box');
     this.messagesContainer = document.getElementById('messages');
     
-    if (!this.textarea || !this.inputBox) {
-      console.warn('Éléments de chat non trouvés, retry dans 100ms');
-      setTimeout(() => this.setupElements(), 100);
-      return;
+    // DÉSACTIVÉ : Conflit avec ModernChatBar - utilise la nouvelle barre de chat
+    if (!this.textarea || !this.inputBox || document.querySelector('.modern-chat-bar')) {
+        console.log('ChatInputManager désactivé - ModernChatBar actif');
+        return;
     }
 
     this.setupEventListeners();
