@@ -3526,12 +3526,17 @@ body.sidebar-open .modern-chat-container {
   cursor: pointer !important;
   transition: all 0.2s ease !important;
   border: none !important;
-  font-size: 16px !important;
+  padding: 0 !important;
 }
 
 .sidebar-header .hamburger-icon:hover {
   background: #1a1a1a !important;
   transform: scale(1.05) !important;
+}
+
+.sidebar-header .hamburger-icon i {
+  font-size: 16px !important;
+  color: white !important;
 }
 
 /* Hamburger externe quand sidebar fermée */
