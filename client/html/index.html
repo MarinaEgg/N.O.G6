@@ -8,6 +8,7 @@
       content="width=device-width, initial-scale=1.0 maximum-scale=1.0"
     />
     <meta name="description" content="EggOn nOg Legal Chatbot" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <meta property="og:title" content="nOg" />
     <meta
       property="og:image"
@@ -195,6 +196,124 @@
     <div id="LinksSideNav" class="sidenav">
       <div class="links-side-nav-content"></div>
     </div>
+    
+    <!-- Scripts existants -->
     <script src="/assets/js/chat-input-manager.js"></script>
+    <script src="/assets/js/chat.js"></script>
+    <script src="/assets/js/icons.js"></script>
+    
+    <!-- Script Modern Chat Bar -->
+    <script src="/js/modern-chat-bar.js"></script>
+    
+    <!-- Initialisation -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            window.modernChatBar = new ModernChatBar();
+        });
+    </script>
+    <div class="modern-chat-container">
+        <div class="modern-chat-bar">
+            <!-- Zone de saisie principale avec boutons intégrés -->
+            <div class="chat-input-wrapper">
+                <div class="chat-input-content">
+                    <!-- Bouton Plus (+) intégré -->
+                    <div class="action-button in-chat" id="plusButton">
+                        <i class="fas fa-plus"></i>
+                        <!-- Menu déroulant Plus -->
+                        <div class="dropdown-menu" id="plusMenu">
+                            <div class="dropdown-item" onclick="handleFileUpload()">
+                                <i class="fas fa-file-pdf"></i>
+                                <div class="dropdown-item-content">
+                                    <div class="dropdown-item-title">Téléverser un fichier</div>
+                                    <div class="dropdown-item-subtitle">PDF, Word, Excel, PowerPoint</div>
+                                </div>
+                            </div>
+                            <div class="dropdown-item" onclick="handleScreenshot()">
+                                <i class="fas fa-camera"></i>
+                                <div class="dropdown-item-content">
+                                    <div class="dropdown-item-title">Prendre une capture d'écran</div>
+                                    <div class="dropdown-item-subtitle">Capturer votre écran</div>
+                                </div>
+                            </div>
+                            <div class="dropdown-item" onclick="handleFolderSelection()">
+                                <i class="fas fa-folder"></i>
+                                <div class="dropdown-item-content">
+                                    <div class="dropdown-item-title">Utiliser un dossier</div>
+                                    <div class="dropdown-item-subtitle">Matières d'avocat - iManage</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Zone de texte -->
+                    <div class="chat-textarea-container">
+                        <textarea 
+                            class="chat-textarea" 
+                            placeholder="Écrivez votre message..."
+                            id="modernChatInput"
+                        ></textarea>
+                    </div>
+
+                    <!-- Bouton Connecteur intégré -->
+                    <div class="action-button in-chat" id="connectorButton">
+                        <i class="fas fa-plug"></i>
+                        <!-- Menu déroulant Connecteur -->
+                        <div class="dropdown-menu connector-menu" id="connectorMenu">
+                            <div class="connector-item" onclick="handleDeepSearch()">
+                                <div class="connector-header">
+                                    <div class="connector-icon">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <div class="connector-title">Recherche approfondie</div>
+                                </div>
+                                <div class="connector-description">
+                                    Recherche avancée avec Jina.ai pour des résultats complets
+                                </div>
+                            </div>
+                            <div class="connector-item" onclick="handleAddConnectors()">
+                                <div class="connector-header">
+                                    <div class="connector-icon">
+                                        <i class="fas fa-project-diagram"></i>
+                                    </div>
+                                    <div class="connector-title">Ajouter des connecteurs</div>
+                                </div>
+                                <div class="connector-description">
+                                    Configurer de nouveaux connecteurs et intégrations
+                                </div>
+                            </div>
+                            <div class="connector-item" onclick="handleIManageConnection()">
+                                <div class="connector-header">
+                                    <div class="connector-icon">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <div class="connector-title">iManage</div>
+                                </div>
+                                <div class="connector-description">
+                                    Connectez-vous à iManage pour coordonner les matières
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton d'envoi -->
+                    <button class="send-button" onclick="sendMessage()">
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay Drag & Drop -->
+    <div class="drag-drop-overlay" id="dragDropOverlay">
+        <div class="drag-drop-content">
+            <div class="drag-drop-icon">
+                <i class="fas fa-cloud-upload-alt"></i>
+            </div>
+            <div class="drag-drop-text">Déposez vos fichiers ici</div>
+            <div class="drag-drop-subtext">PDF, Word, Excel, PowerPoint acceptés</div>
+        </div>
+    </div>
+
   </body>
 </html>
