@@ -1070,18 +1070,19 @@ h3 {
 
 .conversation {
   width: 100%;
-  height: calc(100vh - 16px);
+  height: 100vh;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   position: relative;
   /* Motif de points en arrière-plan */
   background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
   background-size: 30px 30px;
   background-position: 0 0;
-  /* AJOUT : assurer que le scroll part du haut */
   scroll-behavior: smooth;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .conversation #messages {
@@ -1092,12 +1093,13 @@ h3 {
   overflow-y: auto;
   overflow-x: hidden;
   flex: 1;
-  padding: 0 0 120px 0;
+  padding: 20px 0 120px 0;
   scroll-behavior: smooth;
   align-items: center;
-  height: calc(100vh - 136px);
+  height: calc(100vh - 80px);
   position: relative;
   top: 0;
+  margin-top: 0;
 }
 
 .conversation .user-input {
@@ -2754,8 +2756,8 @@ body.sidebar-open .modern-chat-container {
 /* ========== MENUS DÉROULANTS ========== */
 .dropdown-menu {
     position: fixed;
-    bottom: 100px;
-    left: 20px;
+    bottom: auto;
+    left: auto;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(30px);
     -webkit-backdrop-filter: blur(30px);
@@ -2772,6 +2774,7 @@ body.sidebar-open .modern-chat-container {
     transform: translateY(10px) scale(0.95);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 3000;
+    /* Positionnement dynamique géré par JavaScript */
 }
 
 .dropdown-menu.show {
@@ -2943,19 +2946,18 @@ body.sidebar-open .modern-chat-container {
     }
 
     .dropdown-menu {
-        left: 10px;
+        position: fixed;
+        top: auto !important;
+        bottom: 100px !important;
+        left: 10px !important;
         right: 10px;
         min-width: auto;
         width: calc(100% - 20px);
-        width: calc(100% + 16px);
+        max-width: none;
     }
 
     .connector-menu {
         min-width: auto;
+        width: calc(100% - 20px);
     }
-}
-
-/* Masquer l'ancienne barre de chat */
-.user-input-container {
-    display: none !important;
 }
