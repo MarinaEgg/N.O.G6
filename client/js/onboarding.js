@@ -109,8 +109,9 @@ function initializeAgentsPage() {
     try {
         // Générer les cartes d'agents
         generateAgentCards();
-        // Ajouter la fonctionnalité de recherche
-        setupSearchFunctionality();
+        // Ajouter la fonctionnalité de recherche avancée
+        setupAdvancedSearchFunctionality();
+        initAdvancedSearch();
         // Charger les états des agents
         loadAgentStates();
         // Gérer les événements globaux
@@ -609,17 +610,12 @@ function updateActiveAgentsCount() {
     }
 }
 
-// Configurer la fonctionnalité de recherche
-function setupSearchFunctionality() {
+// Configurer la fonctionnalité de recherche avancée
+function setupAdvancedSearchFunctionality() {
     const searchInput = document.getElementById('agent-search');
     const noResultsMessage = document.querySelector('.no-results-message');
     
     if (!searchInput) return;
-    
-    searchInput.addEventListener('input', (e) => {
-        const searchTerm = e.target.value.trim().toLowerCase();
-        filterAgents(searchTerm);
-    });
     
     // Ajouter un bouton pour effacer la recherche
     const clearButton = document.createElement('button');
@@ -628,8 +624,9 @@ function setupSearchFunctionality() {
     clearButton.setAttribute('aria-label', 'Effacer la recherche');
     clearButton.addEventListener('click', () => {
         searchInput.value = '';
-        showAllAgents();
         searchInput.focus();
+        // Déclencher l'événement input pour mettre à jour la recherche
+        searchInput.dispatchEvent(new Event('input'));
     });
     
     const searchContainer = searchInput.parentElement;
@@ -642,40 +639,6 @@ function setupSearchFunctionality() {
     
     // Initialiser l'état du bouton d'effacement
     clearButton.style.display = 'none';
-}
-
-// Filtrer les agents en fonction du terme de recherche
-function filterAgents(searchTerm) {
-    const agentCards = document.querySelectorAll('.agent-card');
-    const noResultsMessage = document.querySelector('.no-results-message');
-    let visibleCount = 0;
-    
-    if (!searchTerm) {
-        showAllAgents();
-        return;
-    }
-    
-    agentCards.forEach(card => {
-        const title = card.querySelector('.agent-title')?.textContent.toLowerCase() || '';
-        const description = card.querySelector('.agent-description')?.textContent.toLowerCase() || '';
-        const context = card.querySelector('.agent-context')?.textContent.toLowerCase() || '';
-        
-        const isMatch = title.includes(searchTerm) || 
-                        description.includes(searchTerm) || 
-                        context.includes(searchTerm);
-        
-        if (isMatch) {
-            card.classList.add('is-visible');
-            visibleCount++;
-        } else {
-            card.classList.remove('is-visible');
-        }
-    });
-    
-    // Afficher/masquer le message "Aucun résultat"
-    if (noResultsMessage) {
-        noResultsMessage.style.display = visibleCount > 0 ? 'none' : 'block';
-    }
 }
 
 // Afficher tous les agents
@@ -739,6 +702,403 @@ function startChat() {
 function skipOnboarding() {
     console.log('Fermeture de la page agents');
     closeOnboarding();
+}
+
+// === SYSTÈME DE RECHERCHE AMÉLIORÉ POUR LES AGENTS ===
+
+// 1. Fonction de normalisation du texte
+function normalizeText(text) {
+    if (!text) return '';
+    
+    return text
+        .toLowerCase()
+        .normalize('NFD') // Décompose les caractères accentués
+        .replace(/[\u0300-\u036f]/g, '') // Supprime les diacritiques
+        .replace(/[^\w\s]/g, ' ') // Remplace la ponctuation par des espaces
+        .replace(/\s+/g, ' ') // Normalise les espaces multiples
+        .trim();
+}
+
+// 2. Index de recherche avec mots-clés et synonymes
+const searchIndex = {
+    contractAnalysis: {
+        keywords: ['contrat', 'juridique', 'risque', 'analyse', 'clause', 'accord', 'fusion', 'acquisition'],
+        synonymes: ['legal', 'droit', 'transaction', 'due diligence']
+    },
+    caseLawResearch: {
+        keywords: ['precedent', 'jurisprudence', 'recherche', 'strategie', 'avocat', 'loi'],
+        synonymes: ['case law', 'legal research', 'tribunal', 'cour']
+    },
+    meetingPrep: {
+        keywords: ['reunion', 'meeting', 'note', 'tache', 'organisation', 'decision'],
+        synonymes: ['rdv', 'rencontre', 'briefing', 'debriefing', 'cr', 'compte rendu']
+    },
+    wikiBuilder: {
+        keywords: ['wiki', 'connaissance', 'documentation', 'interne', 'knowledge'],
+        synonymes: ['base de donnees', 'kb', 'doc', 'savoir']
+    },
+    auditTrail: {
+        keywords: ['ia', 'instruction', 'prompt', 'amelioration', 'optimisation'],
+        synonymes: ['ai', 'llm', 'chatbot', 'bot']
+    },
+    supplierCompliance: {
+        keywords: ['conformite', 'politique', 'compliance', 'obligation', 'reglementation'],
+        synonymes: ['audit', 'controle', 'verification']
+    },
+    quotationAgent: {
+        keywords: ['devis', 'quotation', 'vente', 'tarif', 'prix', 'commercial'],
+        synonymes: ['quote', 'estimation', 'facturation', 'b2b']
+    },
+    clientOnboarding: {
+        keywords: ['veille', 'concurrence', 'concurrent', 'marche', 'intelligence'],
+        synonymes: ['benchmark', 'analyse marche', 'competitive intelligence']
+    },
+    techIntelligence: {
+        keywords: ['veille', 'technologie', 'tech', 'innovation', 'rd', 'recherche'],
+        synonymes: ['r&d', 'innovation', 'startup', 'digital']
+    },
+    rfpDrafting: {
+        keywords: ['depense', 'juridique', 'facture', 'suisse', 'finance', 'budget'],
+        synonymes: ['billing', 'comptabilite', 'ocg', 'controle']
+    },
+    esgCompliance: {
+        keywords: ['reporting', 'financier', 'performance', 'tableau', 'bord', 'bi'],
+        synonymes: ['dashboard', 'kpi', 'power bi', 'tableau']
+    },
+    dataPrivacyAudit: {
+        keywords: ['fiscal', 'fiscalite', 'taxe', 'impot', 'conformite'],
+        synonymes: ['tax', 'taxation', 'optimisation fiscale']
+    }
+};
+
+// 3. Fonction de calcul de score de pertinence
+function calculateRelevanceScore(agentId, searchTerms, agentData) {
+    let score = 0;
+    const index = searchIndex[agentId] || { keywords: [], synonymes: [] };
+    
+    // Récupérer le contenu de l'agent
+    const content = [
+        agentData.title,
+        agentData.context,
+        agentData.body
+    ].join(' ');
+    
+    const normalizedContent = normalizeText(content);
+    const allKeywords = [...index.keywords, ...index.synonymes];
+    
+    searchTerms.forEach(term => {
+        const normalizedTerm = normalizeText(term);
+        
+        // Score pour correspondance exacte dans le titre (poids fort)
+        if (normalizeText(agentData.title).includes(normalizedTerm)) {
+            score += 10;
+        }
+        
+        // Score pour correspondance dans le contexte (poids moyen)
+        if (normalizeText(agentData.context).includes(normalizedTerm)) {
+            score += 5;
+        }
+        
+        // Score pour correspondance dans la description (poids faible)
+        if (normalizeText(agentData.body).includes(normalizedTerm)) {
+            score += 2;
+        }
+        
+        // Score pour mots-clés indexés (poids fort)
+        allKeywords.forEach(keyword => {
+            if (normalizeText(keyword).includes(normalizedTerm) || 
+                normalizedTerm.includes(normalizeText(keyword))) {
+                score += 8;
+            }
+        });
+        
+        // Score pour correspondance floue (Levenshtein simplifié)
+        allKeywords.forEach(keyword => {
+            if (fuzzyMatch(normalizedTerm, normalizeText(keyword))) {
+                score += 3;
+            }
+        });
+    });
+    
+    return score;
+}
+
+// 4. Fonction de correspondance floue simple
+function fuzzyMatch(term, keyword, threshold = 0.7) {
+    if (term === keyword) return true;
+    if (term.length < 3 || keyword.length < 3) return false;
+    
+    // Vérifier les sous-chaînes communes
+    const minLength = Math.min(term.length, keyword.length);
+    let matches = 0;
+    
+    for (let i = 0; i < minLength; i++) {
+        if (term[i] === keyword[i]) matches++;
+    }
+    
+    return (matches / Math.max(term.length, keyword.length)) >= threshold;
+}
+
+// 5. Fonction de recherche avancée avec suggestions
+function advancedSearch(query) {
+    if (!query || query.trim().length < 2) {
+        return {
+            results: Object.keys(agentsData),
+            suggestions: [],
+            hasResults: true
+        };
+    }
+    
+    const searchTerms = normalizeText(query).split(' ').filter(term => term.length > 1);
+    const results = [];
+    
+    // Calculer les scores pour chaque agent
+    Object.entries(agentsData).forEach(([agentId, agentData]) => {
+        const score = calculateRelevanceScore(agentId, searchTerms, agentData);
+        if (score > 0) {
+            results.push({ agentId, score });
+        }
+    });
+    
+    // Trier par score décroissant
+    results.sort((a, b) => b.score - a.score);
+    
+    const agentIds = results.map(r => r.agentId);
+    
+    // Générer des suggestions si peu de résultats
+    let suggestions = [];
+    if (results.length < 3) {
+        suggestions = generateSearchSuggestions(query, searchTerms);
+    }
+    
+    return {
+        results: agentIds,
+        suggestions,
+        hasResults: agentIds.length > 0,
+        scores: results
+    };
+}
+
+// 6. Génération de suggestions intelligentes
+function generateSearchSuggestions(originalQuery, searchTerms) {
+    const suggestions = new Set();
+    
+    // Suggestions basées sur les mots-clés populaires
+    const popularKeywords = [
+        'reunion', 'contrat', 'juridique', 'veille', 'finance', 
+        'conformite', 'devis', 'analyse', 'ia', 'reporting'
+    ];
+    
+    searchTerms.forEach(term => {
+        popularKeywords.forEach(keyword => {
+            if (keyword.includes(term) || term.includes(keyword)) {
+                suggestions.add(keyword);
+            }
+            
+            // Suggestions phonétiquement similaires
+            if (fuzzyMatch(term, keyword, 0.6)) {
+                suggestions.add(keyword);
+            }
+        });
+    });
+    
+    // Limiter à 5 suggestions maximum
+    return Array.from(suggestions).slice(0, 5);
+}
+
+// 7. Interface utilisateur avec suggestions
+function createSearchSuggestions(suggestions, searchInput) {
+    // Supprimer les anciennes suggestions
+    const existingSuggestions = document.querySelector('.search-suggestions');
+    if (existingSuggestions) {
+        existingSuggestions.remove();
+    }
+    
+    if (suggestions.length === 0) return;
+    
+    // Créer le conteneur de suggestions
+    const suggestionsContainer = document.createElement('div');
+    suggestionsContainer.className = 'search-suggestions';
+    suggestionsContainer.innerHTML = `
+        <div class="suggestions-header">Essayez ces termes :</div>
+        ${suggestions.map(suggestion => 
+            `<button class="suggestion-item" data-suggestion="${suggestion}">
+                ${suggestion}
+            </button>`
+        ).join('')}
+    `;
+    
+    // Positionner sous l'input de recherche
+    searchInput.parentElement.appendChild(suggestionsContainer);
+    
+    // Gérer les clics sur les suggestions
+    suggestionsContainer.addEventListener('click', (e) => {
+        if (e.target.classList.contains('suggestion-item')) {
+            const suggestion = e.target.dataset.suggestion;
+            searchInput.value = suggestion;
+            filterAgentsAdvanced(suggestion);
+            suggestionsContainer.remove();
+            searchInput.focus();
+        }
+    });
+}
+
+// 8. Fonction principale de filtrage amélioré
+function filterAgentsAdvanced(searchTerm) {
+    const agentCards = document.querySelectorAll('.agent-card');
+    const noResultsMessage = document.querySelector('.no-results-message');
+    const searchInput = document.getElementById('agent-search');
+    
+    // Effectuer la recherche avancée
+    const searchResult = advancedSearch(searchTerm);
+    
+    // Afficher/masquer les cartes selon les résultats
+    agentCards.forEach(card => {
+        const agentId = card.dataset.agentId;
+        const shouldShow = searchResult.results.includes(agentId);
+        
+        if (shouldShow) {
+            card.classList.add('is-visible');
+            // Ajouter un indicateur de score pour le debug (optionnel)
+            const scoreInfo = searchResult.scores.find(s => s.agentId === agentId);
+            if (scoreInfo && window.DEBUG_SEARCH) {
+                card.dataset.searchScore = scoreInfo.score;
+            }
+        } else {
+            card.classList.remove('is-visible');
+        }
+    });
+    
+    // Gérer le message "Aucun résultat" et les suggestions
+    if (noResultsMessage) {
+        if (searchResult.hasResults) {
+            noResultsMessage.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'block';
+            noResultsMessage.innerHTML = `
+                <h3>Aucun agent trouvé pour "${searchTerm}"</h3>
+                <p>Vérifiez l'orthographe ou essayez des termes plus généraux.</p>
+            `;
+        }
+    }
+    
+    // Afficher les suggestions si nécessaire
+    if (searchTerm && searchResult.suggestions.length > 0 && !searchResult.hasResults) {
+        createSearchSuggestions(searchResult.suggestions, searchInput);
+    }
+    
+    // Log pour le debug
+    console.log(`Recherche "${searchTerm}":`, {
+        results: searchResult.results.length,
+        suggestions: searchResult.suggestions,
+        scores: searchResult.scores
+    });
+}
+
+// 9. Remplacement de la fonction de recherche existante
+function setupAdvancedSearchFunctionality() {
+    const searchInput = document.getElementById('agent-search');
+    if (!searchInput) return;
+    
+    // Remplacer l'ancien event listener
+    searchInput.removeEventListener('input', filterAgents);
+    
+    // Nouveau event listener avec debounce pour les performances
+    let searchTimeout;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        const searchTerm = e.target.value.trim();
+        
+        // Recherche en temps réel avec un petit délai
+        searchTimeout = setTimeout(() => {
+            filterAgentsAdvanced(searchTerm);
+        }, 200);
+        
+        // Masquer les suggestions quand on tape
+        const suggestions = document.querySelector('.search-suggestions');
+        if (suggestions) {
+            suggestions.remove();
+        }
+    });
+    
+    // Gérer la touche Entrée pour une recherche immédiate
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            clearTimeout(searchTimeout);
+            filterAgentsAdvanced(e.target.value.trim());
+        }
+    });
+}
+
+// 10. CSS pour les suggestions (à ajouter au CSS)
+const searchSuggestionsCSS = `
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.suggestions-header {
+    padding: 8px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    background: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item {
+    display: block;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+    background-color: #f0f8ff;
+}
+
+.search-container {
+    position: relative;
+}`;
+
+// 11. Initialisation du nouveau système
+function initAdvancedSearch() {
+    // Ajouter les styles CSS
+    if (!document.getElementById('search-suggestions-styles')) {
+        const style = document.createElement('style');
+        style.id = 'search-suggestions-styles';
+        style.textContent = searchSuggestionsCSS;
+        document.head.appendChild(style);
+    }
+    
+    // Activer la recherche avancée
+    setupAdvancedSearchFunctionality();
+    
+    console.log('Système de recherche avancé initialisé');
+}
+
+// Remplacer la fonction de recherche existante
+setupSearchFunctionality = setupAdvancedSearchFunctionality;
+
+// Initialiser la recherche avancée au chargement
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAdvancedSearch);
+} else {
+    initAdvancedSearch();
 }
 
 // Export des fonctions principales pour usage externe si nécessaire
