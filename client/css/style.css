@@ -3074,10 +3074,7 @@ body.sidebar-open .modern-chat-container {
   position: relative;
 }
 
-.nav-item:hover {
-  background: rgba(255, 255, 255, 0.5);
-  transform: translateX(4px);
-}
+/* Nav item hover effect removed */
 
 .nav-item.active {
   background: rgba(47, 47, 46, 0.1);
@@ -3453,4 +3450,116 @@ body.sidebar-open .modern-chat-container {
 
 .recents-section::-webkit-scrollbar-thumb:hover {
   background: rgba(47, 47, 46, 0.5);
+}
+
+/* ========== NEW CONVERSATION BUTTON STYLES ========== */
+.new-conversation-section {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 12px 16px !important;
+  margin: 8px 0 !important;
+  border-radius: 8px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.new-conversation-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 6px !important;
+  background: #2f2f2e !important;
+  color: white !important;
+  border: none !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  flex-shrink: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.new-conversation-btn:hover {
+  background: #1a1a1a !important;
+  transform: scale(1.05) !important;
+}
+
+.new-conversation-label {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #2f2f2e !important;
+  font-family: "Inter", sans-serif !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  transition: color 0.2s ease !important;
+}
+
+/* Hover effect on the entire section */
+.new-conversation-section:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.new-conversation-section:hover .new-conversation-label {
+  color: #000 !important;
+}
+
+/* ========== CORRECTION HAMBURGER DANS SIDEBAR ========== */
+
+.new-conversation-label {
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #2f2f2e !important;
+  font-family: "Inter", sans-serif !important;
+  margin: 0 !important;
+}
+
+.sidebar-header .hamburger-icon {
+  width: 32px !important;
+  height: 32px !important;
+  background: #2f2f2e !important;
+  color: white !important;
+  border-radius: 6px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  border: none !important;
+  font-size: 16px !important;
+}
+
+.sidebar-header .hamburger-icon:hover {
+  background: #1a1a1a !important;
+  transform: scale(1.05) !important;
+}
+
+/* Hamburger externe quand sidebar fermée */
+.sidebar-toggle-external {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  width: 32px;
+  height: 32px;
+  background: #2f2f2e;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.sidebar-toggle-external:hover {
+  background: #1a1a1a;
+  transform: scale(1.05);
+}
+
+/* Afficher le bouton externe quand sidebar fermée */
+body:not(.sidebar-open) .sidebar-toggle-external {
+  display: flex;
 }
