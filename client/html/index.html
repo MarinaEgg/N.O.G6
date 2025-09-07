@@ -146,30 +146,6 @@
                   <!-- Bouton Plus (+) intégré -->
                   <div class="action-button in-chat" id="plusButton">
                     <i class="fas fa-plus"></i>
-                    <!-- Menu déroulant Plus -->
-                    <div class="dropdown-menu" id="plusMenu">
-                      <div class="dropdown-item" onclick="handleFileUpload()">
-                        <i class="fas fa-file-pdf"></i>
-                        <div class="dropdown-item-content">
-                          <div class="dropdown-item-title">Téléverser un fichier</div>
-                          <div class="dropdown-item-subtitle">PDF, Word, Excel, PowerPoint</div>
-                        </div>
-                      </div>
-                      <div class="dropdown-item" onclick="handleScreenshot()">
-                        <i class="fas fa-camera"></i>
-                        <div class="dropdown-item-content">
-                          <div class="dropdown-item-title">Prendre une capture d'écran</div>
-                          <div class="dropdown-item-subtitle">Capturer votre écran</div>
-                        </div>
-                      </div>
-                      <div class="dropdown-item" onclick="handleFolderSelection()">
-                        <i class="fas fa-folder"></i>
-                        <div class="dropdown-item-content">
-                          <div class="dropdown-item-title">Utiliser un dossier</div>
-                          <div class="dropdown-item-subtitle">Matières d'avocat - iManage</div>
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <!-- Zone de texte UNIQUE -->
@@ -185,42 +161,6 @@
                   <!-- Bouton Connecteur intégré -->
                   <div class="action-button in-chat" id="connectorButton">
                     <i class="fas fa-plug"></i>
-                    <!-- Menu déroulant Connecteur -->
-                    <div class="dropdown-menu connector-menu" id="connectorMenu">
-                      <div class="connector-item" onclick="handleDeepSearch()">
-                        <div class="connector-header">
-                          <div class="connector-icon">
-                            <i class="fas fa-clock"></i>
-                          </div>
-                          <div class="connector-title">Recherche approfondie</div>
-                        </div>
-                        <div class="connector-description">
-                          Recherche avancée avec Jina.ai pour des résultats complets
-                        </div>
-                      </div>
-                      <div class="connector-item" onclick="handleAddConnectors()">
-                        <div class="connector-header">
-                          <div class="connector-icon">
-                            <i class="fas fa-project-diagram"></i>
-                          </div>
-                          <div class="connector-title">Ajouter des connecteurs</div>
-                        </div>
-                        <div class="connector-description">
-                          Configurer de nouveaux connecteurs et intégrations
-                        </div>
-                      </div>
-                      <div class="connector-item" onclick="handleIManageConnection()">
-                        <div class="connector-header">
-                          <div class="connector-icon">
-                            <i class="fas fa-briefcase"></i>
-                          </div>
-                          <div class="connector-title">iManage</div>
-                        </div>
-                        <div class="connector-description">
-                          Connectez-vous à iManage pour coordonner les matières
-                        </div>
-                      </div>
-                    </div>
                   </div>
 
                   <!-- Bouton d'envoi -->
@@ -236,6 +176,67 @@
           <select hidden name="model" id="model">
             <option value="Eggon-V1">Eggon-V1.6</option>
           </select>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Menus déroulants SORTIS de la barre de chat -->
+    <div class="dropdown-menu" id="plusMenu">
+      <div class="dropdown-item" onclick="handleFileUpload()">
+        <i class="fas fa-file-pdf"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Téléverser un fichier</div>
+          <div class="dropdown-item-subtitle">PDF, Word, Excel, PowerPoint</div>
+        </div>
+      </div>
+      <div class="dropdown-item" onclick="handleScreenshot()">
+        <i class="fas fa-camera"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Prendre une capture d'écran</div>
+          <div class="dropdown-item-subtitle">Capturer votre écran</div>
+        </div>
+      </div>
+      <div class="dropdown-item" onclick="handleFolderSelection()">
+        <i class="fas fa-folder"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Utiliser un dossier</div>
+          <div class="dropdown-item-subtitle">Matières d'avocat - iManage</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown-menu connector-menu" id="connectorMenu">
+      <div class="connector-item" onclick="handleDeepSearch()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="connector-title">Recherche approfondie</div>
+        </div>
+        <div class="connector-description">
+          Recherche avancée avec Jina.ai pour des résultats complets
+        </div>
+      </div>
+      <div class="connector-item" onclick="handleAddConnectors()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="connector-title">Ajouter des connecteurs</div>
+        </div>
+        <div class="connector-description">
+          Configurer de nouveaux connecteurs et intégrations
+        </div>
+      </div>
+      <div class="connector-item" onclick="handleIManageConnection()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <div class="connector-title">iManage</div>
+        </div>
+        <div class="connector-description">
+          Connectez-vous à iManage pour coordonner les matières
         </div>
       </div>
     </div>
