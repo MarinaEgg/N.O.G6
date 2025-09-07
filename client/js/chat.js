@@ -49,8 +49,8 @@ const colorThemes = document.querySelectorAll('[name="theme"]');
 const markdown = window.markdownit();
 const message_box = document.getElementById(`messages`);
 const message_input = document.getElementById(`message-input`);
-const box_conversations = document.querySelector(`.top`);
-const spinner = box_conversations.querySelector(".spinner");
+const box_conversations = document.querySelector(`.conversations-list`) || document.querySelector(`.top`);
+const spinner = box_conversations?.querySelector(".spinner");
 const stop_generating = document.querySelector(`.stop_generating`);
 const send_button = document.querySelector(`#send-button`);
 const get_sep = "|||";
@@ -122,12 +122,16 @@ const handle_ask = async () => {
 };
 
 const remove_cancel_button = async () => {
-  stop_generating.classList.add(`stop_generating-hiding`);
+  if (stop_generating) {
+    stop_generating.classList.add(`stop_generating-hiding`);
 
-  setTimeout(() => {
-    stop_generating.classList.remove(`stop_generating-hiding`);
-    stop_generating.classList.add(`stop_generating-hidden`);
-  }, 300);
+    setTimeout(() => {
+      if (stop_generating) {
+        stop_generating.classList.remove(`stop_generating-hiding`);
+        stop_generating.classList.add(`stop_generating-hidden`);
+      }
+    }, 300);
+  }
 };
 
 function openLibrary() {
@@ -189,7 +193,9 @@ const ask_gpt = async (message) => {
     window.text = ``;
     window.token = message_id();
 
-    stop_generating.classList.remove(`stop_generating-hidden`);
+    if (stop_generating) {
+      stop_generating.classList.remove(`stop_generating-hidden`);
+    }
 
     message_box.innerHTML += `
             <div class="message message-user">
@@ -545,6 +551,14 @@ function getScrollY(msg) {
 }
 
 const clear_conversations = async () => {
+  const conversationsList = document.getElementById('conversationsList');
+  if (conversationsList) {
+    conversationsList.innerHTML = '';
+    return;
+  }
+  
+  // Fallback pour ancien système
+  if (!box_conversations) return;
   const elements = box_conversations.childNodes;
   let index = elements.length;
 
