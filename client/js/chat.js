@@ -14,9 +14,16 @@ function toggleSidebar() {
 
 // Initialiser l'état de la sidebar au chargement
 function initSidebar() {
-  const sidebarToggle = document.getElementById('sidebarToggleExternal');
-  if (sidebarToggle) {
-    sidebarToggle.addEventListener('click', toggleSidebar);
+  // Bouton hamburger externe (quand sidebar fermée)
+  const sidebarToggleExternal = document.getElementById('sidebarToggleExternal');
+  if (sidebarToggleExternal) {
+    sidebarToggleExternal.addEventListener('click', toggleSidebar);
+  }
+  
+  // Bouton hamburger interne (dans la sidebar)
+  const sidebarToggleInternal = document.querySelector('.sidebar-header .hamburger-icon');
+  if (sidebarToggleInternal) {
+    sidebarToggleInternal.addEventListener('click', toggleSidebar);
   }
   
   // Restaurer l'état depuis localStorage
