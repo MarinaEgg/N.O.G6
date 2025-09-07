@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -30,6 +30,13 @@
         #LinksSideNav,
         .chat-main-container {
             display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            z-index: -1 !important;
+        }
+        
+        body {
+            overflow: hidden !important;
         }
     </style>
     
@@ -49,102 +56,16 @@
             </button>
         </header>
         
-        <main class="onboarding-content">
-            <div class="onboarding-steps">
-                <div class="step active" data-step="1">
-                    <div class="step-content">
-                        <h2>Découvrez nOg</h2>
-                        <p>Votre assistant juridique intelligent pour vous accompagner dans vos démarches légales.</p>
-                        <div class="features-grid">
-                            <div class="feature-card">
-                                <div class="feature-icon">⚖️</div>
-                                <h3>Conseil Juridique</h3>
-                                <p>Obtenez des réponses précises à vos questions légales</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">📄</div>
-                                <h3>Documents</h3>
-                                <p>Analysez et générez des documents juridiques</p>
-                            </div>
-                            <div class="feature-card">
-                                <div class="feature-icon">🔍</div>
-                                <h3>Recherche</h3>
-                                <p>Trouvez rapidement les informations dont vous avez besoin</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="step" data-step="2">
-                    <div class="step-content">
-                        <h2>Comment utiliser nOg</h2>
-                        <div class="usage-steps">
-                            <div class="usage-step">
-                                <span class="step-number">1</span>
-                                <div>
-                                    <h3>Posez votre question</h3>
-                                    <p>Décrivez votre situation ou votre problème juridique</p>
-                                </div>
-                            </div>
-                            <div class="usage-step">
-                                <span class="step-number">2</span>
-                                <div>
-                                    <h3>Recevez des conseils</h3>
-                                    <p>nOg analyse votre demande et vous fournit une réponse adaptée</p>
-                                </div>
-                            </div>
-                            <div class="usage-step">
-                                <span class="step-number">3</span>
-                                <div>
-                                    <h3>Approfondissez</h3>
-                                    <p>Posez des questions complémentaires pour plus de précisions</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="step" data-step="3">
-                    <div class="step-content">
-                        <h2>Prêt à commencer ?</h2>
-                        <p>Vous êtes maintenant prêt à utiliser nOg pour vos besoins juridiques.</p>
-                        <div class="cta-container">
-                            <button class="cta-button primary" onclick="startChat()">
-                                Commencer à utiliser nOg
-                            </button>
-                            <button class="cta-button secondary" onclick="skipOnboarding()">
-                                Passer l'introduction
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <main class="agents-grid-container">
+            <div class="agents-grid" id="agents-grid">
+                <!-- Les cartes seront générées ici -->
             </div>
-            
-            <div class="onboarding-navigation">
-                <button class="nav-btn prev-btn" onclick="prevStep()" disabled>
-                    Précédent
-                </button>
-                <div class="steps-indicator">
-                    <span class="dot active" data-step="1"></span>
-                    <span class="dot" data-step="2"></span>
-                    <span class="dot" data-step="3"></span>
-                </div>
-                <button class="nav-btn next-btn" onclick="nextStep()">
-                    Suivant
-                </button>
+            <div class="no-results-message" id="no-results" style="display: none;">
+                Aucun agent ne correspond à votre recherche.
             </div>
         </main>
     </div>
     
-    <!-- Agents Grid Container -->
-    <div class="agents-grid" id="agents-grid">
-        <!-- Les cartes seront générées ici -->
-    </div>
-    <div class="no-results-message" id="no-results" style="display: none;">
-        Aucun agent ne correspond à votre recherche.
-    </div>
-    
-    <!-- JavaScript propre à l'onboarding -->
     <script src="/assets/js/onboarding.js"></script>
 </body>
 </html>
