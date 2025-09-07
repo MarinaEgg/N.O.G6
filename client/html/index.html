@@ -90,11 +90,9 @@
   <body>
     <div class="gradient"></div>
     
-    <!-- Bouton hamburger -->
-    <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
-      <span></span>
-      <span></span>
-      <span></span>
+    <!-- Bouton hamburger externe (visible quand sidebar fermée) -->
+    <button class="sidebar-toggle-external" id="sidebarToggleExternal" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
     </button>
     
     <!-- Wrapper pour l'effet push -->
@@ -108,11 +106,12 @@
             <span class="product-name">N.O.G</span>
           </div>
 
-          <!-- Bouton nouvelle conversation rond -->
+          <!-- Bouton nouvelle conversation avec texte -->
           <div class="new-conversation-section">
             <button class="new-conversation-btn" onclick="new_conversation()" aria-label="Nouvelle conversation">
               <i class="fas fa-plus"></i>
             </button>
+            <span class="new-conversation-label">Nouvelle conversation</span>
           </div>
 
           <!-- Navigation principale -->
