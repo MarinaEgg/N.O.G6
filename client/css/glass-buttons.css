@@ -578,18 +578,3 @@ body .conversations .bottom_buttons button:active span::before {
     --angle-1: -75deg !important;
   }
 }
-
-/* ========== DEBUG - FORCER L'AFFICHAGE ========== */
-
-/* Force l'affichage pour debug */
-body .conversations .new_convo,
-body .conversations .bottom_buttons button,
-body .user-input-container #send-button,
-body .library-side-nav-content .onboarding-section,
-body .library-side-nav-content .video-button,
-body .library-side-nav-content .collapsible,
-body .library-side-nav-content .onboarding-subsection {
-  /* Forcer l'affichage avec une couleur de test temporaire */
-  border: 2px solid red !important;
-  background-color: rgba(255, 0, 0, 0.1) !important;
-}
