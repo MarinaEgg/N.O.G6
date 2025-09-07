@@ -20,11 +20,23 @@ function initSidebar() {
     sidebarToggleExternal.addEventListener('click', toggleSidebar);
   }
   
-  // Bouton hamburger interne (dans la sidebar)
-  const sidebarToggleInternal = document.querySelector('.sidebar-header .hamburger-icon');
-  if (sidebarToggleInternal) {
-    sidebarToggleInternal.addEventListener('click', toggleSidebar);
-  }
+  // Bouton hamburger interne (dans la sidebar) - SOLUTION ROBUSTE
+  const attachInternalHamburger = () => {
+    const sidebarToggleInternal = document.querySelector('.sidebar-header .hamburger-icon');
+    if (sidebarToggleInternal) {
+      // Supprimer l'ancien event listener s'il existe
+      sidebarToggleInternal.removeEventListener('click', toggleSidebar);
+      // Ajouter le nouveau
+      sidebarToggleInternal.addEventListener('click', toggleSidebar);
+      console.log('✅ Internal hamburger connected');
+    } else {
+      console.warn('❌ Internal hamburger not found, retrying...');
+      setTimeout(attachInternalHamburger, 100);
+    }
+  };
+  
+  // Attacher après un petit délai pour s'assurer que le DOM est prêt
+  setTimeout(attachInternalHamburger, 50);
   
   // Restaurer l'état depuis localStorage
   const savedState = localStorage.getItem('sidebarOpen');
