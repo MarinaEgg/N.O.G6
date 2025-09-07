@@ -1400,6 +1400,17 @@ div.message:last-child {
   gap: 12px;
   cursor: pointer;
   animation: show_popup 0.4s;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+}
+
+.stop_generating button span {
+  font-weight: 500;
+}
+
+.stop_generating button i {
+  font-size: 14px;
+  color: var(--colour-3);
 }
 
 @keyframes show_popup {
@@ -2636,7 +2647,7 @@ body.sidebar-open .modern-chat-container {
     position: relative;
     z-index: 1;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     gap: 8px;
     padding: 12px 16px;
     min-height: 60px;
@@ -2663,6 +2674,8 @@ body.sidebar-open .modern-chat-container {
     border: none;
     width: 32px;
     height: 32px;
+    align-self: center;
+    flex-shrink: 0;
 }
 
 .action-button:hover {
@@ -2699,7 +2712,7 @@ body.sidebar-open .modern-chat-container {
     width: 100%;
     min-height: 36px;
     max-height: 200px;
-    padding: 8px 0;
+    padding: 6px 0;
     background: transparent;
     border: none;
     outline: none;
@@ -2709,6 +2722,7 @@ body.sidebar-open .modern-chat-container {
     line-height: 1.4;
     font-family: "Inter", sans-serif;
     overflow-y: hidden;
+    vertical-align: middle;
 }
 
 .chat-textarea::placeholder {
@@ -2740,6 +2754,7 @@ body.sidebar-open .modern-chat-container {
     cursor: pointer;
     transition: all 0.2s ease;
     flex-shrink: 0;
+    align-self: center;
 }
 
 .send-button:hover {
