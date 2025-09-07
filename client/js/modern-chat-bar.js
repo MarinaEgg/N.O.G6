@@ -45,6 +45,12 @@ class ModernChatBar {
         this.setupDragAndDrop();
         this.setupKeyboardShortcuts();
         this.setupClickOutside();
+        
+        // Debug pour vérifier les éléments
+        console.log('Plus button:', this.plusButton);
+        console.log('Connector button:', this.connectorButton);
+        console.log('Plus menu:', this.plusMenu);
+        console.log('Connector menu:', this.connectorMenu);
     }
 
     setupTextareaResize() {
@@ -70,6 +76,8 @@ class ModernChatBar {
             this.textarea.style.height = Math.max(scrollHeight, minHeight) + 'px';
             this.textarea.classList.remove('scrollable');
         }
+        
+        this.adjustMessagesContainer();
     }
 
     resetTextareaHeight() {
@@ -78,21 +86,55 @@ class ModernChatBar {
         this.textarea.style.height = 'auto';
         this.textarea.style.height = '40px';
         this.textarea.classList.remove('scrollable');
+        this.adjustMessagesContainer();
+    }
+
+    // Ajuster la zone de messages quand l'input s'agrandit
+    adjustMessagesContainer() {
+        const messagesContainer = document.getElementById('messages');
+        if (!messagesContainer || !this.textarea) return;
+
+        const textareaHeight = parseInt(this.textarea.style.height) || 40;
+        const heightDifference = textareaHeight - 40; // 40 est la hauteur minimale
+
+        if (heightDifference > 0) {
+            messagesContainer.style.paddingBottom = `${120 + heightDifference}px`;
+        } else {
+            messagesContainer.style.paddingBottom = '120px';
+        }
+
+        // Ajuster le bouton stop generating
+        const stopButton = document.querySelector('.stop_generating');
+        if (stopButton) {
+            stopButton.style.bottom = `${80 + heightDifference}px`;
+        }
     }
 
     setupMenuToggles() {
+        console.log('Setting up menu toggles...');
+        
         if (this.plusButton) {
+            console.log('Adding event listener to plus button');
             this.plusButton.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                console.log('Plus button clicked!');
                 this.toggleMenu('plus');
             });
+        } else {
+            console.error('Plus button not found!');
         }
 
         if (this.connectorButton) {
+            console.log('Adding event listener to connector button');
             this.connectorButton.addEventListener('click', (e) => {
+                e.preventDefault();
                 e.stopPropagation();
+                console.log('Connector button clicked!');
                 this.toggleMenu('connector');
             });
+        } else {
+            console.error('Connector button not found!');
         }
     }
 
