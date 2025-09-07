@@ -14,7 +14,7 @@ function toggleSidebar() {
 
 // Initialiser l'état de la sidebar au chargement
 function initSidebar() {
-  const sidebarToggle = document.getElementById('sidebarToggle');
+  const sidebarToggle = document.getElementById('sidebarToggleExternal');
   if (sidebarToggle) {
     sidebarToggle.addEventListener('click', toggleSidebar);
   }
