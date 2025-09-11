@@ -56,7 +56,7 @@ class Website:
         return render_template('onboarding.html')
     
     def _workspace(self):
-        return render_template('workspace.html')
+        return render_template('workspace.html', chat_id=f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time() * 1000))[2:]}')
     
     def _links(self, 
                conversation_id, 
