@@ -886,14 +886,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // Navigation entre sections
 function switchToDiscussions() {
   setActiveNavItem('discussions');
-  // Logique pour afficher la section discussions
-  console.log('Switch to discussions');
+  window.location.href = '/chat/';
 }
 
 function switchToWorkspace() {
   setActiveNavItem('workspace');
-  // Logique pour afficher l'espace de travail
-  console.log('Switch to workspace');
+  window.location.href = '/workspace/';
 }
 
 function setActiveNavItem(section) {
