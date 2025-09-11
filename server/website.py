@@ -27,6 +27,10 @@ class Website:
                 'function': self._onboarding,
                 'methods': ['GET']
             },
+            '/workspace/': {
+                'function': self._workspace,
+                'methods': ['GET']
+            },
             '/links/<conversation_id>/<scrolly>/<video_ids_concat>/<titles_concat>': {
                 'function': self._links,
                 'methods': ['GET']
@@ -50,6 +54,9 @@ class Website:
 
     def _onboarding(self):
         return render_template('onboarding.html')
+    
+    def _workspace(self):
+        return render_template('workspace.html')
     
     def _links(self, 
                conversation_id, 
