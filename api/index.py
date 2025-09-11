@@ -217,6 +217,36 @@ def chat(conversation_id=None):
     except Exception as e:
         return f"Error loading chat: {str(e)}"
 
+@app.route('/workspace')
+@app.route('/workspace/')
+def workspace():
+    try:
+        # Essayer de lire le fichier workspace.html
+        possible_paths = [
+            'client/html/workspace.html',
+            '../client/html/workspace.html',
+            './client/html/workspace.html'
+        ]
+        
+        for path in possible_paths:
+            if os.path.exists(path):
+                with open(path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    # Générer un ID de conversation aléatoire
+                    import time
+                    from os import urandom
+                    chat_id = f'{urandom(4).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{urandom(2).hex()}-{hex(int(time.time() * 1000))[2:]}'
+                    content = content.replace('{{chat_id}}', chat_id)
+                    return content
+        
+        return """
+        <h1>Workspace Page</h1>
+        <p>Workspace template not found, but route is working!</p>
+        <p><a href="/">← Back to Home</a></p>
+        """
+    except Exception as e:
+        return f"Error loading workspace: {str(e)}"
+
 # ROUTE CRITIQUE: API Backend pour le chatbot
 @app.route('/backend-api/v2/conversation', methods=['POST'])
 def conversation():
