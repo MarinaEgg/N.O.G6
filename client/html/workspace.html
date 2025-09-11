@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0 maximum-scale=1.0"
+    />
+    <meta name="description" content="EggOn nOg Legal Chatbot" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta property="og:title" content="nOg" />
+    <meta
+      property="og:image"
+      content="https://openai.com/content/images/2022/11/ChatGPT.jpg"
+    />
+    <meta property="og:description" content="EggOn nOg Legal Chatbot" />
+    <meta property="og:url" content="https://chat.acy.dev" />
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/img/apple-touch-icon.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="/assets/img/nog_logo_no_text.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="/assets/img/nog_logo_no_text.png"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind:wght@300;400;500;600;700&family=Lora:ital,wght@0,400..700;1,400..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="manifest" href="/assets/img/site.webmanifest" />
+    <script src="/assets/js/icons.js"></script>
+    <script src="/assets/js/links.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/markdown-it@latest/dist/markdown-it.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="//cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/base16/dracula.min.css"
+    />
+    <script>
+      const like_img = `<img src="/assets/img/convertation-icons/like.png" alt="Like">`;
+      const user_image = `<img class="user" src="/assets/img/user-icon.webp" alt="User Avatar">`;
+      const gpt_image = `<img class="user" src="/assets/img/gpt_egg.png" alt="GPT Avatar">`;
+      const imanage_image = `<img class="user" src="/assets/img/imanage_egg.png" alt="iManage Avatar">`;
+      const video_image = `<img class="user" src="/assets/img/imanage_egg.png" alt="Video Icon">`;
+      const nog_image = `<img id="nog_image" class="user" src="/assets/img/nog_logo_no_text.png" alt="nOg logo">`; // egg
+      const loading_video = `<img style="width: 40px; height: 40px; opacity:1; content: url(/assets/img/nog_logo_no_text.png); background-position: center; background-repeat: no-repeat; background-size: cover;" id="nog_video" class="conversation_video">`;
+      const shape = `<img class="assistant-image" id="shape" style="width: 40px; height: 40px;position:absolute; content: url(/assets/img/gpt_egg.png); background-position: center; background-repeat: no-repeat; background-size: cover;">`;
+    </script>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const back_scrolly = params.get("scrollPos", -1); // scroll level in the chat if back from links
+    </script>
+    <style>
+      .hljs {
+        color: #e9e9f4;
+        background: #28293629;
+        border-radius: var(--border-radius-1);
+        border: 1px solid var(--blur-border);
+        font-size: 15px;
+      }
+
+      .conversation_video {
+        transition: 0.5s;
+      }
+    </style>
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/glass-buttons.css" />
+    <link rel="stylesheet" href="/assets/css/workspace.css" />
+    <script src="/assets/js/highlight.min.js"></script>
+    <script src="/assets/js/highlightjs-copy.min.js"></script>
+    <script>
+      window.conversation_id = `{{chat_id}}`;
+    </script>
+    <title>nOg</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  </head>
+  <body>
+    <div class="gradient"></div>
+    
+    <!-- Bouton hamburger externe (visible quand sidebar fermée) -->
+    <button class="sidebar-toggle-external" id="sidebarToggleExternal" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+    
+    <!-- Wrapper pour l'effet push -->
+    <div class="chat-main-container" id="chatMainContainer">
+      <div class="row">
+        <!-- Conversations sidebar reste ici mais sera positionnée en fixed -->
+        <div class="conversations shadow" id="conversations">
+          <!-- Header avec hamburger et nom produit -->
+          <div class="sidebar-header">
+            <button class="hamburger-icon" aria-label="Toggle sidebar">
+              <i class="fas fa-bars"></i>
+            </button>
+            <span class="product-name">N.O.G</span>
+          </div>
+
+          <!-- Bouton nouvelle conversation avec texte -->
+          <div class="new-conversation-section">
+            <button class="new-conversation-btn" onclick="new_conversation()" aria-label="Nouvelle conversation">
+              <i class="fas fa-plus"></i>
+            </button>
+            <span class="new-conversation-label">Nouvelle conversation</span>
+          </div>
+
+          <!-- Navigation principale -->
+          <div class="main-navigation">
+            <div class="nav-item" data-section="discussions" onclick="switchToDiscussions()">
+              <i class="fas fa-comments"></i>
+              <span>Discussions</span>
+            </div>
+            <div class="nav-item active" data-section="workspace" onclick="switchToWorkspace()">
+              <i class="fas fa-folder"></i>
+              <span>Espace de travail</span>
+            </div>
+            <div class="nav-item" data-section="agents" onclick="openLibrary()">
+              <div class="agents-icon">
+                <i class="fas fa-search mini-icon"></i>
+                <i class="fas fa-brain mini-icon"></i>
+                <i class="fas fa-pen mini-icon"></i>
+                <i class="fas fa-file mini-icon"></i>
+              </div>
+              <span>Agents</span>
+            </div>
+          </div>
+
+          <!-- Section récents avec conversations dynamiques -->
+          <div class="recents-section">
+            <div class="recents-header">
+              <span>Récents</span>
+              <i class="fas fa-ellipsis-h" onclick="delete_conversations()" title="Supprimer toutes les conversations"></i>
+            </div>
+            <div class="conversations-list" id="conversationsList">
+              <!-- Les conversations seront injectées ici par JavaScript -->
+            </div>
+          </div>
+
+          <!-- Footer profil utilisateur -->
+          <div class="user-profile" id="userProfile">
+            <div class="user-info">
+              <div class="user-avatar">U</div>
+              <span class="user-name">Utilisateur</span>
+            </div>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+
+          <!-- Menu utilisateur (caché par défaut) -->
+          <div class="user-menu" id="userMenu">
+            <div class="user-menu-header">
+              <span class="user-email">user@cabinet.fr</span>
+              <div class="user-avatar-large">U</div>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item" onclick="openSettings()">
+              <i class="fas fa-cog"></i>
+              <span>Paramètres</span>
+            </div>
+            <div class="menu-item submenu-trigger" onclick="toggleLanguageSubmenu()">
+              <i class="fas fa-language"></i>
+              <span>Langue</span>
+              <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="menu-item submenu-trigger" onclick="toggleAboutSubmenu()">
+              <i class="fas fa-info-circle"></i>
+              <span>En savoir plus</span>
+              <i class="fas fa-chevron-right"></i>
+            </div>
+            <div class="menu-separator"></div>
+            <div class="menu-item logout" onclick="logout()">
+              <i class="fas fa-sign-out-alt"></i>
+              <span>Se déconnecter</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="workspace-container disable-scrollbars">
+          <!-- Header workspace -->
+          <div class="workspace-header">
+            <h1>Espace de travail juridique</h1>
+            <div class="workspace-actions">
+              <button class="workspace-btn" id="addCardBtn">
+                <i class="fas fa-plus"></i>
+                Nouvelle carte
+              </button>
+              <button class="workspace-btn" id="saveLayoutBtn">
+                <i class="fas fa-save"></i>
+                Sauvegarder
+              </button>
+            </div>
+          </div>
+
+          <!-- Zone des cartes -->
+          <div class="workspace-canvas" id="workspaceCanvas">
+            <!-- Les cartes seront ajoutées ici dynamiquement -->
+          </div>
+
+          <!-- La barre de chat reste identique -->
+          <div class="modern-chat-container">
+            <div class="modern-chat-bar">
+              <!-- Zone de saisie principale avec boutons intégrés -->
+              <div class="chat-input-wrapper">
+                <div class="chat-input-content">
+                  <!-- Bouton Plus (+) intégré -->
+                  <div class="action-button in-chat" id="plusButton">
+                    <i class="fas fa-plus"></i>
+                  </div>
+
+                  <!-- Zone de texte UNIQUE -->
+                  <div class="chat-textarea-container">
+                    <textarea 
+                      class="chat-textarea" 
+                      placeholder="Posez votre question à N.O.G"
+                      id="message-input"
+                      rows="1"
+                    ></textarea>
+                  </div>
+
+                  <!-- Bouton Connecteur intégré -->
+                  <div class="action-button in-chat" id="connectorButton">
+                    <i class="fas fa-plug"></i>
+                  </div>
+
+                  <!-- Bouton d'envoi -->
+                  <button class="send-button" id="send-button" onclick="handle_ask()">
+                    <i class="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Menus déroulants SORTIS de la barre de chat -->
+    <div class="dropdown-menu" id="plusMenu">
+      <div class="dropdown-item" onclick="handleFileUpload()">
+        <i class="fas fa-file-pdf"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Téléverser un fichier</div>
+          <div class="dropdown-item-subtitle">PDF, Word, Excel, PowerPoint</div>
+        </div>
+      </div>
+      <div class="dropdown-item" onclick="handleScreenshot()">
+        <i class="fas fa-camera"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Prendre une capture d'écran</div>
+          <div class="dropdown-item-subtitle">Capturer votre écran</div>
+        </div>
+      </div>
+      <div class="dropdown-item" onclick="handleFolderSelection()">
+        <i class="fas fa-folder"></i>
+        <div class="dropdown-item-content">
+          <div class="dropdown-item-title">Utiliser un dossier</div>
+          <div class="dropdown-item-subtitle">Matières d'avocat - iManage</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dropdown-menu connector-menu" id="connectorMenu">
+      <div class="connector-item" onclick="handleDeepSearch()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="connector-title">Recherche approfondie</div>
+        </div>
+        <div class="connector-description">
+          Recherche avancée avec Jina.ai pour des résultats complets
+        </div>
+      </div>
+      <div class="connector-item" onclick="handleAddConnectors()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-project-diagram"></i>
+          </div>
+          <div class="connector-title">Ajouter des connecteurs</div>
+        </div>
+        <div class="connector-description">
+          Configurer de nouveaux connecteurs et intégrations
+        </div>
+      </div>
+      <div class="connector-item" onclick="handleIManageConnection()">
+        <div class="connector-header">
+          <div class="connector-icon">
+            <i class="fas fa-briefcase"></i>
+          </div>
+          <div class="connector-title">iManage</div>
+        </div>
+        <div class="connector-description">
+          Connectez-vous à iManage pour coordonner les matières
+        </div>
+      </div>
+    </div>
+    
+    <!-- Les sidNav restent en dehors du wrapper -->
+    <div id="librarySideNav" class="sidenav">
+      <div class="library-side-nav-content"></div>
+    </div>
+    <div id="LinksSideNav" class="sidenav">
+      <div class="links-side-nav-content"></div>
+    </div>
+
+    <!-- Overlay Drag & Drop -->
+    <div class="drag-drop-overlay" id="dragDropOverlay">
+      <div class="drag-drop-content">
+        <div class="drag-drop-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <div class="drag-drop-text">Déposez vos fichiers ici</div>
+        <div class="drag-drop-subtext">PDF, Word, Excel, PowerPoint acceptés</div>
+      </div>
+    </div>
+    
+    <!-- Scripts existants -->
+    <script src="/assets/js/icons.js"></script>
+    <script src="/assets/js/chat-input-manager.js"></script>
+    <script src="/assets/js/chat.js"></script>
+    
+    <!-- Script Modern Chat Bar -->
+    <script src="/assets/js/modern-chat-bar.js"></script>
+    
+    <!-- Initialisation -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        window.modernChatBar = new ModernChatBar();
+      });
+    </script>
+    
+    <!-- Workspace Script -->
+    <script src="/assets/js/workspace.js"></script>
+  </body>
+</html>
