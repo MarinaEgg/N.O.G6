@@ -202,11 +202,11 @@ const handle_ask = async () => {
       window.modernChatBar.resizeTextarea();
     }
     
-    // NOUVELLE LOGIQUE : Vérifier si on doit router vers une carte
+    // Vérifier si on doit router vers une carte
     if (isWorkspacePage() && isCardChatActive()) {
-      // Laisser le workspace manager gérer le message
-      // La fonction ask_gpt a été interceptée dans workspace.js
-      await ask_gpt(message);
+      // Router vers le gestionnaire de carte
+      await window.workspaceManager.handleCardChatMessage(message, window.workspaceManager.activeCardChat);
+      return; // IMPORTANT : éviter le double traitement
     } else {
       // Fonctionnement normal du chat
       await ask_gpt(message);
