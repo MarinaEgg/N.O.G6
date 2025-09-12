@@ -95,6 +95,7 @@ class WorkspaceManager {
         const cardElement = document.createElement('div');
         cardElement.className = 'workspace-card';
         cardElement.id = cardData.id;
+        cardElement.setAttribute('data-card-id', cardData.id);
         cardElement.style.left = cardData.position.x + 'px';
         cardElement.style.top = cardData.position.y + 'px';
         
@@ -121,7 +122,7 @@ class WorkspaceManager {
                 </div>
             </div>
             
-            <!-- Standard content area -->
+            <!-- Contenu standard de la carte -->
             <div class="card-content" id="content-${cardData.id}">
                 <div class="card-theme">${cardData.theme}</div>
                 <p class="card-description">${cardData.description}</p>
@@ -137,13 +138,13 @@ class WorkspaceManager {
                 </div>
             </div>
             
-            <!-- Chat area (hidden by default) -->
+            <!-- Interface de chat (cachée par défaut) -->
             <div class="card-chat-container" id="chat-${cardData.id}" style="display: none;">
                 <div class="card-chat-messages" id="messages-${cardData.id}">
-                    <!-- Chat messages will be injected here -->
+                    <!-- Messages de chat apparaîtront ici -->
                 </div>
                 <div class="card-chat-status" id="status-${cardData.id}">
-                    <span class="chat-indicator">💬 Chat actif</span>
+                    <span class="chat-indicator">💬 Chat actif - Utilisez la barre de chat principale</span>
                 </div>
             </div>
         `;
@@ -157,7 +158,7 @@ class WorkspaceManager {
     }
 
     setupCardEvents(cardElement, cardData) {
-        // Click to select (not drag)
+        // Click pour sélectionner (pas pour drag)
         cardElement.addEventListener('click', (e) => {
             if (!this.isDragging) {
                 this.selectCard(cardElement);
@@ -167,7 +168,7 @@ class WorkspaceManager {
         // Drag & Drop
         cardElement.addEventListener('mousedown', (e) => this.handleMouseDown(e, cardElement));
         
-        // Action buttons
+        // Boutons d'action
         const pinBtn = cardElement.querySelector('.pin-btn');
         const deleteBtn = cardElement.querySelector('.delete-btn');
         const chatToggleBtn = cardElement.querySelector('.chat-toggle-btn');
@@ -183,13 +184,13 @@ class WorkspaceManager {
             this.deleteCard(cardElement);
         });
         
-        // Chat toggle button
+        // NOUVEAU : Bouton toggle chat
         chatToggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.toggleChatMode(cardElement, cardData.id);
         });
         
-        // Clear chat button
+        // NOUVEAU : Bouton clear chat
         clearChatBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
             this.clearCardChat(cardData.id);
@@ -696,8 +697,97 @@ class WorkspaceManager {
         this.showChatIndicator(cardData.title);
     }
 
+    // ========== MÉTHODES DE GESTION DU CHAT DES CARTES ==========
+    
+    // Activer le mode chat sur une carte
+    toggleChatMode(cardElement, cardId) {
+        const chatContainer = cardElement.querySelector('.card-chat-container');
+        const contentContainer = cardElement.querySelector('.card-content');
+        const chatToggleBtn = cardElement.querySelector('.chat-toggle-btn');
+        
+        const isCurrentlyInChatMode = chatContainer.style.display !== 'none';
+        
+        if (isCurrentlyInChatMode) {
+            // Désactiver le mode chat
+            chatContainer.style.display = 'none';
+            contentContainer.style.display = 'block';
+            cardElement.classList.remove('chat-mode');
+            chatToggleBtn.classList.remove('active');
+            
+            // Déconnecter du chat principal si cette carte était active
+            if (this.activeCardChat === cardId) {
+                this.disconnectFromMainChat();
+            }
+        } else {
+            // Activer le mode chat
+            chatContainer.style.display = 'block';
+            contentContainer.style.display = 'none';
+            cardElement.classList.add('chat-mode');
+            chatToggleBtn.classList.add('active');
+            
+            // Connecter au chat principal
+            this.connectToMainChat(cardId, cardElement);
+        }
+    }
+    
+    // Connecter une carte au système de chat principal
+    connectToMainChat(cardId, cardElement) {
+        // Déconnecter la carte précédente si elle existe
+        if (this.activeCardChat && this.activeCardChat !== cardId) {
+            this.disconnectFromMainChat();
+        }
+        
+        this.activeCardChat = cardId;
+        this.selectedCard = cardElement;
+        
+        // Mettre à jour le placeholder du textarea
+        const textarea = document.getElementById('message-input');
+        if (textarea) {
+            const cardTitle = cardElement.querySelector('.card-title').textContent;
+            textarea.placeholder = `Discuter avec "${cardTitle}"...`;
+        }
+        
+        // Afficher l'indicateur de connexion
+        this.showChatIndicator(cardElement.querySelector('.card-title').textContent);
+        
+        // Charger et afficher l'historique de conversation dans la carte
+        this.displayCardConversation(cardId);
+        
+        console.log(`Carte ${cardId} connectée au chat principal`);
+    }
+    
+    // Déconnecter du chat principal
+    disconnectFromMainChat() {
+        if (!this.activeCardChat) return;
+        
+        // Remettre le placeholder par défaut
+        const textarea = document.getElementById('message-input');
+        if (textarea) {
+            textarea.placeholder = 'Posez votre question à N.O.G';
+        }
+        
+        // Supprimer l'indicateur
+        const indicator = document.querySelector('.chat-card-indicator');
+        if (indicator) {
+            indicator.remove();
+        }
+        
+        // Désactiver visuellement la carte précédente
+        const prevCard = this.cards.find(c => c.data.id === this.activeCardChat);
+        if (prevCard) {
+            const chatToggleBtn = prevCard.element.querySelector('.chat-toggle-btn');
+            chatToggleBtn?.classList.remove('active');
+        }
+        
+        this.activeCardChat = null;
+        this.selectedCard = null;
+        
+        console.log('Déconnecté du chat principal');
+    }
+    
+    // Afficher l'indicateur de connexion chat
     showChatIndicator(cardTitle) {
-        // Supprimer l'ancien indicateur s'il existe
+        // Supprimer l'indicateur existant s'il y en a un
         const existingIndicator = document.querySelector('.chat-card-indicator');
         if (existingIndicator) {
             existingIndicator.remove();
@@ -709,7 +799,7 @@ class WorkspaceManager {
         indicator.innerHTML = `
             <i class="fas fa-link"></i>
             <span>Connecté à: ${cardTitle}</span>
-            <button onclick="this.parentElement.remove()" title="Déconnecter">
+            <button onclick="window.workspaceManager.disconnectFromMainChat()" title="Déconnecter">
                 <i class="fas fa-times"></i>
             </button>
         `;
@@ -719,6 +809,231 @@ class WorkspaceManager {
         if (chatContainer) {
             chatContainer.parentNode.insertBefore(indicator, chatContainer);
         }
+    }
+    
+    // Gérer les messages de chat pour une carte
+    async handleCardChatMessage(message, cardId) {
+        try {
+            const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
+            if (!cardElement) return;
+            
+            // Générer un token unique pour cette interaction
+            const token = this.generateMessageId();
+            
+            // Ajouter le message utilisateur à la carte
+            this.addMessageToCard(cardId, 'user', message, token);
+            
+            // Ajouter l'indicateur de frappe de l'assistant
+            this.addMessageToCard(cardId, 'assistant', '', token, true);
+            
+            // Sauvegarder la conversation
+            this.saveCardMessage(cardId, 'user', message);
+            
+            // Appeler l'API
+            await this.streamToCard(message, cardId, token);
+            
+        } catch (error) {
+            console.error('Erreur chat carte:', error);
+            this.addMessageToCard(cardId, 'assistant', 'Erreur lors du traitement de votre message.', token);
+        }
+    }
+    
+    // Streamer la réponse vers la carte
+    async streamToCard(message, cardId, token) {
+        const controller = new AbortController();
+        
+        try {
+            const response = await fetch(`/backend-api/v2/conversation`, {
+                method: 'POST',
+                signal: controller.signal,
+                headers: {
+                    'content-type': 'application/json',
+                    'accept': 'text/event-stream',
+                },
+                body: JSON.stringify({
+                    conversation_id: window.conversation_id || `workspace-card-${cardId}`,
+                    action: '_ask',
+                    model: 'Eggon-V1',
+                    meta: {
+                        id: token,
+                        content: {
+                            conversation: this.getCardConversationHistory(cardId),
+                            content_type: 'text',
+                            parts: [{ content: message, role: 'user' }],
+                        },
+                    },
+                }),
+            });
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let assistantText = '';
+            
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const eventData = line.slice(6).trim();
+                        if (eventData === '[DONE]') {
+                            // Finaliser le message
+                            this.updateCardMessage(cardId, token, assistantText, false);
+                            this.saveCardMessage(cardId, 'assistant', assistantText);
+                            return;
+                        }
+                        
+                        try {
+                            const dataObject = JSON.parse(eventData);
+                            if (dataObject.response) {
+                                assistantText += dataObject.response;
+                                // Mettre à jour en temps réel dans la carte
+                                this.updateCardMessage(cardId, token, assistantText, true);
+                            }
+                        } catch (e) {
+                            console.error('Erreur parsing JSON:', e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erreur streaming:', error);
+            this.updateCardMessage(cardId, token, 'Erreur de connexion.', false);
+        }
+    }
+    
+    // Ajouter un message à la carte
+    addMessageToCard(cardId, role, content, token, isStreaming = false) {
+        const messagesContainer = document.getElementById(`messages-${cardId}`);
+        if (!messagesContainer) return;
+        
+        const messageClass = role === 'user' ? 'message-user' : 'message-assistant';
+        const avatar = role === 'user' ? 
+            '<div class="card-message-avatar user">👤</div>' : 
+            '<div class="card-message-avatar assistant">🤖</div>';
+        
+        const messageHtml = `
+            <div class="card-message ${messageClass}" id="msg-${token}">
+                ${avatar}
+                <div class="card-message-content" id="content-${token}">
+                    ${this.formatCardMessage(content)}
+                    ${isStreaming ? '<span class="streaming-cursor">▊</span>' : ''}
+                </div>
+            </div>
+        `;
+        
+        messagesContainer.insertAdjacentHTML('beforeend', messageHtml);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Mettre à jour un message de carte (pour le streaming)
+    updateCardMessage(cardId, token, content, isStreaming) {
+        const contentElement = document.getElementById(`content-${token}`);
+        if (!contentElement) return;
+        
+        const formattedContent = this.formatCardMessage(content);
+        contentElement.innerHTML = formattedContent + (isStreaming ? '<span class="streaming-cursor">▊</span>' : '');
+        
+        // Auto-scroll
+        const messagesContainer = document.getElementById(`messages-${cardId}`);
+        if (messagesContainer) {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+    }
+    
+    // Formater un message pour l'affichage dans la carte
+    formatCardMessage(content) {
+        if (!content) return '';
+        // Utiliser la même logique que le chat principal
+        if (window.marked) {
+            return window.marked.parse(content);
+        }
+        return content.replace(/\n/g, '<br>');
+    }
+    
+    // Sauvegarder un message de carte dans l'historique
+    saveCardMessage(cardId, role, content) {
+        let conversation = this.cardConversations.get(cardId) || {
+            id: cardId,
+            title: this.getCardTitle(cardId),
+            items: []
+        };
+        
+        conversation.items.push({
+            role: role,
+            content: content,
+            timestamp: Date.now()
+        });
+        
+        this.cardConversations.set(cardId, conversation);
+        
+        // Sauvegarder dans localStorage
+        localStorage.setItem(`workspace-card-${cardId}`, JSON.stringify(conversation));
+    }
+    
+    // Charger la conversation d'une carte depuis le stockage
+    loadCardConversation(cardId) {
+        const saved = localStorage.getItem(`workspace-card-${cardId}`);
+        if (saved) {
+            try {
+                const conversation = JSON.parse(saved);
+                this.cardConversations.set(cardId, conversation);
+            } catch (e) {
+                console.error('Erreur lors du chargement de la conversation de carte:', e);
+            }
+        }
+    }
+    
+    // Afficher la conversation pour une carte
+    displayCardConversation(cardId) {
+        const conversation = this.cardConversations.get(cardId);
+        const messagesContainer = document.getElementById(`messages-${cardId}`);
+        
+        if (!conversation || !messagesContainer) return;
+        
+        messagesContainer.innerHTML = ''; // Vider
+        
+        conversation.items.forEach((item, index) => {
+            const token = `history-${cardId}-${index}`;
+            this.addMessageToCard(cardId, item.role, item.content, token, false);
+        });
+    }
+    
+    // Vider le chat d'une carte
+    clearCardChat(cardId) {
+        if (confirm('Vider tout l\'historique de conversation pour cette carte ?')) {
+            this.cardConversations.delete(cardId);
+            localStorage.removeItem(`workspace-card-${cardId}`);
+            
+            const messagesContainer = document.getElementById(`messages-${cardId}`);
+            if (messagesContainer) {
+                messagesContainer.innerHTML = '';
+            }
+            
+            console.log(`Chat vidé pour la carte ${cardId}`);
+        }
+    }
+    
+    // Obtenir l'historique de conversation pour l'API
+    getCardConversationHistory(cardId) {
+        const conversation = this.cardConversations.get(cardId);
+        return conversation ? conversation.items : [];
+    }
+    
+    // Obtenir le titre d'une carte par ID
+    getCardTitle(cardId) {
+        const card = this.cards.find(c => c.data.id === cardId);
+        return card ? card.data.title : 'Carte inconnue';
+    }
+    
+    // Générer un ID de message unique
+    generateMessageId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
     }
 }
 
