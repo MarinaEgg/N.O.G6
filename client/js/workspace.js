@@ -107,14 +107,14 @@ class WorkspaceManager {
             <div class="card-header">
                 <h3 class="card-title">${cardData.title}</h3>
                 <div class="card-actions">
-                    <button class="card-action-btn chat-toggle-btn" title="Mode Chat" data-card-id="${cardData.id}">
-                        <i class="fas fa-comments"></i>
+                    <button class="card-action-btn chat-toggle-btn" title="Mode Collaboration" data-card-id="${cardData.id}">
+                        <i class="fas fa-edit"></i>
                     </button>
                     <button class="card-action-btn pin-btn ${cardData.pinned ? 'pinned' : ''}" title="Épingler">
                         <i class="fas fa-thumbtack"></i>
                     </button>
-                    <button class="card-action-btn clear-chat-btn" title="Vider le chat" data-card-id="${cardData.id}">
-                        <i class="fas fa-broom"></i>
+                    <button class="card-action-btn clear-content-btn" title="Vider le contenu" data-card-id="${cardData.id}">
+                        <i class="fas fa-eraser"></i>
                     </button>
                     <button class="card-action-btn delete-btn" title="Supprimer">
                         <i class="fas fa-trash"></i>
@@ -122,8 +122,8 @@ class WorkspaceManager {
                 </div>
             </div>
             
-            <!-- Contenu standard de la carte -->
-            <div class="card-content" id="content-${cardData.id}">
+            <!-- Vue document standard -->
+            <div class="card-content-view" id="content-${cardData.id}">
                 <div class="card-theme">${cardData.theme}</div>
                 <p class="card-description">${cardData.description}</p>
                 <div class="card-stats">
@@ -138,13 +138,18 @@ class WorkspaceManager {
                 </div>
             </div>
             
-            <!-- Interface de chat (cachée par défaut) -->
-            <div class="card-chat-container" id="chat-${cardData.id}" style="display: none;">
-                <div class="card-chat-messages" id="messages-${cardData.id}">
-                    <!-- Messages de chat apparaîtront ici -->
+            <!-- Vue document collaboratif -->
+            <div class="card-document-view" id="document-${cardData.id}" style="display: none;">
+                <div class="document-content" contenteditable="true" id="doc-content-${cardData.id}">
+                    <h1 class="document-title">${cardData.title}</h1>
+                    <div class="document-body" id="doc-body-${cardData.id}">
+                        <!-- Le contenu GPT + manuel apparaîtra ici -->
+                        <p class="document-placeholder">Commencez à taper ou utilisez l'IA pour générer du contenu...</p>
+                    </div>
                 </div>
-                <div class="card-chat-status" id="status-${cardData.id}">
-                    <span class="chat-indicator">💬 Chat actif - Utilisez la barre de chat principale</span>
+                
+                <div class="document-status">
+                    <span class="collab-indicator">✍️ Mode collaboration - Tapez ou utilisez la barre de chat</span>
                 </div>
             </div>
         `;
@@ -153,8 +158,8 @@ class WorkspaceManager {
         this.setupCardEvents(cardElement, cardData);
         this.cards.push({ element: cardElement, data: cardData });
         
-        // Load existing conversation for this card
-        this.loadCardConversation(cardData.id);
+        // Charger le contenu existant du document
+        this.loadCardDocument(cardData.id);
     }
 
     setupCardEvents(cardElement, cardData) {
@@ -184,17 +189,42 @@ class WorkspaceManager {
             this.deleteCard(cardElement);
         });
         
-        // NOUVEAU : Bouton toggle chat
+        // Bouton bascule mode document
         chatToggleBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.toggleChatMode(cardElement, cardData.id);
+            this.toggleDocumentMode(cardElement, cardData.id);
         });
         
-        // NOUVEAU : Bouton clear chat
+        // Bouton vider le contenu du document
         clearChatBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
+            this.clearDocumentContent(cardData.id);
             this.clearCardChat(cardData.id);
         });
+
+        // Gestion de l'édition manuelle du document
+        const docContent = cardElement.querySelector('.document-content');
+        if (docContent) {
+            // Sauvegarder automatiquement les modifications
+            docContent.addEventListener('input', () => {
+                this.saveDocumentContent(cardData.id);
+            });
+            
+            // Gérer les raccourcis clavier
+            docContent.addEventListener('keydown', (e) => {
+                // Ctrl+B pour gras
+                if (e.ctrlKey && e.key === 'b') {
+                    e.preventDefault();
+                    document.execCommand('bold');
+                }
+                
+                // Ctrl+I pour italique
+                if (e.ctrlKey && e.key === 'i') {
+                    e.preventDefault();
+                    document.execCommand('italic');
+                }
+            });
+        }
     }
 
     handleMouseDown(e, cardElement) {
@@ -697,36 +727,46 @@ class WorkspaceManager {
         this.showChatIndicator(cardData.title);
     }
 
-    // ========== MÉTHODES DE GESTION DU CHAT DES CARTES ==========
+    // ========== MÉTHODES DE GESTION DES DOCUMENTS COLLABORATIFS ==========
     
-    // Activer le mode chat sur une carte
-    toggleChatMode(cardElement, cardId) {
-        const chatContainer = cardElement.querySelector('.card-chat-container');
-        const contentContainer = cardElement.querySelector('.card-content');
-        const chatToggleBtn = cardElement.querySelector('.chat-toggle-btn');
+    // Basculer entre la vue normale et le mode document collaboratif
+    toggleDocumentMode(cardElement, cardId) {
+        const documentView = cardElement.querySelector('.card-document-view');
+        const contentView = cardElement.querySelector('.card-content-view');
+        const toggleBtn = cardElement.querySelector('.chat-toggle-btn');
         
-        const isCurrentlyInChatMode = chatContainer.style.display !== 'none';
+        const isCurrentlyInDocMode = documentView.style.display !== 'none';
         
-        if (isCurrentlyInChatMode) {
-            // Désactiver le mode chat
-            chatContainer.style.display = 'none';
-            contentContainer.style.display = 'block';
-            cardElement.classList.remove('chat-mode');
-            chatToggleBtn.classList.remove('active');
+        if (isCurrentlyInDocMode) {
+            // Retour à la vue normale
+            documentView.style.display = 'none';
+            contentView.style.display = 'block';
+            cardElement.classList.remove('document-mode');
+            toggleBtn.classList.remove('active');
+            toggleBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            toggleBtn.title = 'Mode Collaboration';
             
-            // Déconnecter du chat principal si cette carte était active
+            // Déconnecter du chat principal
             if (this.activeCardChat === cardId) {
                 this.disconnectFromMainChat();
             }
         } else {
-            // Activer le mode chat
-            chatContainer.style.display = 'block';
-            contentContainer.style.display = 'none';
-            cardElement.classList.add('chat-mode');
-            chatToggleBtn.classList.add('active');
+            // Activer le mode document
+            documentView.style.display = 'block';
+            contentView.style.display = 'none';
+            cardElement.classList.add('document-mode');
+            toggleBtn.classList.add('active');
+            toggleBtn.innerHTML = '<i class="fas fa-file-alt"></i>';
+            toggleBtn.title = 'Retour vue normale';
             
-            // Connecter au chat principal
+            // Connecter au chat principal pour génération de contenu
             this.connectToMainChat(cardId, cardElement);
+            
+            // Focus sur le contenu éditable
+            const docContent = cardElement.querySelector('.document-content');
+            if (docContent) {
+                docContent.focus();
+            }
         }
     }
     
@@ -1031,6 +1071,276 @@ class WorkspaceManager {
         return card ? card.data.title : 'Carte inconnue';
     }
     
+    // ========== MÉTHODES DE GESTION DES DOCUMENTS ==========
+    
+    // Traiter les messages en mode document
+    async handleDocumentMessage(message, cardId) {
+        try {
+            const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
+            if (!cardElement) return;
+            
+            // Transformer la question en titre de section
+            const sectionTitle = this.generateSectionTitle(message);
+            
+            // Ajouter un indicateur de génération
+            this.showDocumentGenerating(cardId, sectionTitle);
+            
+            // Appeler l'API avec un prompt spécialisé pour la génération de document
+            const documentPrompt = this.buildDocumentPrompt(message, cardId);
+            
+            const token = this.generateMessageId();
+            await this.streamToDocument(documentPrompt, cardId, sectionTitle, token);
+            
+        } catch (error) {
+            console.error('Erreur génération document:', error);
+            this.addToDocument(cardId, `<p class="error">Erreur lors de la génération du contenu.</p>`);
+        }
+    }
+
+    // Construire un prompt spécialisé pour les documents
+    buildDocumentPrompt(userMessage, cardId) {
+        const cardTitle = this.getCardTitle(cardId);
+        const existingContent = this.getDocumentContent(cardId);
+        
+        return `Tu es un assistant spécialisé dans la rédaction de documents professionnels.
+    
+Contexte : Document "${cardTitle}"
+Contenu existant : ${existingContent}
+
+Instruction : ${userMessage}
+
+Génère du contenu de document professionnel avec :
+- Des titres et sous-titres appropriés (utilise ##, ###)
+- Du texte structuré et professionnel
+- Des listes à puces si pertinent
+- Un style document de travail, pas de chat
+
+Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion de chatbot.`;
+    }
+
+    // Transformer la question en titre de section
+    generateSectionTitle(message) {
+        // Simplifier la question en titre
+        let title = message.trim();
+        
+        // Supprimer les mots interrogatifs courants
+        title = title.replace(/^(qu'est-ce que|comment|pourquoi|quand|où|qui|quoi)\s*/i, '');
+        title = title.replace(/\?$/, '');
+        
+        // Capitaliser la première lettre
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        
+        // Limiter la longueur
+        if (title.length > 60) {
+            title = title.substring(0, 57) + '...';
+        }
+        
+        return title || 'Nouvelle section';
+    }
+
+    // Afficher l'indicateur de génération
+    showDocumentGenerating(cardId, sectionTitle) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return;
+        
+        // Supprimer le placeholder s'il existe
+        const placeholder = docBody.querySelector('.document-placeholder');
+        if (placeholder) {
+            placeholder.remove();
+        }
+        
+        // Ajouter l'indicateur de génération
+        const generatingHTML = `
+            <div class="generating-section" id="generating-${cardId}">
+                <h2 class="section-title">${sectionTitle}</h2>
+                <p class="generating-text">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Génération en cours...
+                </p>
+            </div>
+        `;
+        
+        docBody.insertAdjacentHTML('beforeend', generatingHTML);
+        docBody.scrollTop = docBody.scrollHeight;
+    }
+
+    // Streamer vers le document
+    async streamToDocument(prompt, cardId, sectionTitle, token) {
+        try {
+            const response = await fetch(`/backend-api/v2/conversation`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'accept': 'text/event-stream',
+                },
+                body: JSON.stringify({
+                    conversation_id: window.conversation_id || `workspace-doc-${cardId}`,
+                    action: '_ask',
+                    model: 'Eggon-V1',
+                    meta: {
+                        id: token,
+                        content: {
+                            conversation: [], // Pas d'historique pour les documents
+                            content_type: 'text',
+                            parts: [{ content: prompt, role: 'user' }],
+                        },
+                    },
+                }),
+            });
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let generatedContent = '';
+            
+            // Supprimer l'indicateur de génération
+            this.hideDocumentGenerating(cardId);
+            
+            // Créer la section avec le titre
+            this.startDocumentSection(cardId, sectionTitle, token);
+            
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const eventData = line.slice(6).trim();
+                        if (eventData === '[DONE]') {
+                            this.finalizeDocumentSection(cardId, token, generatedContent);
+                            this.saveDocumentContent(cardId);
+                            return;
+                        }
+                        
+                        try {
+                            const dataObject = JSON.parse(eventData);
+                            if (dataObject.response) {
+                                generatedContent += dataObject.response;
+                                this.updateDocumentSection(cardId, token, generatedContent);
+                            }
+                        } catch (e) {
+                            console.error('Erreur parsing JSON:', e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erreur streaming document:', error);
+            this.hideDocumentGenerating(cardId);
+            this.addToDocument(cardId, `<p class="error">Erreur de connexion.</p>`);
+        }
+    }
+
+    // Méthodes utilitaires pour la gestion du document
+    hideDocumentGenerating(cardId) {
+        const indicator = document.getElementById(`generating-${cardId}`);
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    startDocumentSection(cardId, sectionTitle, token) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return;
+        
+        const sectionHTML = `
+            <div class="document-section" id="section-${token}">
+                <h2 class="section-title">${sectionTitle}</h2>
+                <div class="section-content" id="content-${token}">
+                    <span class="typing-cursor">▊</span>
+                </div>
+            </div>
+        `;
+        
+        docBody.insertAdjacentHTML('beforeend', sectionHTML);
+        docBody.scrollTop = docBody.scrollHeight;
+    }
+
+    updateDocumentSection(cardId, token, content) {
+        const sectionContent = document.getElementById(`content-${token}`);
+        if (!sectionContent) return;
+        
+        // Formater le contenu avec Markdown
+        const formattedContent = this.formatDocumentContent(content);
+        sectionContent.innerHTML = formattedContent + '<span class="typing-cursor">▊</span>';
+        
+        // Auto-scroll
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (docBody) {
+            docBody.scrollTop = docBody.scrollHeight;
+        }
+    }
+
+    finalizeDocumentSection(cardId, token, content) {
+        const sectionContent = document.getElementById(`content-${token}`);
+        if (!sectionContent) return;
+        
+        const formattedContent = this.formatDocumentContent(content);
+        sectionContent.innerHTML = formattedContent;
+    }
+
+    formatDocumentContent(content) {
+        if (!content) return '';
+        
+        // Utiliser marked pour le rendu markdown
+        if (window.marked) {
+            return window.marked.parse(content);
+        }
+        
+        // Fallback simple
+        return content
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/^/, '<p>')
+            .replace(/$/, '</p>');
+    }
+
+    // Sauvegarder le contenu du document
+    saveDocumentContent(cardId) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return;
+        
+        const content = docBody.innerHTML;
+        localStorage.setItem(`workspace-doc-${cardId}`, content);
+    }
+
+    // Charger le contenu du document
+    loadCardDocument(cardId) {
+        const content = localStorage.getItem(`workspace-doc-${cardId}`);
+        if (content) {
+            const docBody = document.getElementById(`doc-body-${cardId}`);
+            if (docBody) {
+                docBody.innerHTML = content;
+            }
+        }
+    }
+
+    // Obtenir le contenu actuel du document (pour le contexte)
+    getDocumentContent(cardId) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return '';
+        
+        return docBody.textContent || docBody.innerText || '';
+    }
+
+    // Vider le contenu du document
+    clearDocumentContent(cardId) {
+        if (confirm('Vider tout le contenu de ce document ?')) {
+            const docBody = document.getElementById(`doc-body-${cardId}`);
+            if (docBody) {
+                docBody.innerHTML = '<p class="document-placeholder">Commencez à taper ou utilisez l\'IA pour générer du contenu...</p>';
+            }
+            localStorage.removeItem(`workspace-doc-${cardId}`);
+            console.log(`Document vidé pour la carte ${cardId}`);
+        }
+    }
+
     // Générer un ID de message unique
     generateMessageId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
