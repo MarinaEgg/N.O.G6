@@ -1,3 +1,14 @@
+// ========== PATCH CHAT.JS POUR INTÉGRATION WORKSPACE ==========
+// Fonction pour détecter si on est sur workspace
+const isWorkspacePage = () => {
+  return window.location.pathname.includes('/workspace');
+};
+
+// Fonction pour vérifier si une carte est active en mode chat
+const isCardChatActive = () => {
+  return window.workspaceManager && window.workspaceManager.activeCardChat;
+};
+
 // ========== SIDEBAR TOGGLE ========== 
 function toggleSidebar() {
   const body = document.body;
@@ -51,9 +62,64 @@ function handleOverlayClick(e) {
   }
 }
 
+// NOUVELLE FONCTION : Initialiser l'intégration workspace
+const initWorkspaceIntegration = () => {
+  if (isWorkspacePage()) {
+    console.log('🔧 Initialisation intégration workspace...');
+    
+    // Attendre que le workspace manager soit prêt
+    const waitForWorkspace = () => {
+      if (window.workspaceManager) {
+        console.log('✅ Workspace manager détecté');
+        return;
+      }
+      setTimeout(waitForWorkspace, 100);
+    };
+    
+    waitForWorkspace();
+  }
+};
+
+// AMÉLIORATION : Gestion des conversations workspace dans localStorage
+const getWorkspaceConversations = () => {
+  const conversations = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith('workspace-card-')) {
+      try {
+        const conversation = JSON.parse(localStorage.getItem(key));
+        conversations.push(conversation);
+      } catch (e) {
+        console.warn('Conversation workspace corrompue:', key);
+      }
+    }
+  }
+  return conversations;
+};
+
+// NOUVELLE FONCTION : Nettoyer les conversations workspace
+const cleanWorkspaceConversations = () => {
+  const keys = Object.keys(localStorage);
+  keys.forEach(key => {
+    if (key.startsWith('workspace-card-')) {
+      localStorage.removeItem(key);
+    }
+  });
+  console.log('Conversations workspace nettoyées');
+};
+
+// Export des fonctions utilitaires pour le workspace
+window.workspaceUtils = {
+  isWorkspacePage,
+  isCardChatActive,
+  getWorkspaceConversations,
+  cleanWorkspaceConversations
+};
+
 // Initialize sidebar when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   initSidebar();
+  initWorkspaceIntegration();
   document.body.addEventListener('click', handleOverlayClick);
 });
 
@@ -135,7 +201,16 @@ const handle_ask = async () => {
     if (window.modernChatBar) {
       window.modernChatBar.resizeTextarea();
     }
-    await ask_gpt(message);
+    
+    // NOUVELLE LOGIQUE : Vérifier si on doit router vers une carte
+    if (isWorkspacePage() && isCardChatActive()) {
+      // Laisser le workspace manager gérer le message
+      // La fonction ask_gpt a été interceptée dans workspace.js
+      await ask_gpt(message);
+    } else {
+      // Fonctionnement normal du chat
+      await ask_gpt(message);
+    }
   }
 };
 
@@ -885,6 +960,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Navigation entre sections
 function switchToDiscussions() {
+  // Déconnecter du workspace si actif
+  if (window.workspaceManager && window.workspaceManager.activeCardChat) {
+    window.workspaceManager.disconnectFromMainChat();
+  }
+  
   setActiveNavItem('discussions');
   window.location.href = '/chat/';
 }
@@ -936,7 +1016,14 @@ function updateNavigationState() {
 // Initialiser l'état de navigation au chargement
 document.addEventListener('DOMContentLoaded', () => {
   updateNavigationState();
+  
+  // Si on est sur la page de chat, initialiser l'intégration workspace
+  if (window.location.pathname.includes('/chat')) {
+    initWorkspaceIntegration();
+  }
 });
+
+console.log('🔧 Patch chat.js pour workspace appliqué');
 
 function h2a(str1) {
   var hex = str1.toString();
