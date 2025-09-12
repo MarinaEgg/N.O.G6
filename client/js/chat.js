@@ -62,6 +62,30 @@ function handleOverlayClick(e) {
   }
 }
 
+// NOUVELLE FONCTION : Vérifier intégration workspace
+const checkWorkspaceIntegration = () => {
+  if (isWorkspacePage()) {
+    const indicator = document.querySelector('.chat-card-indicator');
+    if (indicator && window.workspaceManager && window.workspaceManager.activeCardChat) {
+      console.log('✅ Intégration workspace active:', window.workspaceManager.activeCardChat);
+      return true;
+    }
+  }
+  return false;
+};
+
+// CORRECTION : Fonction ask_gpt pour éviter conflit workspace
+const original_ask_gpt = ask_gpt;
+window.ask_gpt = async (message) => {
+  // Si workspace actif, bloquer l'exécution normale
+  if (checkWorkspaceIntegration()) {
+    console.log('🚫 Chat bloqué - workspace actif');
+    return;
+  }
+  
+  return await original_ask_gpt(message);
+};
+
 // NOUVELLE FONCTION : Initialiser l'intégration workspace
 const initWorkspaceIntegration = () => {
   if (isWorkspacePage()) {
@@ -71,6 +95,27 @@ const initWorkspaceIntegration = () => {
     const waitForWorkspace = () => {
       if (window.workspaceManager) {
         console.log('✅ Workspace manager détecté');
+        
+        // Sauvegarder la fonction ask_gpt originale
+        if (!window.original_ask_gpt) {
+          window.original_ask_gpt = window.ask_gpt || ask_gpt;
+          
+          // Remplacer par une fonction qui vérifie le contexte
+          window.ask_gpt = async (message) => {
+            if (window.workspaceManager && window.workspaceManager.activeCardChat) {
+              console.log('📝 Message routé vers carte:', window.workspaceManager.activeCardChat);
+              return await window.workspaceManager.handleDocumentMessage(
+                message, 
+                window.workspaceManager.activeCardChat
+              );
+            } else {
+              return await window.original_ask_gpt(message);
+            }
+          };
+          
+          console.log('✅ Fonction ask_gpt interceptée pour workspace');
+        }
+        
         return;
       }
       setTimeout(waitForWorkspace, 100);
@@ -78,23 +123,6 @@ const initWorkspaceIntegration = () => {
     
     waitForWorkspace();
   }
-};
-
-// AMÉLIORATION : Gestion des conversations workspace dans localStorage
-const getWorkspaceConversations = () => {
-  const conversations = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (key.startsWith('workspace-card-')) {
-      try {
-        const conversation = JSON.parse(localStorage.getItem(key));
-        conversations.push(conversation);
-      } catch (e) {
-        console.warn('Conversation workspace corrompue:', key);
-      }
-    }
-  }
-  return conversations;
 };
 
 // NOUVELLE FONCTION : Nettoyer les conversations workspace
@@ -186,7 +214,7 @@ const delete_conversations = async () => {
 };
 
 const handle_ask = async () => {
-  // Réinitialiser la hauteur de la barre de chat via le modernChatBar
+  // Réinitialiser la hauteur de la barre de chat
   if (window.modernChatBar && window.modernChatBar.isInitialized) {
     window.modernChatBar.resetTextareaHeight();
   }
@@ -196,17 +224,19 @@ const handle_ask = async () => {
   let message = message_input.value;
 
   if (message.length > 0) {
-    message_input.value = ``;
+    message_input.value = '';
+    
     // Réinitialiser la hauteur du textarea
     if (window.modernChatBar) {
       window.modernChatBar.resizeTextarea();
     }
     
-    // Vérifier si on doit router vers une carte
-    if (isWorkspacePage() && isCardChatActive()) {
-      // Router vers le gestionnaire de document
+    // CORRECTION : Vérifier si on est sur workspace avec carte active
+    if (isWorkspacePage() && window.workspaceManager && window.workspaceManager.activeCardChat) {
+      console.log('🔄 Routage vers carte workspace:', window.workspaceManager.activeCardChat);
+      // Router vers le gestionnaire de document de la carte
       await window.workspaceManager.handleDocumentMessage(message, window.workspaceManager.activeCardChat);
-      return; // IMPORTANT : éviter le double traitement
+      return; // Éviter le double traitement
     } else {
       // Fonctionnement normal du chat
       await ask_gpt(message);
