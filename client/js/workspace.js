@@ -19,9 +19,13 @@ class WorkspaceManager {
 
     init() {
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.setupElements());
+            document.addEventListener('DOMContentLoaded', () => {
+                this.setupElements();
+                this.initZoomControls(); // Initialiser les contrôles de zoom
+            });
         } else {
             this.setupElements();
+            this.initZoomControls(); // Initialiser les contrôles de zoom
         }
     }
 
@@ -42,10 +46,11 @@ class WorkspaceManager {
         this.setupEventListeners();
         this.loadDefaultCards();
         
-        // Setup chat integration
+        this.loadDefaultCards();
         this.setupChatIntegration();
+        this.loadZoomLevel(); // Charger le niveau de zoom sauvegardé
         
-        console.log('WorkspaceManager initialized with chat integration');
+        console.log('WorkspaceManager initialized with chat integration and zoom controls');
     }
 
     setupEventListeners() {
@@ -1403,6 +1408,478 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
     // Générer un ID de message unique
     generateMessageId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // ========== SYSTÈME DE ZOOM WORKSPACE ==========
+
+    initZoomControls() {
+        this.zoomLevel = 1.0; // Niveau de zoom initial (100%)
+        this.minZoom = 0.5;   // Zoom minimum (50%)
+        this.maxZoom = 2.0;   // Zoom maximum (200%)
+        this.zoomStep = 0.1;  // Pas d'incrémentation
+
+        // Créer les contrôles de zoom
+        this.createZoomControls();
+        
+        // Event listeners pour le zoom
+        this.setupZoomEventListeners();
+        
+        console.log('Contrôles de zoom initialisés');
+    }
+
+    createZoomControls() {
+        // Vérifier si les contrôles existent déjà
+        if (document.getElementById('zoom-controls')) return;
+        
+        const zoomControls = document.createElement('div');
+        zoomControls.id = 'zoom-controls';
+        zoomControls.className = 'zoom-controls';
+        
+        zoomControls.innerHTML = `
+            <button class="zoom-btn zoom-out" id="zoom-out" title="Zoom arrière (Ctrl + -)">
+                <i class="fas fa-minus"></i>
+            </button>
+            
+            <div class="zoom-slider-container">
+                <input type="range" 
+                       class="zoom-slider" 
+                       id="zoom-slider" 
+                       min="${this.minZoom * 100}" 
+                       max="${this.maxZoom * 100}" 
+                       value="100" 
+                       step="${this.zoomStep * 100}"
+                       title="Niveau de zoom">
+            </div>
+            
+            <div class="zoom-percentage" id="zoom-percentage">100%</div>
+            
+            <button class="zoom-btn zoom-in" id="zoom-in" title="Zoom avant (Ctrl + +)">
+                <i class="fas fa-plus"></i>
+            </button>
+            
+            <button class="zoom-btn fit-screen" id="fit-screen" title="Ajuster à l'écran (Ctrl + F)">
+                <i class="fas fa-expand-arrows-alt"></i>
+            </button>
+            
+            <button class="zoom-reset" id="zoom-reset" title="Réinitialiser zoom (Ctrl + 0)">
+                Reset
+            </button>
+        `;
+        
+        document.body.appendChild(zoomControls);
+    }
+
+    setupZoomEventListeners() {
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomReset = document.getElementById('zoom-reset');
+        const fitScreenBtn = document.getElementById('fit-screen');
+        
+        // Bouton zoom avant
+        zoomInBtn?.addEventListener('click', () => {
+            this.zoomIn();
+        });
+        
+        // Bouton zoom arrière
+        zoomOutBtn?.addEventListener('click', () => {
+            this.zoomOut();
+        });
+        
+        // Slider de zoom
+        zoomSlider?.addEventListener('input', (e) => {
+            const zoomValue = parseFloat(e.target.value) / 100;
+            this.isDragging = false;
+            this.setZoom(zoomValue);
+        });
+        
+        // Double-clic pour zoomer sur une carte
+        this.cards.forEach((card) => {
+            card.element.addEventListener('dblclick', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.focusOnCard(card.data.id, 1.5);
+            });
+        });
+        
+        // Bouton reset
+        zoomReset?.addEventListener('click', () => {
+            this.resetZoom();
+        });
+        
+        // Bouton fit-to-screen
+        fitScreenBtn?.addEventListener('click', () => {
+            this.animateFitScreenButton();
+            this.fitToScreen();
+        });
+        
+        // Raccourcis clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                switch(e.key) {
+                    case '+':
+                    case '=':
+                        e.preventDefault();
+                        this.zoomIn();
+                        break;
+                    case '-':
+                        e.preventDefault();
+                        this.zoomOut();
+                        break;
+                    case '0':
+                        e.preventDefault();
+                        this.resetZoom();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        this.fitToScreen();
+                        break;
+                }
+            }
+        });
+
+        // Ajouter les gestes tactiles
+        this.setupTouchGestures();
+        
+        // Optimisation des performances
+        let zoomTimeout;
+        const originalSetZoom = this.setZoom.bind(this);
+        
+        this.setZoom = function(zoomValue) {
+            // Activer l'optimisation
+            this.optimizeZoomPerformance(true);
+            
+            // Appliquer le zoom
+            originalSetZoom(zoomValue);
+            
+            // Désactiver l'optimisation après un délai
+            clearTimeout(zoomTimeout);
+            zoomTimeout = setTimeout(() => {
+                this.optimizeZoomPerformance(false);
+            }, 300);
+        }.bind(this);
+        
+        // Zoom avec molette (Ctrl + molette)
+        this.canvas?.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                
+                const delta = e.deltaY > 0 ? -this.zoomStep : this.zoomStep;
+                const newZoom = Math.max(this.minZoom, Math.min(this.maxZoom, this.zoomLevel + delta));
+                this.setZoom(newZoom);
+            }
+        });
+    }
+
+    zoomIn() {
+        const newZoom = Math.min(this.maxZoom, this.zoomLevel + this.zoomStep);
+        this.setZoom(newZoom);
+    }
+
+    zoomOut() {
+        const newZoom = Math.max(this.minZoom, this.zoomLevel - this.zoomStep);
+        this.setZoom(newZoom);
+    }
+
+    setZoom(zoomValue) {
+        // Limiter la valeur dans les bornes
+        this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
+        
+        // Appliquer le zoom au canvas
+        this.applyZoom();
+        
+        // Mettre à jour les contrôles
+        this.updateZoomControls();
+        
+        // Sauvegarder le niveau de zoom
+        localStorage.setItem('workspace-zoom-level', this.zoomLevel.toString());
+    }
+
+    applyZoom() {
+        if (!this.canvas) return;
+        
+        // Ajouter classe temporaire pour animation fluide
+        this.canvas.classList.add('zooming');
+        
+        // Appliquer la transformation
+        this.canvas.style.transform = `scale(${this.zoomLevel})`;
+        
+        // Retirer la classe après l'animation
+        setTimeout(() => {
+            this.canvas.classList.remove('zooming');
+        }, 100);
+        
+        // Ajuster les états des boutons
+        const zoomControls = document.getElementById('zoom-controls');
+        if (zoomControls) {
+            if (this.zoomLevel !== 1.0) {
+                zoomControls.classList.add('active');
+            } else {
+                zoomControls.classList.remove('active');
+            }
+        }
+    }
+
+    updateZoomControls() {
+        const zoomSlider = document.getElementById('zoom-slider');
+        const zoomPercentage = document.getElementById('zoom-percentage');
+        const zoomInBtn = document.getElementById('zoom-in');
+        const zoomOutBtn = document.getElementById('zoom-out');
+        
+        if (zoomSlider) {
+            zoomSlider.value = this.zoomLevel * 100;
+        }
+        
+        if (zoomPercentage) {
+            const percentage = Math.round(this.zoomLevel * 100);
+            zoomPercentage.textContent = `${percentage}%`;
+            
+            // Animation de changement
+            zoomPercentage.classList.add('changed');
+            setTimeout(() => {
+                zoomPercentage.classList.remove('changed');
+            }, 300);
+        }
+        
+        // États des boutons
+        if (zoomInBtn) {
+            zoomInBtn.disabled = this.zoomLevel >= this.maxZoom;
+            zoomInBtn.style.opacity = this.zoomLevel >= this.maxZoom ? '0.5' : '1';
+        }
+        
+        if (zoomOutBtn) {
+            zoomOutBtn.disabled = this.zoomLevel <= this.minZoom;
+            zoomOutBtn.style.opacity = this.zoomLevel <= this.minZoom ? '0.5' : '1';
+        }
+    }
+
+    resetZoom() {
+        this.setZoom(1.0);
+        
+        // Animation de feedback
+        const zoomControls = document.getElementById('zoom-controls');
+        if (zoomControls) {
+            zoomControls.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                zoomControls.style.transform = '';
+            }, 150);
+        }
+    }
+
+    loadZoomLevel() {
+        const savedZoom = localStorage.getItem('workspace-zoom-level');
+        if (savedZoom) {
+            const zoomLevel = parseFloat(savedZoom);
+            if (zoomLevel >= this.minZoom && zoomLevel <= this.maxZoom) {
+                this.setZoom(zoomLevel);
+            }
+        }
+    }
+
+    // Obtenir le niveau de zoom actuel (utile pour d'autres composants)
+    getCurrentZoom() {
+        return this.zoomLevel;
+    }
+
+    // Centrer la vue sur une carte spécifique avec zoom
+    focusOnCard(cardId, zoomLevel = 1.2) {
+        const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
+        if (!cardElement || !this.canvas) return;
+        
+        // Calculer la position de la carte
+        const cardRect = cardElement.getBoundingClientRect();
+        const canvasRect = this.canvas.getBoundingClientRect();
+        const viewportCenterX = window.innerWidth / 2;
+        const viewportCenterY = window.innerHeight / 2;
+        
+        // Définir le zoom
+        this.setZoom(zoomLevel);
+        
+        // Centrer la carte (animation fluide)
+        const cardCenterX = cardRect.left + cardRect.width / 2;
+        const cardCenterY = cardRect.top + cardRect.height / 2;
+        
+        const offsetX = viewportCenterX - cardCenterX;
+        const offsetY = viewportCenterY - cardCenterY;
+        
+        // Appliquer le déplacement au canvas
+        this.canvas.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        this.canvas.style.transform = `scale(${this.zoomLevel}) translate(${offsetX/this.zoomLevel}px, ${offsetY/this.zoomLevel}px)`;
+        
+        // Retirer la transition après l'animation
+        setTimeout(() => {
+            this.canvas.style.transition = '';
+        }, 600);
+    }
+
+    // ========== FONCTIONNALITÉS AVANCÉES DU ZOOM ==========
+
+    // Zoom fit-to-screen (ajuster pour voir toutes les cartes)
+    // Animer le bouton fit-screen
+    animateFitScreenButton() {
+        const fitBtn = document.getElementById('fit-screen');
+        if (fitBtn) {
+            fitBtn.classList.add('active');
+            setTimeout(() => {
+                fitBtn.classList.remove('active');
+            }, 600);
+        }
+    }
+
+    fitToScreen() {
+        if (!this.canvas || this.cards.length === 0) return;
+        
+        // Animation du bouton
+        this.animateFitScreenButton();
+        
+        // Calculer les bounds de toutes les cartes
+        let minX = Infinity, minY = Infinity;
+        let maxX = -Infinity, maxY = -Infinity;
+        
+        this.cards.forEach(card => {
+            const rect = card.element.getBoundingClientRect();
+            const canvasRect = this.canvas.getBoundingClientRect();
+            
+            const x = rect.left - canvasRect.left;
+            const y = rect.top - canvasRect.top;
+            const width = rect.width;
+            const height = rect.height;
+            
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x + width);
+            maxY = Math.max(maxY, y + height);
+        });
+        
+        // Calculer le zoom nécessaire avec padding
+        const padding = 50;
+        const viewportWidth = this.canvas.offsetWidth;
+        const viewportHeight = this.canvas.offsetHeight;
+        const contentWidth = maxX - minX + padding * 2;
+        const contentHeight = maxY - minY + padding * 2;
+        
+        const scaleX = viewportWidth / contentWidth;
+        const scaleY = viewportHeight / contentHeight;
+        const optimalZoom = Math.min(scaleX, scaleY, this.maxZoom);
+        
+        this.setZoom(Math.max(optimalZoom, this.minZoom));
+        
+        // Centrer le contenu
+        this.centerContent();
+        
+        // Log pour le débogage
+        console.log('Fit to screen applied - Zoom:', Math.round(optimalZoom * 100) + '%');
+    }
+
+    // Centrer le contenu dans la vue
+    centerContent() {
+        if (!this.canvas || this.cards.length === 0) return;
+        
+        // Animation fluide vers le centre
+        this.canvas.style.transition = 'transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)';
+        this.canvas.style.transformOrigin = 'center center';
+        
+        setTimeout(() => {
+            this.canvas.style.transition = '';
+        }, 500);
+    }
+
+    // Zoom sur une zone spécifique
+    zoomToArea(x, y, width, height, padding = 50) {
+        if (!this.canvas) return;
+        
+        const viewportWidth = this.canvas.offsetWidth;
+        const viewportHeight = this.canvas.offsetHeight;
+        
+        const scaleX = viewportWidth / (width + padding * 2);
+        const scaleY = viewportHeight / (height + padding * 2);
+        const optimalZoom = Math.min(scaleX, scaleY, this.maxZoom);
+        
+        this.setZoom(Math.max(optimalZoom, this.minZoom));
+        
+        // Calculer le déplacement pour centrer la zone
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+        const viewportCenterX = viewportWidth / 2;
+        const viewportCenterY = viewportHeight / 2;
+        
+        const offsetX = (viewportCenterX - centerX) / this.zoomLevel;
+        const offsetY = (viewportCenterY - centerY) / this.zoomLevel;
+        
+        this.canvas.style.transition = 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+        this.canvas.style.transform = `scale(${this.zoomLevel}) translate(${offsetX}px, ${offsetY}px)`;
+        
+        setTimeout(() => {
+            this.canvas.style.transition = '';
+        }, 600);
+    }
+
+    // Gestion des gestes tactiles pour mobile
+    setupTouchGestures() {
+        if (!this.canvas) return;
+        
+        let initialDistance = 0;
+        let initialZoom = 1;
+        let isZooming = false;
+        
+        this.canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                e.preventDefault();
+                isZooming = true;
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                
+                initialDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                
+                initialZoom = this.zoomLevel;
+            }
+        });
+        
+        this.canvas.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && isZooming) {
+                e.preventDefault();
+                
+                const touch1 = e.touches[0];
+                const touch2 = e.touches[1];
+                
+                const currentDistance = Math.sqrt(
+                    Math.pow(touch2.clientX - touch1.clientX, 2) +
+                    Math.pow(touch2.clientY - touch1.clientY, 2)
+                );
+                
+                const scale = currentDistance / initialDistance;
+                const newZoom = initialZoom * scale;
+                
+                this.setZoom(newZoom);
+            }
+        });
+        
+        this.canvas.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) {
+                isZooming = false;
+            }
+        });
+    }
+
+    // Optimisation des performances pendant le zoom
+    optimizeZoomPerformance(enable = true) {
+        this.cards.forEach(card => {
+            if (enable) {
+                // Réduire la qualité pendant le zoom pour de meilleures performances
+                card.element.style.willChange = 'transform';
+                card.element.style.backfaceVisibility = 'hidden';
+                card.element.style.perspective = '1000px';
+            } else {
+                // Restaurer la qualité normale
+                card.element.style.willChange = 'auto';
+                card.element.style.backfaceVisibility = 'visible';
+                card.element.style.perspective = 'none';
+            }
+        });
     }
 }
 
