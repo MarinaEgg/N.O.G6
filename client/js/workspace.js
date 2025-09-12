@@ -1268,10 +1268,21 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent + '<span class="typing-cursor">▊</span>';
         
-        // Auto-scroll
+        // Auto-scroll fluide
         const docBody = document.getElementById(`doc-body-${cardId}`);
         if (docBody) {
             docBody.scrollTop = docBody.scrollHeight;
+        }
+        
+        // Auto-resize de la carte si nécessaire
+        const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
+        if (cardElement) {
+            const contentHeight = docBody.scrollHeight;
+            const maxHeight = window.innerHeight * 0.85;
+            
+            if (contentHeight > 300 && contentHeight < maxHeight) {
+                cardElement.style.minHeight = Math.min(contentHeight + 100, maxHeight) + 'px';
+            }
         }
     }
 
@@ -1281,23 +1292,71 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
         
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent;
+        
+        // Ajouter le redimensionnement automatique de la carte
+        this.autoResizeDocumentCard(cardId);
+    }
+    
+    // Auto-redimensionnement intelligent des cartes en mode document
+    autoResizeDocumentCard(cardId) {
+        const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
+        if (!cardElement || !cardElement.classList.contains('document-mode')) return;
+        
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return;
+        
+        const contentHeight = docBody.scrollHeight;
+        const viewportHeight = window.innerHeight;
+        const maxHeight = viewportHeight * 0.85;
+        const minHeight = 450;
+        
+        // Calculer la hauteur idéale
+        let idealHeight = Math.max(minHeight, contentHeight + 120);
+        idealHeight = Math.min(idealHeight, maxHeight);
+        
+        // Appliquer avec transition fluide
+        cardElement.style.transition = 'min-height 0.3s ease';
+        cardElement.style.minHeight = idealHeight + 'px';
+        
+        // Remettre la transition par défaut après l'animation
+        setTimeout(() => {
+            cardElement.style.transition = 'all 0.3s ease';
+        }, 300);
     }
 
     formatDocumentContent(content) {
         if (!content) return '';
         
-        // Utiliser marked pour le rendu markdown
+        // Utiliser marked pour le rendu markdown si disponible
         if (window.marked) {
-            return window.marked.parse(content);
+            // Configurer marked pour un rendu plus propre
+            const renderer = new window.marked.Renderer();
+            
+            // Personnaliser le rendu des titres
+            renderer.heading = function(text, level) {
+                const tag = `h${level}`;
+                return `<${tag}>${text}</${tag}>\n`;
+            };
+            
+            // Personnaliser le rendu des paragraphes
+            renderer.paragraph = function(text) {
+                return `<p>${text}</p>\n`;
+            };
+            
+            return window.marked.parse(content, { renderer });
         }
         
-        // Fallback simple
+        // Fallback simple mais amélioré
         return content
-            .replace(/\n\n/g, '</p><p>')
+            .replace(/\n\n+/g, '</p><p>')
             .replace(/\n/g, '<br>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/^/, '<p>')
+            .replace(/^(?!<)/, '<p>')
+            .replace(/(?<!>)$/, '</p>')
+            .replace(/<p><\/p>/g, '')
+            .replace(/<p>(<h[1-6])/g, '$1')
+            .replace(/<\/h[1-6]><\/p>/g, '<\/h$1>')
             .replace(/$/, '</p>');
     }
 
