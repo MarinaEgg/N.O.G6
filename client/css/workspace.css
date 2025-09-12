@@ -465,6 +465,207 @@ body.sidebar-open .chat-card-indicator {
         0 16px 48px rgba(0, 0, 0, 0.12);
 }
 
+/* ========== MODE DOCUMENT COLLABORATIF ========== */
+
+.workspace-card.document-mode {
+    min-height: 500px;
+    max-height: 80vh;
+    width: 450px;
+    overflow: hidden;
+}
+
+.card-document-view {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+}
+
+.document-content {
+    flex: 1;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.98);
+    overflow-y: auto;
+    outline: none;
+    font-family: "Inter", sans-serif;
+    line-height: 1.6;
+    border-radius: 8px;
+    margin: 8px;
+}
+
+.document-content:focus {
+    background: rgba(255, 255, 255, 1);
+    box-shadow: inset 0 0 0 2px rgba(249, 228, 121, 0.3);
+}
+
+.document-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #2f2f2e;
+    margin: 0 0 20px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid rgba(249, 228, 121, 0.5);
+}
+
+.document-body {
+    font-size: 15px;
+    color: #2f2f2e;
+}
+
+.document-body h1 {
+    font-size: 22px;
+    font-weight: 600;
+    margin: 25px 0 15px 0;
+    color: #2f2f2e;
+}
+
+.document-body h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 20px 0 12px 0;
+    color: #2f2f2e;
+}
+
+.document-body h3 {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 16px 0 10px 0;
+    color: #2f2f2e;
+}
+
+.document-body p {
+    margin: 10px 0;
+    line-height: 1.6;
+}
+
+.document-body ul, .document-body ol {
+    margin: 15px 0;
+    padding-left: 25px;
+}
+
+.document-body li {
+    margin: 5px 0;
+    line-height: 1.5;
+}
+
+.document-placeholder {
+    color: rgba(47, 47, 46, 0.5);
+    font-style: italic;
+    margin: 40px 0;
+    text-align: center;
+}
+
+.document-section {
+    margin: 20px 0;
+    border-left: 3px solid rgba(249, 228, 121, 0.7);
+    padding-left: 15px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #2f2f2e;
+    margin: 0 0 10px 0;
+}
+
+.section-content {
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.generating-section {
+    margin: 20px 0;
+    padding: 15px;
+    background: rgba(249, 228, 121, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid rgba(249, 228, 121, 0.7);
+}
+
+.generating-text {
+    color: rgba(47, 47, 46, 0.7);
+    font-style: italic;
+    margin: 10px 0 0 0;
+}
+
+.generating-text i {
+    color: rgba(249, 228, 121, 0.8);
+    margin-right: 8px;
+}
+
+.typing-cursor {
+    display: inline-block;
+    animation: documentBlink 1s infinite;
+    color: rgba(249, 228, 121, 0.8);
+    font-weight: bold;
+    margin-left: 2px;
+}
+
+@keyframes documentBlink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+.document-status {
+    padding: 10px 20px;
+    background: rgba(249, 228, 121, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 13px;
+    color: rgba(47, 47, 46, 0.7);
+    text-align: center;
+}
+
+.collab-indicator {
+    font-weight: 500;
+}
+
+.error {
+    color: #dc2626;
+    background: rgba(220, 38, 38, 0.1);
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+}
+
+/* Scrollbar personnalisée pour le document */
+.document-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.document-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+}
+
+.document-content::-webkit-scrollbar-thumb {
+    background: rgba(47, 47, 46, 0.3);
+    border-radius: 3px;
+}
+
+.document-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(47, 47, 46, 0.5);
+}
+
+/* Responsive */
+@media (max-width: 990px) {
+    .workspace-card.document-mode {
+        width: calc(100vw - 40px);
+        max-width: 500px;
+        max-height: 70vh;
+    }
+    
+    .document-title {
+        font-size: 20px;
+    }
+    
+    .document-body h1 {
+        font-size: 18px;
+    }
+    
+    .document-body h2 {
+        font-size: 16px;
+    }
+}
+
 .chat-card-indicator {
     position: fixed;
     bottom: 100px;
