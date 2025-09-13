@@ -1,3 +1,5 @@
+// ========== CORRECTIONS WORKSPACE : ZOOM + PANNEAU ==========
+
 class WorkspaceManager {
     constructor() {
         this.cards = [];
@@ -19,10 +21,10 @@ class WorkspaceManager {
         this.canvasStartPos = { x: 0, y: 0 };
         this.canvasOffset = { x: 0, y: 0 };
         
-        // Zoom simplifié
+        // Zoom avec compensation
         this.zoomLevel = 1.0;
-        this.minZoom = 0.5;
-        this.maxZoom = 2.0;
+        this.minZoom = 0.3;
+        this.maxZoom = 3.0;
         this.zoomStep = 0.1;
         
         this.init();
@@ -53,8 +55,9 @@ class WorkspaceManager {
         this.setupEventListeners();
         this.loadDefaultCards();
         this.setupChatIntegration();
-        this.initSimpleZoom();
+        this.initZoom();
         this.loadZoomLevel();
+        this.updateCanvasBackground(); // NOUVEAU : Initialiser le fond
         
         console.log('WorkspaceManager initialized');
     }
@@ -71,23 +74,23 @@ class WorkspaceManager {
         document.addEventListener('mouseup', () => this.handleGlobalMouseUp());
     }
 
-    // ========== DRAG CARDS - VERSION CORRIGÉE ==========
+    // ========== DRAG CARDS - VERSION COMPENSÉE ZOOM ==========
     
     handleMouseDown(e, cardElement) {
         e.preventDefault();
         
-        // Éviter le drag sur les boutons
         if (e.target.closest('.card-action-btn')) return;
         
         this.selectedCard = cardElement;
         this.isDragging = true;
         
         const rect = cardElement.getBoundingClientRect();
+        const canvasRect = this.canvas.getBoundingClientRect();
         
-        // CORRECTION : Offset correct pour éviter le décalage
+        // CORRECTION : Compenser le zoom dans l'offset
         this.dragOffset = {
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top
+            x: (e.clientX - rect.left) / this.zoomLevel,
+            y: (e.clientY - rect.top) / this.zoomLevel
         };
         
         cardElement.classList.add('dragging');
@@ -101,11 +104,10 @@ class WorkspaceManager {
         
         const canvasRect = this.canvas.getBoundingClientRect();
         
-        // Position directe : souris - offset
-        const newX = e.clientX - canvasRect.left - this.dragOffset.x;
-        const newY = e.clientY - canvasRect.top - this.dragOffset.y;
+        // CORRECTION : Position compensée avec zoom et translation du canvas
+        const newX = (e.clientX - canvasRect.left) / this.zoomLevel - this.canvasOffset.x / this.zoomLevel - this.dragOffset.x;
+        const newY = (e.clientY - canvasRect.top) / this.zoomLevel - this.canvasOffset.y / this.zoomLevel - this.dragOffset.y;
         
-        // Application immédiate, pas de smooth
         this.selectedCard.style.left = newX + 'px';
         this.selectedCard.style.top = newY + 'px';
     }
@@ -124,10 +126,9 @@ class WorkspaceManager {
         this.dragOffset = { x: 0, y: 0 };
     }
 
-    // ========== CANVAS DRAG-TO-PAN - NOUVEAU ==========
+    // ========== CANVAS DRAG-TO-PAN - AMÉLIORÉ ==========
     
     handleCanvasMouseDown(e) {
-        // Ne pas draguer si on clique sur une carte
         if (e.target.closest('.workspace-card')) {
             return;
         }
@@ -135,7 +136,6 @@ class WorkspaceManager {
         this.canvasIsDragging = true;
         this.canvasStartPos = { x: e.clientX, y: e.clientY };
         
-        // Curseur main immédiatement
         this.canvas.style.cursor = 'grabbing';
         document.body.style.cursor = 'grab';
         
@@ -143,24 +143,21 @@ class WorkspaceManager {
     }
 
     handleGlobalMouseMove(e) {
-        // Gestion du drag des cartes
         if (this.isDragging && this.selectedCard) {
             this.handleMouseMove(e);
             return;
         }
         
-        // Gestion du drag du canvas (panneau)
         if (this.canvasIsDragging) {
             const deltaX = e.clientX - this.canvasStartPos.x;
             const deltaY = e.clientY - this.canvasStartPos.y;
             
-            // Appliquer le déplacement immédiatement
             this.canvasOffset.x += deltaX;
             this.canvasOffset.y += deltaY;
             
             this.applyCanvasTransform();
+            this.updateCanvasBackground(); // NOUVEAU : Mettre à jour le fond
             
-            // Mettre à jour la position de départ
             this.canvasStartPos = { x: e.clientX, y: e.clientY };
             
             e.preventDefault();
@@ -168,12 +165,10 @@ class WorkspaceManager {
     }
 
     handleGlobalMouseUp() {
-        // Fin drag des cartes
         if (this.isDragging) {
             this.handleMouseUp();
         }
         
-        // Fin drag du canvas
         if (this.canvasIsDragging) {
             this.canvasIsDragging = false;
             this.canvas.style.cursor = 'grab';
@@ -184,18 +179,37 @@ class WorkspaceManager {
     applyCanvasTransform() {
         if (!this.canvas) return;
         
-        const scale = this.zoomLevel || 1;
+        const scale = this.zoomLevel;
         this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x / scale}px, ${this.canvasOffset.y / scale}px)`;
     }
 
-    // ========== ZOOM SIMPLIFIÉ ==========
+    // ========== NOUVEAU : GESTION FOND À POIS RÉACTIF ==========
     
-    initSimpleZoom() {
-        this.createSimpleZoomControls();
-        this.setupSimpleZoomEvents();
+    updateCanvasBackground() {
+        if (!this.canvas) return;
+        
+        const container = this.canvas.closest('.workspace-container');
+        if (!container) return;
+        
+        // Taille des pois proportionnelle au zoom
+        const dotSize = 30 * this.zoomLevel;
+        
+        // Position des pois qui suit le déplacement du canvas
+        const bgX = (this.canvasOffset.x * this.zoomLevel) % dotSize;
+        const bgY = (this.canvasOffset.y * this.zoomLevel) % dotSize;
+        
+        container.style.backgroundSize = `${dotSize}px ${dotSize}px`;
+        container.style.backgroundPosition = `${bgX}px ${bgY}px`;
     }
 
-    createSimpleZoomControls() {
+    // ========== ZOOM AMÉLIORÉ ==========
+    
+    initZoom() {
+        this.createZoomControls();
+        this.setupZoomEvents();
+    }
+
+    createZoomControls() {
         if (document.getElementById('zoom-controls')) return;
         
         const zoomControls = document.createElement('div');
@@ -206,13 +220,13 @@ class WorkspaceManager {
             <button id="zoom-out" title="Zoom arrière">−</button>
             <span id="zoom-percentage">100%</span>
             <button id="zoom-in" title="Zoom avant">+</button>
-            <button id="zoom-reset" title="Reset zoom">Reset</button>
+            <button id="zoom-reset" title="Reset zoom">⌂</button>
         `;
         
         document.body.appendChild(zoomControls);
     }
 
-    setupSimpleZoomEvents() {
+    setupZoomEvents() {
         document.getElementById('zoom-in')?.addEventListener('click', () => this.zoomIn());
         document.getElementById('zoom-out')?.addEventListener('click', () => this.zoomOut());
         document.getElementById('zoom-reset')?.addEventListener('click', () => this.resetZoom());
@@ -239,11 +253,13 @@ class WorkspaceManager {
         this.setZoom(1.0);
         this.canvasOffset = { x: 0, y: 0 };
         this.applyCanvasTransform();
+        this.updateCanvasBackground(); // NOUVEAU : Reset du fond
     }
 
     setZoom(zoomValue) {
         this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
         this.applyCanvasTransform();
+        this.updateCanvasBackground(); // NOUVEAU : Mettre à jour le fond
         this.updateZoomDisplay();
         localStorage.setItem('workspace-zoom-level', this.zoomLevel.toString());
     }
@@ -265,7 +281,7 @@ class WorkspaceManager {
         }
     }
 
-    // ========== GESTION DES CARTES (CONSERVÉ) ==========
+    // ========== GESTION DES CARTES (IDENTIQUE) ==========
 
     loadDefaultCards() {
         const defaultCards = [
@@ -367,17 +383,15 @@ class WorkspaceManager {
     }
 
     setupCardEvents(cardElement, cardData) {
-        // Click pour sélectionner
         cardElement.addEventListener('click', (e) => {
             if (!this.isDragging) {
                 this.selectCard(cardElement);
             }
         });
         
-        // Drag & Drop - VERSION CORRIGÉE
+        // CORRECTION : Events de drag avec compensation zoom
         cardElement.addEventListener('mousedown', (e) => this.handleMouseDown(e, cardElement));
         
-        // Boutons d'action
         const pinBtn = cardElement.querySelector('.pin-btn');
         const deleteBtn = cardElement.querySelector('.delete-btn');
         const chatToggleBtn = cardElement.querySelector('.chat-toggle-btn');
@@ -403,7 +417,6 @@ class WorkspaceManager {
             this.clearDocumentContent(cardData.id);
         });
 
-        // Gestion édition document
         const docContent = cardElement.querySelector('.document-content');
         if (docContent) {
             docContent.addEventListener('input', () => {
@@ -412,7 +425,7 @@ class WorkspaceManager {
         }
     }
 
-    // ========== GESTION UTILITAIRES ==========
+    // ========== UTILITAIRES (IDENTIQUES) ==========
 
     togglePin(cardElement) {
         const isPinned = cardElement.classList.toggle('pinned');
@@ -435,12 +448,10 @@ class WorkspaceManager {
     }
 
     selectCard(cardElement) {
-        // Désélectionner toutes les cartes
         this.cards.forEach(card => {
             card.element.classList.remove('selected');
         });
         
-        // Sélectionner la carte cliquée
         cardElement.classList.add('selected');
         this.selectedCard = cardElement;
     }
@@ -471,7 +482,6 @@ class WorkspaceManager {
         
         localStorage.setItem('workspace-layout', JSON.stringify(layout));
         
-        // Notification simple
         const notification = document.createElement('div');
         notification.textContent = 'Layout sauvegardé !';
         notification.style.cssText = `
@@ -663,7 +673,102 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     showDocumentGenerating(cardId, sectionTitle) {
         const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (docBody) {
+            docBody.scrollTop = docBody.scrollHeight;
+        }
+    }
+
+    finalizeDocumentSection(cardId, token, content) {
+        const sectionContent = document.getElementById(`content-${token}`);
+        if (!sectionContent) return;
+        
+        const formattedContent = this.formatDocumentContent(content);
+        sectionContent.innerHTML = formattedContent;
+    }
+
+    formatDocumentContent(content) {
+        if (!content) return '';
+        
+        if (window.marked) {
+            return window.marked.parse(content);
+        }
+        
+        return content
+            .replace(/\n\n+/g, '</p><p>')
+            .replace(/\n/g, '<br>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
+    saveDocumentContent(cardId) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
         if (!docBody) return;
+        
+        const content = docBody.innerHTML;
+        localStorage.setItem(`workspace-doc-${cardId}`, content);
+    }
+
+    loadCardDocument(cardId) {
+        const content = localStorage.getItem(`workspace-doc-${cardId}`);
+        if (content) {
+            const docBody = document.getElementById(`doc-body-${cardId}`);
+            if (docBody) {
+                docBody.innerHTML = content;
+            }
+        }
+    }
+
+    getDocumentContent(cardId) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return '';
+        
+        return docBody.textContent || docBody.innerText || '';
+    }
+
+    clearDocumentContent(cardId) {
+        if (confirm('Vider tout le contenu de ce document ?')) {
+            const docBody = document.getElementById(`doc-body-${cardId}`);
+            if (docBody) {
+                docBody.innerHTML = '<p class="document-placeholder">Commencez à taper ou utilisez l\'IA pour générer du contenu...</p>';
+            }
+            localStorage.removeItem(`workspace-doc-${cardId}`);
+            console.log(`Document vidé pour la carte ${cardId}`);
+        }
+    }
+
+    getCardTitle(cardId) {
+        const card = this.cards.find(c => c.data.id === cardId);
+        return card ? card.data.title : 'Carte inconnue';
+    }
+
+    displayCardConversation(cardId) {
+        console.log(`Affichage conversation pour carte ${cardId}`);
+    }
+
+    generateMessageId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+}
+
+// Initialiser le workspace
+document.addEventListener('DOMContentLoaded', () => {
+    window.workspaceManager = new WorkspaceManager();
+});
+
+// ========== AMÉLIORATIONS CSS COMPLÉMENTAIRES ==========
+/*
+Ajouter ces styles CSS pour le scroll vertical naturel :
+
+.workspace-container {
+    height: 100vh;
+    overflow: auto; // Permettre le scroll
+}
+
+.workspace-canvas {
+    min-height: 200vh; // Canvas plus haut pour scroll vertical
+    min-width: 200vw;
+}
+*/!docBody) return;
         
         const placeholder = docBody.querySelector('.document-placeholder');
         if (placeholder) {
