@@ -14,6 +14,11 @@ class WorkspaceManager {
         this.addCardBtn = null;
         this.saveLayoutBtn = null;
         
+        // Canvas dragging
+        this.canvasDragMode = false;
+        this.canvasOffset = { x: 0, y: 0 };
+        this.canvasDragStart = { x: 0, y: 0 };
+        
         this.init();
     }
 
@@ -42,6 +47,9 @@ class WorkspaceManager {
             setTimeout(() => this.setupElements(), 100);
             return;
         }
+        
+        // Initialize canvas dragging
+        this.initCanvasDragging();
 
         this.setupEventListeners();
         this.loadDefaultCards();
@@ -1424,6 +1432,79 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
         console.log('Contrôles de zoom initialisés');
     }
 
+    // ========== CANVAS DRAGGING ==========
+
+    initCanvasDragging() {
+        // Créer l'icône de déplacement
+        this.createCanvasDragButton();
+        
+        // Event listeners pour le déplacement du canvas
+        this.setupCanvasDragEvents();
+    }
+
+    createCanvasDragButton() {
+        const dragButton = document.createElement('button');
+        dragButton.id = 'canvas-drag-btn';
+        dragButton.className = 'canvas-drag-btn';
+        dragButton.innerHTML = '<i class="fas fa-arrows-alt"></i>';
+        dragButton.title = 'Déplacer le canvas (maintenir enfoncé)';
+        
+        const zoomControls = document.getElementById('zoom-controls');
+        if (zoomControls) {
+            zoomControls.appendChild(dragButton);
+        }
+    }
+
+    setupCanvasDragEvents() {
+        const dragBtn = document.getElementById('canvas-drag-btn');
+        
+        // Mode drag avec mousedown sur le bouton
+        dragBtn?.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            this.canvasDragMode = true;
+            this.canvasDragStart = { x: e.clientX, y: e.clientY };
+            dragBtn.classList.add('active');
+            dragBtn.innerHTML = '<i class="fas fa-hand-rock"></i>';
+            document.body.style.cursor = 'grab';
+        });
+        
+        // Déplacement du canvas
+        document.addEventListener('mousemove', (e) => {
+            if (this.canvasDragMode) {
+                const deltaX = e.clientX - this.canvasDragStart.x;
+                const deltaY = e.clientY - this.canvasDragStart.y;
+                
+                this.canvasOffset.x += deltaX;
+                this.canvasOffset.y += deltaY;
+                
+                this.applyCanvasTransform();
+                
+                this.canvasDragStart = { x: e.clientX, y: e.clientY };
+                document.body.style.cursor = 'grabbing';
+            }
+        });
+        
+        // Arrêter le mode drag
+        document.addEventListener('mouseup', () => {
+            if (this.canvasDragMode) {
+                this.canvasDragMode = false;
+                document.body.style.cursor = 'default';
+                const dragBtn = document.getElementById('canvas-drag-btn');
+                if (dragBtn) {
+                    dragBtn.classList.remove('active');
+                    dragBtn.innerHTML = '<i class="fas fa-arrows-alt"></i>';
+                }
+            }
+        });
+    }
+
+    applyCanvasTransform() {
+        if (this.canvas) {
+            const scale = this.zoomLevel || 1;
+            this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
+        }
+    }
+
     createZoomControls() {
         // Vérifier si les contrôles existent déjà
         if (document.getElementById('zoom-controls')) return;
@@ -1598,8 +1679,9 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
         // Ajouter classe temporaire pour animation fluide
         this.canvas.classList.add('zooming');
         
-        // Appliquer la transformation
-        this.canvas.style.transform = `scale(${this.zoomLevel})`;
+        // Appliquer zoom ET translation
+        const scale = this.zoomLevel || 1;
+        this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x}px, ${this.canvasOffset.y}px)`;
         
         // Retirer la classe après l'animation
         setTimeout(() => {
