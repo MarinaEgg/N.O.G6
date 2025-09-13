@@ -1,14 +1,15 @@
 /* ========== WORKSPACE CORE STYLES ========== */
 
+/* ========== CORRECTIONS CSS WORKSPACE ========== */
+
+/* CORRECTION 1 : Conteneur workspace avec scroll naturel */
 .workspace-container {
     width: 100%;
     height: 100vh;
-    overflow: hidden;
+    overflow: auto; /* CHANGEMENT : Permettre le scroll */
     display: flex;
     flex-direction: column;
-    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px;
-    background-position: 0 0;
+    /* SUPPRESSION : background-image déplacé vers .workspace-canvas */
 }
 
 .workspace-header {
@@ -55,17 +56,22 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ========== CANVAS DRAGGABLE - SIMPLIFIÉ ========== */
+/* ========== CANVAS DRAGGABLE - AMÉLIORÉ ========== */
 
+/* CORRECTION 2 : Canvas draggable avec fond à pois réactif */
 .workspace-canvas {
     flex: 1;
     position: relative;
     cursor: grab;
     min-width: 200vw;
-    min-height: 200vh;
+    min-height: 200vh; /* AUGMENTATION : Plus de hauteur pour scroll vertical */
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
     overflow: visible;
+    /* NOUVEAU : Fond à pois géré dynamiquement par JS */
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px; /* Taille par défaut, sera modifiée par JS */
+    background-position: 0 0; /* Position par défaut, sera modifiée par JS */
 }
 
 .workspace-canvas:active {
@@ -76,8 +82,9 @@
     transition: transform 0.2s ease-out;
 }
 
-/* ========== CARTES - VERSION SIMPLIFIÉE ========== */
+/* ========== CARTES - VERSION OPTIMISÉE ========== */
 
+/* CORRECTION 3 : Cartes avec position compensée zoom */
 .workspace-card {
     position: absolute;
     width: 280px;
@@ -93,19 +100,24 @@
     cursor: move;
     user-select: none;
     z-index: 5;
-    /* PLUS D'EFFETS DE TRANSITION COMPLEXES */
+    /* CHANGEMENT : Transitions simplifiées pour performance */
+    transition: box-shadow 0.2s ease, z-index 0s;
+    /* Optimisation GPU */
+    will-change: transform;
+    transform: translateZ(0);
 }
 
 .workspace-card:hover {
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
     z-index: 6;
-    /* PLUS DE TRANSFORM, SCALE, OU ROTATION */
 }
 
 .workspace-card.dragging {
     z-index: 1000;
     cursor: grabbing;
-    /* PLUS DE ROTATION NI SCALE */
+    /* NOUVEAU : Désactiver les transitions pendant le drag */
+    transition: none !important;
+    will-change: transform, left, top;
 }
 
 .workspace-card.pinned {
@@ -460,6 +472,7 @@ body.sidebar-open .chat-card-indicator {
 
 /* ========== CONTRÔLES DE ZOOM - SIMPLIFIÉS ========== */
 
+/* CORRECTION 4 : Contrôles de zoom repositionnés et améliorés */
 .zoom-controls {
     position: fixed;
     top: 20px;
@@ -469,21 +482,49 @@ body.sidebar-open .chat-card-indicator {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 12px;
-    padding: 8px 14px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    padding: 8px 16px;
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.08),
+        0 2px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
     font-family: "Inter", sans-serif;
+    /* NOUVEAU : Même style glassmorphique que les cartes */
+    animation: fadeInFromTop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.zoom-controls::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.2) 0%, 
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0.1) 100%
+    );
+    border-radius: 12px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.zoom-controls > * {
+    position: relative;
+    z-index: 1;
 }
 
 .zoom-controls button {
     width: 32px;
     height: 32px;
     border: none;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
@@ -492,9 +533,14 @@ body.sidebar-open .chat-card-indicator {
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .zoom-controls button:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: rgba(255, 255, 255, 0.6);
     background: rgba(0, 0, 0, 0.15);
     transform: scale(1.05);
 }
@@ -685,16 +731,6 @@ SUPPRIMÉS :
     z-index: -1;
 }
 
-/* Préservation des styles de chat intégrés (si nécessaire) */
-.card-chat-container,
-.card-chat-messages,
-.card-message,
-.card-message-content,
-.card-message-avatar {
-    /* Styles conservés du système de chat original */
-    /* Ces styles peuvent être maintenus si le chat dans les cartes est utilisé */
-}
-
 /* ========== CURSEUR PERSONNALISÉ POUR LE CANVAS ========== */
 
 .workspace-canvas {
@@ -714,4 +750,82 @@ SUPPRIMÉS :
 .workspace-card:active,
 .workspace-card.dragging {
     cursor: grabbing;
+}
+
+/* ========== AMÉLIORATIONS DE PERFORMANCE ========== */
+
+/* Optimisation GPU pour les transformations */
+.workspace-card,
+.workspace-canvas {
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.workspace-card.dragging {
+    will-change: transform, left, top;
+}
+
+/* ========== SCROLLBARS PERSONNALISÉES ========== */
+
+.workspace-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.workspace-container::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+.workspace-container::-webkit-scrollbar-thumb {
+    background: rgba(47, 47, 46, 0.3);
+    border-radius: 4px;
+}
+
+.workspace-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(47, 47, 46, 0.5);
+}
+
+.workspace-container::-webkit-scrollbar-corner {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ========== INDICATEUR DE CHARGEMENT ========== */
+
+.workspace-canvas.transforming {
+    pointer-events: none;
+}
+
+.workspace-canvas.transforming::after {
+    content: '';
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #2f2f2e;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 9999;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== ANIMATION D'APPARITION ========== */
+
+@keyframes fadeInFromTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
 }
