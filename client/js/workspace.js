@@ -19,6 +19,10 @@ class WorkspaceManager {
         this.canvasOffset = { x: 0, y: 0 };
         this.canvasDragStart = { x: 0, y: 0 };
         
+        // Canvas direct dragging
+        this.canvasIsDragging = false;
+        this.canvasStartPos = { x: 0, y: 0 };
+        
         this.init();
     }
 
@@ -65,9 +69,12 @@ class WorkspaceManager {
         this.addCardBtn?.addEventListener('click', () => this.showAddCardDialog());
         this.saveLayoutBtn?.addEventListener('click', () => this.saveLayout());
         
+        // Canvas direct dragging
+        this.canvas?.addEventListener('mousedown', (e) => this.handleCanvasMouseDown(e));
+        
         // Events globaux pour le drag & drop
-        document.addEventListener('mousemove', (e) => this.handleMouseMove(e));
-        document.addEventListener('mouseup', () => this.handleMouseUp());
+        document.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
+        document.addEventListener('mouseup', () => this.handleGlobalMouseUp());
     }
 
     loadDefaultCards() {
@@ -242,40 +249,117 @@ class WorkspaceManager {
 
     handleMouseDown(e, cardElement) {
         e.preventDefault();
+        
+        // Éviter le drag sur les boutons
+        if (e.target.closest('.card-action-btn')) return;
+        
         this.selectedCard = cardElement;
         this.isDragging = true;
         
         const rect = cardElement.getBoundingClientRect();
+        const canvasRect = this.canvas.getBoundingClientRect();
+        
+        // Position relative au canvas (pas à la carte)
         this.dragOffset = {
             x: e.clientX - rect.left,
             y: e.clientY - rect.top
         };
         
+        // Position initiale dans le canvas
+        this.initialPosition = {
+            x: rect.left - canvasRect.left,
+            y: rect.top - canvasRect.top
+        };
+        
         cardElement.classList.add('dragging');
+        
+        // Curseur grabbing immédiatement
+        document.body.style.cursor = 'grabbing';
     }
 
     handleMouseMove(e) {
         if (!this.isDragging || !this.selectedCard) return;
         
+        e.preventDefault();
+        
         const canvasRect = this.canvas.getBoundingClientRect();
-        const x = e.clientX - canvasRect.left - this.dragOffset.x;
-        const y = e.clientY - canvasRect.top - this.dragOffset.y;
         
-        // Pas de contraintes - placement libre
-        const constrainedX = x;
-        const constrainedY = y;
+        // Calcul direct sans décalage
+        const newX = e.clientX - canvasRect.left - this.dragOffset.x;
+        const newY = e.clientY - canvasRect.top - this.dragOffset.y;
         
-        this.selectedCard.style.left = constrainedX + 'px';
-        this.selectedCard.style.top = constrainedY + 'px';
+        // Application immédiate sans contraintes
+        this.selectedCard.style.left = newX + 'px';
+        this.selectedCard.style.top = newY + 'px';
     }
 
     handleMouseUp() {
         if (!this.isDragging) return;
         
         this.isDragging = false;
+        document.body.style.cursor = 'default';
+        
         if (this.selectedCard) {
             this.selectedCard.classList.remove('dragging');
             this.selectedCard = null;
+        }
+        
+        // Nettoyer les variables
+        this.dragOffset = { x: 0, y: 0 };
+        this.initialPosition = null;
+    }
+
+    // ========== CANVAS DIRECT DRAGGING ==========
+
+    handleCanvasMouseDown(e) {
+        // Éviter le drag si on clique sur une carte ou ses boutons
+        if (e.target.closest('.workspace-card') || e.target.closest('.card-action-btn')) {
+            return;
+        }
+        
+        // Démarrer le drag du canvas
+        this.canvasIsDragging = true;
+        this.canvasStartPos = { x: e.clientX, y: e.clientY };
+        
+        // Curseur main
+        document.body.style.cursor = 'grab';
+        this.canvas.style.cursor = 'grabbing';
+        
+        e.preventDefault();
+    }
+
+    handleGlobalMouseMove(e) {
+        // Gestion du drag des cartes
+        if (this.isDragging && this.selectedCard) {
+            this.handleMouseMove(e);
+            return;
+        }
+        
+        // Gestion du drag du canvas
+        if (this.canvasIsDragging) {
+            const deltaX = e.clientX - this.canvasStartPos.x;
+            const deltaY = e.clientY - this.canvasStartPos.y;
+            
+            this.canvasOffset.x += deltaX;
+            this.canvasOffset.y += deltaY;
+            
+            this.applyCanvasTransform();
+            
+            this.canvasStartPos = { x: e.clientX, y: e.clientY };
+        }
+    }
+
+    handleGlobalMouseUp() {
+        // Gestion fin drag des cartes
+        if (this.isDragging) {
+            this.handleMouseUp();
+        }
+        
+        // Gestion fin drag du canvas
+        if (this.canvasIsDragging) {
+            this.canvasIsDragging = false;
+            document.body.style.cursor = 'default';
+            this.canvas.style.cursor = 'default';
         }
     }
     
