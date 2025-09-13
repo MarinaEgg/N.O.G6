@@ -536,13 +536,13 @@ body.sidebar-open .chat-card-indicator {
     border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
+/* ========== BOUTONS ZOOM ========== */
+
 .zoom-controls button:hover {
-    background: rgba(255, 255, 255, 1);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-color: rgba(255, 255, 255, 0.6);
-    background: rgba(0, 0, 0, 0.15);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 1) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .zoom-controls button:active {
@@ -550,12 +550,12 @@ body.sidebar-open .chat-card-indicator {
 }
 
 .zoom-controls span {
-    font-size: 14px;
-    font-weight: 600;
-    color: #2f2f2e;
-    min-width: 40px;
-    text-align: center;
-    padding: 0 4px;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    color: #2f2f2e !important;
+    min-width: 50px !important;
+    text-align: center !important;
+    padding: 0 8px !important;
 }
 
 /* Animation d'apparition */
