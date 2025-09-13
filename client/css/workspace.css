@@ -61,295 +61,6 @@
   padding: 20px;
 }
 
-/* ========== CARTES DE BASE ========== */
-.workspace-card {
-  position: absolute;
-  width: 280px;
-  min-height: 200px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-radius: 12px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  cursor: move;
-  transition: all 0.3s ease;
-  user-select: none;
-  z-index: 5;
-}
-
-.workspace-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12);
-  z-index: 6;
-}
-
-.workspace-card.dragging {
-  transform: rotate(5deg) scale(1.05);
-  z-index: 1000;
-  cursor: grabbing;
-}
-
-.workspace-card.pinned {
-  border-color: #F9E479;
-  box-shadow: 
-    0 8px 32px rgba(249, 228, 121, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.04),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-}
-
-.workspace-card.selected {
-  border-color: #F9E479;
-  box-shadow: 
-      0 0 0 2px rgba(249, 228, 121, 0.3),
-      0 16px 48px rgba(0, 0, 0, 0.12);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.card-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2f2f2e;
-  margin: 0;
-}
-
-.card-actions {
-  display: flex;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.workspace-card:hover .card-actions {
-  opacity: 1;
-}
-
-.card-action-btn {
-  width: 24px;
-  height: 24px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #2f2f2e;
-  transition: all 0.2s ease;
-}
-
-.card-action-btn:hover {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.card-action-btn.pin-btn.pinned {
-  color: #F9E479;
-}
-
-.card-content {
-  padding: 16px;
-}
-
-.card-theme {
-  display: inline-block;
-  padding: 4px 8px;
-  background: rgba(47, 47, 46, 0.1);
-  border-radius: 12px;
-  font-size: 11px;
-  font-weight: 500;
-  color: #2f2f2e;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 12px;
-}
-
-.card-description {
-  font-size: 14px;
-  color: rgba(47, 47, 46, 0.7);
-  line-height: 1.4;
-  margin-bottom: 16px;
-}
-
-.card-stats {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: rgba(47, 47, 46, 0.5);
-}
-
-.card-stat {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Boutons d'action des cartes */
-.card-action-btn.clear-chat-btn {
-  color: rgba(220, 38, 38, 0.8);
-}
-
-.card-action-btn.clear-chat-btn:hover {
-  background: rgba(220, 38, 38, 0.1);
-  color: #dc2626;
-}
-
-.card-action-btn.chat-toggle-btn.active {
-  background: rgba(249, 228, 121, 0.9);
-  color: #2f2f2e;
-  transform: scale(1.1);
-}
-
-.card-action-btn.chat-toggle-btn:hover {
-  background: rgba(249, 228, 121, 0.7);
-  transform: scale(1.05);
-}
-
-/* Indicateur de messages non lus (futur développement) */
-.card-action-btn.chat-toggle-btn::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 8px;
-  height: 8px;
-  background: #dc2626;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.card-action-btn.chat-toggle-btn.has-unread::after {
-  opacity: 1;
-}
-
-/* Messages avec markdown dans les cartes */
-.card-message-content p {
-  margin: 0 0 4px 0;
-  font-size: 13px;
-}
-
-.card-message-content p:last-child {
-  margin-bottom: 0;
-}
-
-.card-message-content code {
-  background: rgba(0, 0, 0, 0.1);
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-size: 11px;
-  font-family: 'Monaco', monospace;
-}
-
-.card-message-content pre {
-  background: rgba(0, 0, 0, 0.05);
-  padding: 8px;
-  border-radius: 6px;
-  overflow-x: auto;
-  font-size: 11px;
-  margin: 4px 0;
-}
-
-.card-message-content ul,
-.card-message-content ol {
-  padding-left: 16px;
-  margin: 4px 0;
-}
-
-.card-message-content li {
-  font-size: 12px;
-  line-height: 1.3;
-  margin: 2px 0;
-}
-
-/* Effet glassmorphism renforcé pour les cartes en mode chat */
-.workspace-card.chat-mode::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    135deg, 
-    rgba(255, 255, 255, 0.3) 0%, 
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 255, 255, 0.2) 100%
-  );
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: -1;
-}
-.workspace-container {
-  width: 100%;
-  height: 100vh;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-  background-size: 30px 30px;
-  background-position: 0 0;
-}
-
-.workspace-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(25px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  z-index: 10;
-}
-
-.workspace-header h1 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #2f2f2e;
-  margin: 0;
-}
-
-.workspace-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.workspace-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #2f2f2e;
-  transition: all 0.2s ease;
-}
-
-.workspace-btn:hover {
-  background: rgba(255, 255, 255, 1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.workspace-canvas {
-  flex: 1;
-  position: relative;
-  overflow: hidden;
-  padding: 20px;
-}
-
 /* ========== CARTES JURIDIQUES ========== */
 .workspace-card {
   position: absolute;
@@ -1026,23 +737,26 @@ body.sidebar-open .chat-card-indicator {
 .zoom-controls {
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1002;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    border-radius: 12px;
-    padding: 12px 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 16px;
+    padding: 12px 20px;
     box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.08),
-        0 2px 8px rgba(0, 0, 0, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        0 8px 32px rgba(0, 0, 0, 0.12),
+        0 2px 8px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     user-select: none;
+    min-width: 280px;
+    max-width: 320px;
 }
 
 .zoom-controls::before {
@@ -1054,104 +768,45 @@ body.sidebar-open .chat-card-indicator {
     bottom: 0;
     background: linear-gradient(
         135deg, 
-        rgba(255, 255, 255, 0.2) 0%, 
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(255, 255, 255, 0.1) 100%
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.2) 100%
     );
-    border-radius: 12px;
+    border-radius: 16px;
     pointer-events: none;
     z-index: 0;
 }
 
 .zoom-controls:hover {
-    transform: translateY(-2px);
+    transform: translateX(-50%) translateY(-2px);
     box-shadow: 
-        0 16px 48px rgba(0, 0, 0, 0.12),
-        0 4px 16px rgba(0, 0, 0, 0.08),
+        0 16px 48px rgba(0, 0, 0, 0.15),
+        0 4px 16px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
-/* Boutons + et - */
-.zoom-btn {
+/* Affichage du pourcentage */
+.zoom-percentage {
     position: relative;
     z-index: 1;
-    width: 32px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.8);
+    font-size: 14px;
+    font-weight: 700;
+    color: #2f2f2e;
+    min-width: 42px;
+    text-align: left;
+    font-family: "Inter", monospace;
+    background: rgba(255, 255, 255, 0.7);
+    padding: 6px 10px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    font-weight: 600;
-    color: #2f2f2e;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    flex-shrink: 0;
 }
 
-.zoom-btn:hover {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 0, 0, 0.2);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.zoom-btn:active {
-    transform: translateY(0) scale(0.95);
-}
-
-/* Bouton fit-to-screen spécifique */
-.zoom-btn.fit-screen {
-    background: rgba(249, 228, 121, 0.8);
-    border-color: rgba(249, 228, 121, 0.4);
-    color: #2f2f2e;
-    position: relative;
-    overflow: hidden;
-}
-
-.zoom-btn.fit-screen::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, rgba(249, 228, 121, 0.3) 0%, transparent 100%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.zoom-btn.fit-screen:hover {
-    background: rgba(249, 228, 121, 0.95);
-    border-color: rgba(249, 228, 121, 0.6);
-    box-shadow: 0 4px 16px rgba(249, 228, 121, 0.3);
-}
-
-.zoom-btn.fit-screen:hover::before {
-    opacity: 1;
-}
-
-.zoom-btn.fit-screen:active {
-    transform: translateY(0) scale(0.95);
-}
-
-/* Animation du bouton fit-screen quand utilisé */
-.zoom-btn.fit-screen.active {
-    animation: fitScreenPulse 0.6s ease;
-}
-
-@keyframes fitScreenPulse {
-    0%, 100% {
-        transform: scale(1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-    50% {
-        transform: scale(1.1);
-        box-shadow: 0 8px 24px rgba(249, 228, 121, 0.4);
-    }
+.zoom-percentage.changed {
+    background: rgba(47, 47, 46, 0.1);
+    transform: scale(1.05);
+    border-color: rgba(47, 47, 46, 0.15);
 }
 
 /* Conteneur du slider */
@@ -1160,10 +815,10 @@ body.sidebar-open .chat-card-indicator {
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: 8px;
     flex: 1;
-    min-width: 120px;
+    min-width: 140px;
     max-width: 180px;
+    position: relative;
 }
 
 /* Slider de zoom personnalisé */
@@ -1171,120 +826,297 @@ body.sidebar-open .chat-card-indicator {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
-    height: 4px;
-    background: linear-gradient(
-        to right,
-        rgba(47, 47, 46, 0.2) 0%,
-        rgba(47, 47, 46, 0.4) 50%,
-        rgba(47, 47, 46, 0.2) 100%
-    );
-    border-radius: 2px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
     outline: none;
     cursor: pointer;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .zoom-slider:hover {
-    background: linear-gradient(
-        to right,
-        rgba(47, 47, 46, 0.3) 0%,
-        rgba(47, 47, 46, 0.6) 50%,
-        rgba(47, 47, 46, 0.3) 100%
-    );
+    background: rgba(0, 0, 0, 0.15);
+}
+
+/* Track rempli (simulé avec un pseudo-élément) */
+.zoom-slider::before {
+    content: '';
+    position: relative;
+    display: block;
+    height: 6px;
+    background: linear-gradient(90deg, #2f2f2e 0%, #666 100%);
+    border-radius: 3px;
+    width: var(--fill-width, 50%);
+    transition: width 0.2s ease;
 }
 
 /* Thumb du slider (curseur) */
 .zoom-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
-    background: #2f2f2e;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     cursor: pointer;
     box-shadow: 
         0 2px 8px rgba(0, 0, 0, 0.2),
-        0 1px 3px rgba(0, 0, 0, 0.1);
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px solid white;
+    border: 2px solid rgba(47, 47, 46, 0.8);
+    backdrop-filter: blur(10px);
+    position: relative;
+    margin-top: -7px;
 }
 
 .zoom-slider::-webkit-slider-thumb:hover {
-    transform: scale(1.2);
+    transform: scale(1.15);
     box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        0 2px 6px rgba(0, 0, 0, 0.15);
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        0 2px 6px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: #2f2f2e;
 }
 
 .zoom-slider::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
-    background: #2f2f2e;
+    width: 20px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 50%;
     cursor: pointer;
-    border: 2px solid white;
+    border: 2px solid rgba(47, 47, 46, 0.8);
     box-shadow: 
         0 2px 8px rgba(0, 0, 0, 0.2),
-        0 1px 3px rgba(0, 0, 0, 0.1);
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .zoom-slider::-moz-range-thumb:hover {
-    transform: scale(1.2);
+    transform: scale(1.15);
     box-shadow: 
-        0 4px 16px rgba(0, 0, 0, 0.3),
-        0 2px 6px rgba(0, 0, 0, 0.15);
+        0 4px 16px rgba(0, 0, 0, 0.25),
+        0 2px 6px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    border-color: #2f2f2e;
 }
 
-/* Affichage du pourcentage */
-.zoom-percentage {
-    position: relative;
-    z-index: 1;
-    font-size: 13px;
-    font-weight: 600;
-    color: #2f2f2e;
-    min-width: 36px;
-    text-align: center;
-    font-family: "Inter", monospace;
-    background: rgba(255, 255, 255, 0.6);
-    padding: 4px 6px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-}
-
-.zoom-percentage.changed {
-    background: rgba(249, 228, 121, 0.8);
-    transform: scale(1.1);
-}
-
-/* Bouton reset zoom */
+/* Bouton reset modernisé */
 .zoom-reset {
     position: relative;
     z-index: 1;
-    padding: 6px 10px;
+    width: 32px;
+    height: 32px;
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 11px;
-    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: #2f2f2e;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     font-family: "Inter", sans-serif;
+    font-size: 14px;
 }
 
 .zoom-reset:hover {
     background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(0, 0, 0, 0.2);
+    border-color: rgba(0, 0, 0, 0.15);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .zoom-reset:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.95);
+}
+
+/* Icône de reset */
+.zoom-reset::before {
+    content: '↻';
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Tooltips */
+.zoom-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    margin-bottom: 8px;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.zoom-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.8);
+}
+
+.zoom-slider-container:hover .zoom-tooltip,
+.zoom-reset:hover .zoom-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(-2px);
+}
+
+/* Animation du slider lors du changement */
+.zoom-slider.changing {
+    background: rgba(47, 47, 46, 0.15);
+}
+
+.zoom-slider.changing::before {
+    background: linear-gradient(90deg, #2f2f2e 0%, #555 100%);
+}
+
+/* Animation du reset quand utilisé */
+.zoom-reset.active {
+    animation: resetPulse 0.4s ease;
+}
+
+@keyframes resetPulse {
+    0%, 100% {
+        transform: scale(1);
+        background: rgba(255, 255, 255, 0.8);
+    }
+    50% {
+        transform: scale(1.05);
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* États focus pour l'accessibilité */
+.zoom-slider:focus,
+.zoom-reset:focus {
+    outline: 2px solid rgba(47, 47, 46, 0.3);
+    outline-offset: 2px;
+}
+
+/* Animation d'apparition des contrôles */
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.zoom-controls {
+    animation: slideInFromTop 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Indicateur de zoom actif */
+.zoom-controls.active {
+    border-color: rgba(47, 47, 46, 0.15);
+    background: rgba(255, 255, 255, 0.98);
+}
+
+.zoom-controls.active::before {
+    background: linear-gradient(
+        135deg, 
+        rgba(47, 47, 46, 0.05) 0%, 
+        rgba(47, 47, 46, 0.02) 50%,
+        rgba(47, 47, 46, 0.03) 100%
+    );
+}
+
+/* Responsive */
+@media (max-width: 990px) {
+    .zoom-controls {
+        top: 10px;
+        min-width: 240px;
+        max-width: 280px;
+        padding: 10px 16px;
+        gap: 12px;
+    }
+    
+    .zoom-percentage {
+        font-size: 13px;
+        min-width: 38px;
+        padding: 5px 8px;
+    }
+    
+    .zoom-slider-container {
+        min-width: 120px;
+        max-width: 150px;
+    }
+    
+    .zoom-reset {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 600px) {
+    .zoom-controls {
+        position: fixed;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 200px;
+        max-width: 240px;
+        padding: 8px 12px;
+        gap: 10px;
+    }
+    
+    .zoom-percentage {
+        font-size: 12px;
+        min-width: 34px;
+        padding: 4px 6px;
+    }
+    
+    .zoom-slider-container {
+        min-width: 100px;
+        max-width: 120px;
+    }
+    
+    .zoom-reset {
+        width: 26px;
+        height: 26px;
+        font-size: 12px;
+    }
+    
+    .zoom-tooltip {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+}
+
+/* Suppression des anciens styles non utilisés */
+.zoom-btn,
+.zoom-btn.fit-screen,
+.zoom-btn:hover,
+.zoom-btn:active,
+.zoom-btn.fit-screen:hover,
+.zoom-btn.fit-screen:active,
+.zoom-btn.fit-screen::before,
+.zoom-btn.fit-screen.active,
+@keyframes fitScreenPulse {
+    /* Styles supprimés - remplacés par le nouveau design */
 }
 
 /* Animation du workspace lors du zoom */
@@ -1295,150 +1127,6 @@ body.sidebar-open .chat-card-indicator {
 
 .workspace-canvas.zooming {
     transition: transform 0.1s ease-out;
-}
-
-/* Responsive pour les contrôles de zoom */
-@media (max-width: 990px) {
-    .zoom-controls {
-        top: 10px;
-        right: 10px;
-        padding: 10px 12px;
-        gap: 8px;
-        flex-wrap: wrap;
-        justify-content: center;
-        max-width: 300px;
-    }
-    
-    .zoom-btn {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-    }
-    
-    .zoom-btn.fit-screen {
-        order: -1; /* Placer en premier sur mobile */
-    }
-    
-    .zoom-slider-container {
-        min-width: 80px;
-        max-width: 120px;
-    }
-    
-    .zoom-percentage {
-        font-size: 12px;
-        min-width: 32px;
-        padding: 3px 5px;
-    }
-    
-    .zoom-reset {
-        padding: 5px 8px;
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 600px) {
-    .zoom-controls {
-        position: fixed;
-        bottom: 120px;
-        right: 10px;
-        top: auto;
-        left: auto;
-        flex-direction: column;
-        gap: 6px;
-        padding: 8px;
-        border-radius: 8px;
-        max-width: 200px;
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        grid-template-rows: auto auto;
-    }
-    
-    .zoom-slider-container {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        margin: 8px 0;
-        flex-direction: row;
-        width: 100%;
-    }
-    
-    .zoom-percentage {
-        grid-column: 2;
-        grid-row: 1;
-        text-align: center;
-    }
-    
-    .zoom-btn.fit-screen {
-        grid-column: 1;
-        grid-row: 1;
-    }
-    
-    .zoom-reset {
-        grid-column: 3;
-        grid-row: 1;
-        font-size: 9px;
-        padding: 4px 6px;
-        height: auto;
-        width: auto;
-    }
-    
-    .zoom-slider-container {
-        flex-direction: column;
-        gap: 4px;
-        align-items: center;
-        min-width: 60px;
-        max-width: 60px;
-        margin: 8px 0;
-    }
-    
-    .zoom-slider {
-        transform: rotate(90deg);
-        width: 60px;
-        margin: 15px 0;
-    }
-    
-    .zoom-percentage {
-        font-size: 11px;
-        min-width: 28px;
-    }
-}
-
-/* États focus pour l'accessibilité */
-.zoom-btn:focus,
-.zoom-slider:focus,
-.zoom-reset:focus {
-    outline: 2px solid rgba(47, 47, 46, 0.3);
-    outline-offset: 2px;
-}
-
-/* Animation d'apparition des contrôles */
-@keyframes slideInFromRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.zoom-controls {
-    animation: slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Indicateur de zoom actif */
-.zoom-controls.active {
-    border-color: rgba(249, 228, 121, 0.6);
-    background: rgba(255, 255, 255, 0.98);
-}
-
-.zoom-controls.active::before {
-    background: linear-gradient(
-        135deg, 
-        rgba(249, 228, 121, 0.2) 0%, 
-        rgba(249, 228, 121, 0.05) 50%,
-        rgba(249, 228, 121, 0.1) 100%
-    );
 }
 
 /* Messages avec markdown dans les cartes */
