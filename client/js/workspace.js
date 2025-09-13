@@ -667,9 +667,25 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     showDocumentGenerating(cardId, sectionTitle) {
         const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (docBody) {
-            docBody.scrollTop = docBody.scrollHeight;
+        if (!docBody) return;
+        
+        const placeholder = docBody.querySelector('.document-placeholder');
+        if (placeholder) {
+            placeholder.remove();
         }
+        
+        const generatingHTML = `
+            <div class="generating-section" id="generating-${cardId}">
+                <h2 class="section-title">${sectionTitle}</h2>
+                <p class="generating-text">
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Génération en cours...
+                </p>
+            </div>
+        `;
+        
+        docBody.insertAdjacentHTML('beforeend', generatingHTML);
+        docBody.scrollTop = docBody.scrollHeight;
     }
 
     finalizeDocumentSection(cardId, token, content) {
@@ -741,6 +757,110 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     generateMessageId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    async streamToDocument(prompt, cardId, sectionTitle, token) {
+        try {
+            const response = await fetch(`/backend-api/v2/conversation`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'accept': 'text/event-stream',
+                },
+                body: JSON.stringify({
+                    conversation_id: window.conversation_id || `workspace-doc-${cardId}`,
+                    action: '_ask',
+                    model: 'Eggon-V1',
+                    meta: {
+                        id: token,
+                        content: {
+                            conversation: [],
+                            content_type: 'text',
+                            parts: [{ content: prompt, role: 'user' }],
+                        },
+                    },
+                }),
+            });
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let generatedContent = '';
+            
+            this.hideDocumentGenerating(cardId);
+            this.startDocumentSection(cardId, sectionTitle, token);
+            
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+                
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const eventData = line.slice(6).trim();
+                        if (eventData === '[DONE]') {
+                            this.finalizeDocumentSection(cardId, token, generatedContent);
+                            this.saveDocumentContent(cardId);
+                            return;
+                        }
+                        
+                        try {
+                            const dataObject = JSON.parse(eventData);
+                            if (dataObject.response) {
+                                generatedContent += dataObject.response;
+                                this.updateDocumentSection(cardId, token, generatedContent);
+                            }
+                        } catch (e) {
+                            console.error('Erreur parsing JSON:', e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erreur streaming document:', error);
+            this.hideDocumentGenerating(cardId);
+            this.addToDocument(cardId, `<p class="error">Erreur de connexion.</p>`);
+        }
+    }
+
+    hideDocumentGenerating(cardId) {
+        const indicator = document.getElementById(`generating-${cardId}`);
+        if (indicator) {
+            indicator.remove();
+        }
+    }
+
+    startDocumentSection(cardId, sectionTitle, token) {
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (!docBody) return;
+        
+        const sectionHTML = `
+            <div class="document-section" id="section-${token}">
+                <h2 class="section-title">${sectionTitle}</h2>
+                <div class="section-content" id="content-${token}">
+                    <span class="typing-cursor">▊</span>
+                </div>
+            </div>
+        `;
+        
+        docBody.insertAdjacentHTML('beforeend', sectionHTML);
+        docBody.scrollTop = docBody.scrollHeight;
+    }
+
+    updateDocumentSection(cardId, token, content) {
+        const sectionContent = document.getElementById(`content-${token}`);
+        if (!sectionContent) return;
+        
+        const formattedContent = this.formatDocumentContent(content);
+        sectionContent.innerHTML = formattedContent + '<span class="typing-cursor">▊</span>';
+        
+        const docBody = document.getElementById(`doc-body-${cardId}`);
+        if (docBody) {
+            docBody.scrollTop = docBody.scrollHeight;
+        }
     }
 }
 
