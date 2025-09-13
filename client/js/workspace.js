@@ -253,12 +253,9 @@ class WorkspaceManager {
         const x = e.clientX - canvasRect.left - this.dragOffset.x;
         const y = e.clientY - canvasRect.top - this.dragOffset.y;
         
-        // Contraintes pour garder la carte dans le canvas
-        const maxX = this.canvas.offsetWidth - this.selectedCard.offsetWidth;
-        const maxY = this.canvas.offsetHeight - this.selectedCard.offsetHeight;
-        
-        const constrainedX = Math.max(0, Math.min(x, maxX));
-        const constrainedY = Math.max(0, Math.min(y, maxY));
+        // Pas de contraintes - placement libre
+        const constrainedX = x;
+        const constrainedY = y;
         
         this.selectedCard.style.left = constrainedX + 'px';
         this.selectedCard.style.top = constrainedY + 'px';
@@ -1414,7 +1411,7 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     initZoomControls() {
         this.zoomLevel = 1.0; // Niveau de zoom initial (100%)
-        this.minZoom = 0.5;   // Zoom minimum (50%)
+        this.minZoom = 0.1;   // Zoom minimum (10%)
         this.maxZoom = 2.0;   // Zoom maximum (200%)
         this.zoomStep = 0.1;  // Pas d'incrémentation
 
