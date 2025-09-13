@@ -732,126 +732,7 @@ body.sidebar-open .chat-card-indicator {
     0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
-/* ========== CONTRÔLES DE ZOOM WORKSPACE ========== */
-
-.zoom-controls {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1002;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 16px;
-    padding: 12px 20px;
-    box-shadow: 
-        0 8px 32px rgba(0, 0, 0, 0.12),
-        0 2px 8px rgba(0, 0, 0, 0.06),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    user-select: none;
-    min-width: 280px;
-    max-width: 320px;
-}
-
-.zoom-controls::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        135deg, 
-        rgba(255, 255, 255, 0.3) 0%, 
-        rgba(255, 255, 255, 0.1) 50%,
-        rgba(255, 255, 255, 0.2) 100%
-    );
-    border-radius: 16px;
-    pointer-events: none;
-    z-index: 0;
-}
-
-.zoom-controls:hover {
-    transform: translateX(-50%) translateY(-2px);
-    box-shadow: 
-        0 16px 48px rgba(0, 0, 0, 0.15),
-        0 4px 16px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-/* Affichage du pourcentage */
-.zoom-percentage {
-    position: relative;
-    z-index: 1;
-    font-size: 14px;
-    font-weight: 700;
-    color: #2f2f2e;
-    min-width: 42px;
-    text-align: left;
-    font-family: "Inter", monospace;
-    background: rgba(255, 255, 255, 0.7);
-    padding: 6px 10px;
-    border-radius: 8px;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(10px);
-}
-
-.zoom-percentage.changed {
-    background: rgba(47, 47, 46, 0.1);
-    transform: scale(1.05);
-    border-color: rgba(47, 47, 46, 0.15);
-}
-
-/* Conteneur du slider */
-.zoom-slider-container {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    flex: 1;
-    min-width: 140px;
-    max-width: 180px;
-    position: relative;
-}
-
-/* Slider de zoom personnalisé */
-.zoom-slider {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 6px;
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    outline: none;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    position: relative;
-}
-
-.zoom-slider:hover {
-    background: rgba(0, 0, 0, 0.15);
-}
-
-/* Track rempli (simulé avec un pseudo-élément) */
-.zoom-slider::before {
-    content: '';
-    position: relative;
-    display: block;
-    height: 6px;
-    background: linear-gradient(90deg, #2f2f2e 0%, #666 100%);
-    border-radius: 3px;
-    width: var(--fill-width, 50%);
-    transition: width 0.2s ease;
-}
-
-/* ========== CONTRÔLES DE ZOOM WORKSPACE (clean) ========== */
+/* ========== CONTRÔLES DE ZOOM WORKSPACE (clean minimal) ========== */
 
 .zoom-controls {
   position: fixed;
@@ -872,7 +753,7 @@ body.sidebar-open .chat-card-indicator {
   max-width: 260px;
 }
 
-/* Affichage du pourcentage */
+/* Pourcentage affiché à gauche */
 .zoom-percentage {
   font-size: 13px;
   font-weight: 600;
@@ -888,7 +769,7 @@ body.sidebar-open .chat-card-indicator {
   align-items: center;
 }
 
-/* Slider basique, sobre */
+/* Slider sobre */
 .zoom-slider {
   -webkit-appearance: none;
   appearance: none;
@@ -898,8 +779,10 @@ body.sidebar-open .chat-card-indicator {
   border-radius: 2px;
   outline: none;
   cursor: pointer;
+  position: relative;
 }
 
+/* Portion remplie */
 .zoom-slider::before {
   content: '';
   display: block;
@@ -929,54 +812,6 @@ body.sidebar-open .chat-card-indicator {
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-}
-
-/* Bouton reset */
-.zoom-reset {
-  width: 28px;
-  height: 28px;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #222;
-  font-size: 14px;
-  transition: background 0.2s ease;
-}
-
-.zoom-reset:hover {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-/* Icône reset */
-.zoom-reset::before {
-  content: '↻';
-}
-
-/* Tooltip minimal */
-.zoom-tooltip {
-  position: absolute;
-  bottom: 120%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #000;
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
-}
-
-.zoom-reset:hover .zoom-tooltip,
-.zoom-slider-container:hover .zoom-tooltip {
-  opacity: 1;
 }
 
 @keyframes resetPulse {
