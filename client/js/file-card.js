@@ -283,10 +283,12 @@ class FileCard extends BaseCard {
         if (this.isImageFile()) {
             return `
                 <div class="image-preview">
-                    <img id="preview-image-${this.data.id}" 
-                         src="${this.data.fileData}" 
-                         alt="${this.data.fileName}"
-                         class="preview-img">
+                    <div class="image-container" id="image-container-${this.data.id}">
+                        <img id="preview-image-${this.data.id}" 
+                             src="${this.data.fileData}" 
+                             alt="${this.data.fileName}"
+                             class="preview-img loaded">
+                    </div>
                 </div>
             `;
         }
@@ -353,11 +355,33 @@ class FileCard extends BaseCard {
         const uploadZone = this.element.querySelector('.file-upload-zone');
         if (!uploadZone) return;
 
+        // Events de base drag & drop
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             uploadZone.addEventListener(eventName, (e) => {
                 e.preventDefault();
                 e.stopPropagation();
             });
+        });
+
+        // États visuels
+        ['dragenter', 'dragover'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, () => {
+                uploadZone.classList.add('dragging');
+            });
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            uploadZone.addEventListener(eventName, () => {
+                uploadZone.classList.remove('dragging');
+            });
+        });
+
+        // Gestion du drop
+        uploadZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                this.processFile(files[0]);
+            }
         });
 
         ['dragenter', 'dragover'].forEach(eventName => {
