@@ -205,7 +205,7 @@ const handle_ask = async () => {
     // Vérifier si on doit router vers une carte
     if (isWorkspacePage() && isCardChatActive()) {
       // Router vers le gestionnaire de document
-      await window.workspaceManager.handleDocumentMessage(message, window.workspaceManager.activeCardChat);
+      await window.workspaceManager.handleCardChatMessage(message, window.workspaceManager.activeCardChat);
       return; // IMPORTANT : éviter le double traitement
     } else {
       // Fonctionnement normal du chat
