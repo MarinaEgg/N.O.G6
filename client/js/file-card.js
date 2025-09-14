@@ -25,25 +25,27 @@ class FileCard extends BaseCard {
         if (window.pdfjsLib) return;
         
         try {
-            // Charger PDF.js module
-            const script = document.createElement('script');
-            script.src = 'https://mozilla.github.io/pdf.js/build/pdf.mjs';
-            script.type = 'module';
-            document.head.appendChild(script);
+            // Approche directe avec script global
+            await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
             
-            // Attendre le chargement
-            await new Promise(resolve => {
-                script.onload = resolve;
-            });
-            
-            // Configuration worker
             if (window.pdfjsLib) {
                 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 
-                    'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
+                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                console.log('✅ PDF.js chargé avec succès');
             }
         } catch (error) {
-            console.error('Erreur chargement PDF.js:', error);
+            console.error('❌ Erreur chargement PDF.js:', error);
         }
+    }
+    
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error(`Erreur chargement ${src}`));
+            document.head.appendChild(script);
+        });
     }
 
     async renderPdfPage(pageNum) {
@@ -148,15 +150,39 @@ class FileCard extends BaseCard {
         // Mettre à jour les boutons selon l'état du fichier
         const downloadBtn = this.element.querySelector('.file-download-btn');
         const previewBtn = this.element.querySelector('.file-preview-btn');
+        const uploadBtn = this.element.querySelector('.file-upload-btn');
         
+        const hasFile = !!this.data.fileData;
+        
+        // Mettre à jour le bouton de téléchargement
         if (downloadBtn) {
-            downloadBtn.disabled = !this.data.fileData;
-            downloadBtn.style.opacity = this.data.fileData ? '1' : '0.5';
+            downloadBtn.disabled = !hasFile;
+            downloadBtn.title = hasFile ? 'Télécharger le fichier' : 'Aucun fichier à télécharger';
+            downloadBtn.classList.toggle('disabled', !hasFile);
         }
         
+        // Mettre à jour le bouton de prévisualisation
         if (previewBtn) {
-            previewBtn.disabled = !this.data.fileData;
-            previewBtn.style.opacity = this.data.fileData ? '1' : '0.5';
+            const canPreview = hasFile && (this.isImageFile() || this.isPdfFile());
+            previewBtn.disabled = !canPreview;
+            previewBtn.title = canPreview ? 
+                (this.isPreviewMode ? 'Voir les détails du fichier' : 'Voir la prévisualisation') :
+                'Prévisualisation non disponible';
+            previewBtn.classList.toggle('disabled', !canPreview);
+            
+            // Mettre à jour l'icône en fonction du mode
+            if (canPreview) {
+                const icon = previewBtn.querySelector('i');
+                if (icon) {
+                    icon.className = this.isPreviewMode ? 'fas fa-info-circle' : 'fas fa-eye';
+                }
+            }
+        }
+        
+        // Toujours activer le bouton d'upload
+        if (uploadBtn) {
+            uploadBtn.disabled = false;
+            uploadBtn.title = this.data.fileData ? 'Remplacer le fichier' : 'Téléverser un fichier';
         }
     }
 
@@ -332,10 +358,24 @@ class FileCard extends BaseCard {
             this.downloadFile();
         });
 
-        // Toggle preview
+        // Toggle preview avec meilleure gestion
         previewBtn?.addEventListener('click', (e) => {
             e.stopPropagation();
+            e.preventDefault();
             this.togglePreview();
+        });
+
+        // Gestion du clavier pour l'accessibilité
+        [uploadBtn, downloadBtn, previewBtn].forEach(btn => {
+            if (!btn) return;
+            
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    btn.click();
+                }
+            });
         });
 
         // Drag & drop
@@ -458,65 +498,105 @@ class FileCard extends BaseCard {
         document.body.removeChild(link);
     }
 
-    togglePreview() {
+    async togglePreview() {
+        if (!this.data.fileData) {
+            console.warn('⚠️ Pas de fichier à prévisualiser');
+            return;
+        }
+
         const fileView = this.element.querySelector(`#file-view-${this.data.id}`);
         const previewView = this.element.querySelector(`#file-preview-${this.data.id}`);
         const previewBtn = this.element.querySelector('.file-preview-btn');
 
-        this.isPreviewMode = !this.isPreviewMode;
+        if (!fileView || !previewView || !previewBtn) {
+            console.error('❌ Éléments du DOM introuvables pour le togglePreview');
+            return;
+        }
 
-        if (this.isPreviewMode) {
-            // Passer en mode preview
-            fileView.style.display = 'none';
-            previewView.style.display = 'block';
-            this.element.classList.add('preview-mode');
-            previewBtn.innerHTML = '<i class="fas fa-info-circle"></i>';
-            previewBtn.title = 'Voir infos fichier';
-
-            // Initialiser le preview selon le type
-            if (this.isPdfFile()) {
-                this.initPdfPreview();
-            }
-        } else {
+        // Toggle state
+        const isCurrentlyPreview = previewView.style.display !== 'none';
+        
+        if (isCurrentlyPreview) {
             // Retour au mode info
             fileView.style.display = 'block';
             previewView.style.display = 'none';
             this.element.classList.remove('preview-mode');
             previewBtn.innerHTML = '<i class="fas fa-eye"></i>';
             previewBtn.title = 'Voir preview';
+            this.isPreviewMode = false;
+            console.log('👁️ Retour mode info');
+        } else {
+            // Passage en mode preview
+            fileView.style.display = 'none';
+            previewView.style.display = 'block';
+            this.element.classList.add('preview-mode');
+            previewBtn.innerHTML = '<i class="fas fa-info-circle"></i>';
+            previewBtn.title = 'Voir infos fichier';
+            this.isPreviewMode = true;
+            console.log('👁️ Mode preview activé');
+
+            // Initialiser le preview selon le type
+            if (this.isPdfFile()) {
+                console.log('📄 Initialisation preview PDF');
+                await this.initPdfPreview();
+            } else if (this.isImageFile()) {
+                console.log('🖼️ Preview image déjà chargé');
+                // Attendre le chargement de l'image
+                const img = previewView.querySelector('img');
+                if (img) {
+                    try {
+                        await new Promise((resolve, reject) => {
+                            if (img.complete) {
+                                resolve();
+                            } else {
+                                img.onload = resolve;
+                                img.onerror = reject;
+                            }
+                        });
+                        console.log('✅ Image chargée avec succès');
+                    } catch (error) {
+                        console.error('❌ Erreur chargement image:', error);
+                        previewView.innerHTML = `
+                            <div class="preview-error">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Impossible de charger l'aperçu de l'image</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
         }
+        
+        this.saveData();
     }
 
     async initPdfPreview() {
-        if (!this.data.fileData) return;
-        
+        if (!this.data.fileData || !this.isPdfFile()) return;
+
         try {
-            // Charger PDF.js si nécessaire
             await this.loadPdfJs();
             
-            const { pdfjsLib } = window;
-            if (!pdfjsLib) throw new Error('PDF.js non disponible');
+            // Décoder le PDF
+            const pdfData = atob(this.data.fileData.split(',')[1]);
+            const loadingTask = window.pdfjsLib.getDocument({ data: pdfData });
             
-            // Charger le document PDF
-            const loadingTask = pdfjsLib.getDocument(this.data.fileData);
             this.pdfDoc = await loadingTask.promise;
-            
-            // Mettre à jour les infos de page
-            const pageInfo = this.element.querySelector(`#page-info-${this.data.id}`);
-            if (pageInfo) {
-                pageInfo.textContent = `Page 1 / ${this.pdfDoc.numPages}`;
-            }
-            
-            // Rendre la première page
             this.currentPage = 1;
-            await this.renderPdfPage(this.currentPage);
+            
+            // Mettre à jour l'interface
             this.setupPdfControls();
+            await this.renderPdfPage(this.currentPage);
             
         } catch (error) {
-            console.error('Erreur initialisation PDF:', error);
-            const preview = this.element.querySelector(`#file-preview-${this.data.id}`);
-            if (preview) {
-                preview.innerHTML = '<p class="error">Erreur lors du chargement du PDF</p>';
+            console.error('❌ Erreur initialisation PDF:', error);
+            const previewContainer = this.element.querySelector(`#file-preview-${this.data.id}`);
+            if (previewContainer) {
+                previewContainer.innerHTML = `
+                    <div class="preview-error">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Impossible de charger l'aperçu PDF</p>
+                    </div>
+                `;
             }
         }
     }
