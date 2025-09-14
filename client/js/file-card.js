@@ -25,19 +25,24 @@ class FileCard extends BaseCard {
         if (window.pdfjsLib) return;
         
         try {
-            // Charger PDF.js depuis CDN
-            await this.loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+            // Charger PDF.js module
+            const script = document.createElement('script');
+            script.src = 'https://mozilla.github.io/pdf.js/build/pdf.mjs';
+            script.type = 'module';
+            document.head.appendChild(script);
+            
+            // Attendre le chargement
+            await new Promise(resolve => {
+                script.onload = resolve;
+            });
+            
+            // Configuration worker
             if (window.pdfjsLib) {
                 window.pdfjsLib.GlobalWorkerOptions.workerSrc = 
-                    'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                    'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
             }
         } catch (error) {
-            console.error('Erreur chargement PDF:', error);
-            const canvas = this.element.querySelector(`#pdf-canvas-${this.data.id}`);
-            if (canvas) {
-                canvas.style.display = 'none';
-                canvas.parentNode.innerHTML = '<p class="error">Erreur lors du chargement du PDF</p>';
-            }
+            console.error('Erreur chargement PDF.js:', error);
         }
     }
 
@@ -49,8 +54,8 @@ class FileCard extends BaseCard {
             const canvas = this.element.querySelector(`#pdf-canvas-${this.data.id}`);
             const ctx = canvas.getContext('2d');
 
-            // Calculer l'échelle pour s'adapter à la carte
-            const cardWidth = this.element.offsetWidth - 32; // Padding
+            // Calculer échelle pour s'adapter à la carte
+            const cardWidth = this.element.offsetWidth - 32;
             const viewport = page.getViewport({ scale: 1 });
             const scale = Math.min(cardWidth / viewport.width, 0.8);
             const scaledViewport = page.getViewport({ scale });
@@ -58,6 +63,7 @@ class FileCard extends BaseCard {
             canvas.height = scaledViewport.height;
             canvas.width = scaledViewport.width;
 
+            // Rendu de la page
             const renderContext = {
                 canvasContext: ctx,
                 viewport: scaledViewport
@@ -68,6 +74,11 @@ class FileCard extends BaseCard {
             
         } catch (error) {
             console.error('Erreur rendu page PDF:', error);
+            const canvas = this.element.querySelector(`#pdf-canvas-${this.data.id}`);
+            if (canvas) {
+                canvas.style.display = 'none';
+                canvas.parentNode.innerHTML += '<p class="error">Erreur rendu PDF</p>';
+            }
         }
     }
 
@@ -462,18 +473,32 @@ class FileCard extends BaseCard {
     }
 
     async initPdfPreview() {
-        if (!window.pdfjsLib || !this.data.fileData) return;
-
+        if (!this.data.fileData) return;
+        
         try {
-            const loadingTask = window.pdfjsLib.getDocument(this.data.fileData);
+            // Charger PDF.js si nécessaire
+            await this.loadPdfJs();
+            
+            const { pdfjsLib } = window;
+            if (!pdfjsLib) throw new Error('PDF.js non disponible');
+            
+            // Charger le document PDF
+            const loadingTask = pdfjsLib.getDocument(this.data.fileData);
             this.pdfDoc = await loadingTask.promise;
             
+            // Mettre à jour les infos de page
+            const pageInfo = this.element.querySelector(`#page-info-${this.data.id}`);
+            if (pageInfo) {
+                pageInfo.textContent = `Page 1 / ${this.pdfDoc.numPages}`;
+            }
+            
+            // Rendre la première page
             this.currentPage = 1;
             await this.renderPdfPage(this.currentPage);
             this.setupPdfControls();
             
         } catch (error) {
-            console.error('Erreur lors de l\'initialisation du PDF:', error);
+            console.error('Erreur initialisation PDF:', error);
             const preview = this.element.querySelector(`#file-preview-${this.data.id}`);
             if (preview) {
                 preview.innerHTML = '<p class="error">Erreur lors du chargement du PDF</p>';
