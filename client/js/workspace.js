@@ -1,4 +1,4 @@
-// ========== CORRECTIONS WORKSPACE : ZOOM + PANNEAU ==========
+// ========== WORKSPACE MANAGER AVEC SYSTÈME MODULAIRE ==========
 
 class WorkspaceManager {
     constructor() {
@@ -27,6 +27,9 @@ class WorkspaceManager {
         this.maxZoom = 3.0;
         this.zoomStep = 0.1;
         
+        // Système de cartes modulaire
+        this.cardSystem = null;
+        
         this.init();
     }
 
@@ -52,18 +55,21 @@ class WorkspaceManager {
             return;
         }
 
+        // Initialiser le système de cartes
+        this.cardSystem = new CardSystem(this);
+        
         this.setupEventListeners();
         this.loadDefaultCards();
         this.setupChatIntegration();
         this.initZoom();
         this.loadZoomLevel();
-        this.updateCanvasBackground(); // NOUVEAU : Initialiser le fond
+        this.updateCanvasBackground();
         
-        console.log('WorkspaceManager initialized');
+        console.log('WorkspaceManager initialized with modular card system');
     }
 
     setupEventListeners() {
-        this.addCardBtn?.addEventListener('click', () => this.showAddCardDialog());
+        this.addCardBtn?.addEventListener('click', () => this.showCardTypeSelector());
         this.saveLayoutBtn?.addEventListener('click', () => this.saveLayout());
         
         // Canvas drag (panneau)
@@ -74,7 +80,106 @@ class WorkspaceManager {
         document.addEventListener('mouseup', () => this.handleGlobalMouseUp());
     }
 
-    // ========== DRAG CARDS - VERSION COMPENSÉE ZOOM ==========
+    // ========== NOUVEAU : SÉLECTEUR DE TYPE DE CARTE ==========
+    
+    showCardTypeSelector() {
+        // Créer l'overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        // Créer le sélecteur
+        const selector = document.createElement('div');
+        selector.className = 'card-type-selector';
+        selector.innerHTML = `
+            <button class="selector-cancel">
+                <i class="fas fa-times"></i>
+            </button>
+            <h3 class="selector-title">Choisir le type de carte</h3>
+            <div class="card-type-options">
+                <div class="card-type-option" data-type="text">
+                    <div class="card-type-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div>
+                        <h4 class="card-type-title">Carte Texte</h4>
+                        <p class="card-type-desc">Collaboration IA et documents</p>
+                    </div>
+                </div>
+                <div class="card-type-option" data-type="file">
+                    <div class="card-type-icon">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <div>
+                        <h4 class="card-type-title">Upload File</h4>
+                        <p class="card-type-desc">PDF et images avec preview</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Events
+        overlay.addEventListener('click', () => this.hideCardTypeSelector());
+        selector.addEventListener('click', (e) => e.stopPropagation());
+        
+        selector.querySelector('.selector-cancel').addEventListener('click', () => {
+            this.hideCardTypeSelector();
+        });
+        
+        selector.querySelectorAll('.card-type-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const cardType = option.getAttribute('data-type');
+                this.createCardOfType(cardType);
+                this.hideCardTypeSelector();
+            });
+        });
+        
+        // Ajouter au DOM
+        document.body.appendChild(overlay);
+        overlay.appendChild(selector);
+        
+        // Focus sur le sélecteur
+        selector.focus();
+    }
+
+    hideCardTypeSelector() {
+        const overlay = document.querySelector('.modal-overlay');
+        if (overlay) {
+            overlay.remove();
+        }
+    }
+
+    createCardOfType(type) {
+        let cardData;
+        const position = this.getNewCardPosition();
+        
+        if (type === 'text') {
+            cardData = TextCard.createDefaultTextCard(position);
+        } else if (type === 'file') {
+            cardData = FileCard.createDefaultFileCard(position);
+        } else {
+            console.error('Type de carte inconnu:', type);
+            return;
+        }
+        
+        const card = this.cardSystem.createCard(cardData);
+        if (card) {
+            this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+        }
+    }
+
+    getNewCardPosition() {
+        // Calculer une position libre pour la nouvelle carte
+        const baseX = 200;
+        const baseY = 200;
+        const offset = this.cards.length * 30;
+        
+        return {
+            x: baseX + offset,
+            y: baseY + offset
+        };
+    }
+
+    // ========== MÉTHODES DE DRAG ADAPTÉES AU SYSTÈME MODULAIRE ==========
     
     handleMouseDown(e, cardElement) {
         e.preventDefault();
@@ -87,7 +192,7 @@ class WorkspaceManager {
         const rect = cardElement.getBoundingClientRect();
         const canvasRect = this.canvas.getBoundingClientRect();
         
-        // CORRECTION : Compenser le zoom dans l'offset
+        // Compenser le zoom dans l'offset
         this.dragOffset = {
             x: (e.clientX - rect.left) / this.zoomLevel,
             y: (e.clientY - rect.top) / this.zoomLevel
@@ -104,12 +209,19 @@ class WorkspaceManager {
         
         const canvasRect = this.canvas.getBoundingClientRect();
         
-        // CORRECTION : Position compensée avec zoom et translation du canvas
+        // Position compensée avec zoom et translation du canvas
         const newX = (e.clientX - canvasRect.left) / this.zoomLevel - this.canvasOffset.x / this.zoomLevel - this.dragOffset.x;
         const newY = (e.clientY - canvasRect.top) / this.zoomLevel - this.canvasOffset.y / this.zoomLevel - this.dragOffset.y;
         
         this.selectedCard.style.left = newX + 'px';
         this.selectedCard.style.top = newY + 'px';
+        
+        // Mettre à jour les données de la carte
+        const cardId = this.selectedCard.getAttribute('data-card-id');
+        const card = this.cardSystem.getCard(cardId);
+        if (card) {
+            card.updatePosition(newX, newY);
+        }
     }
 
     handleMouseUp() {
@@ -126,7 +238,7 @@ class WorkspaceManager {
         this.dragOffset = { x: 0, y: 0 };
     }
 
-    // ========== CANVAS DRAG-TO-PAN - AMÉLIORÉ ==========
+    // ========== MÉTHODES CANVAS INCHANGÉES ==========
     
     handleCanvasMouseDown(e) {
         if (e.target.closest('.workspace-card')) {
@@ -156,7 +268,7 @@ class WorkspaceManager {
             this.canvasOffset.y += deltaY;
             
             this.applyCanvasTransform();
-            this.updateCanvasBackground(); // NOUVEAU : Mettre à jour le fond
+            this.updateCanvasBackground();
             
             this.canvasStartPos = { x: e.clientX, y: e.clientY };
             
@@ -183,8 +295,6 @@ class WorkspaceManager {
         this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x / scale}px, ${this.canvasOffset.y / scale}px)`;
     }
 
-    // ========== NOUVEAU : GESTION FOND À POIS RÉACTIF ==========
-    
     updateCanvasBackground() {
         if (!this.canvas) return;
         
@@ -196,7 +306,7 @@ class WorkspaceManager {
         this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
     }
 
-    // ========== ZOOM AMÉLIORÉ ==========
+    // ========== MÉTHODES ZOOM INCHANGÉES ==========
     
     initZoom() {
         this.createZoomControls();
@@ -247,13 +357,13 @@ class WorkspaceManager {
         this.setZoom(1.0);
         this.canvasOffset = { x: 0, y: 0 };
         this.applyCanvasTransform();
-        this.updateCanvasBackground(); // NOUVEAU : Reset du fond
+        this.updateCanvasBackground();
     }
 
     setZoom(zoomValue) {
         this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
         this.applyCanvasTransform();
-        this.updateCanvasBackground(); // NOUVEAU : Mettre à jour le fond
+        this.updateCanvasBackground();
         this.updateZoomDisplay();
         localStorage.setItem('workspace-zoom-level', this.zoomLevel.toString());
     }
@@ -275,12 +385,13 @@ class WorkspaceManager {
         }
     }
 
-    // ========== GESTION DES CARTES (IDENTIQUE) ==========
+    // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
 
     loadDefaultCards() {
         const defaultCards = [
             {
                 id: 'card-1',
+                type: 'text',
                 title: 'Due Diligence',
                 theme: 'Analyse Juridique',
                 description: 'Documents et analyses pour les opérations de due diligence',
@@ -290,6 +401,7 @@ class WorkspaceManager {
             },
             {
                 id: 'card-2', 
+                type: 'text',
                 title: 'Contrats Commerciaux',
                 theme: 'Rédaction',
                 description: 'Modèles et révisions de contrats commerciaux',
@@ -299,180 +411,58 @@ class WorkspaceManager {
             },
             {
                 id: 'card-3',
+                type: 'text',
                 title: 'Compliance',
                 theme: 'Conformité',
                 description: 'Suivi réglementaire et conformité juridique',
                 position: { x: 50, y: 300 },
                 stats: { documents: 31, lastUpdate: '3 heures' },
                 pinned: false
+            },
+            {
+                id: 'card-4',
+                type: 'file',
+                title: 'Documents Administratifs',
+                position: { x: 350, y: 300 },
+                pinned: false
             }
         ];
 
-        defaultCards.forEach(cardData => this.createCard(cardData));
-    }
-
-    createCard(cardData) {
-        const cardElement = document.createElement('div');
-        cardElement.className = 'workspace-card';
-        cardElement.id = cardData.id;
-        cardElement.setAttribute('data-card-id', cardData.id);
-        cardElement.style.left = cardData.position.x + 'px';
-        cardElement.style.top = cardData.position.y + 'px';
-        
-        if (cardData.pinned) {
-            cardElement.classList.add('pinned');
-        }
-
-        cardElement.innerHTML = `
-            <div class="card-header">
-                <h3 class="card-title">${cardData.title}</h3>
-                <div class="card-actions">
-                    <button class="card-action-btn chat-toggle-btn" title="Mode Collaboration" data-card-id="${cardData.id}">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="card-action-btn pin-btn ${cardData.pinned ? 'pinned' : ''}" title="Épingler">
-                        <i class="fas fa-thumbtack"></i>
-                    </button>
-                    <button class="card-action-btn clear-content-btn" title="Vider le contenu" data-card-id="${cardData.id}">
-                        <i class="fas fa-eraser"></i>
-                    </button>
-                    <button class="card-action-btn delete-btn" title="Supprimer">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-            
-            <div class="card-content-view" id="content-${cardData.id}">
-                <div class="card-theme">${cardData.theme}</div>
-                <p class="card-description">${cardData.description}</p>
-                <div class="card-stats">
-                    <div class="card-stat">
-                        <i class="fas fa-file"></i>
-                        <span>${cardData.stats.documents} docs</span>
-                    </div>
-                    <div class="card-stat">
-                        <i class="fas fa-clock"></i>
-                        <span>Mis à jour il y a ${cardData.stats.lastUpdate}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="card-document-view" id="document-${cardData.id}" style="display: none;">
-                <div class="document-content" contenteditable="true" id="doc-content-${cardData.id}">
-                    <h1 class="document-title">${cardData.title}</h1>
-                    <div class="document-body" id="doc-body-${cardData.id}">
-                        <p class="document-placeholder">Commencez à taper ou utilisez l'IA pour générer du contenu...</p>
-                    </div>
-                </div>
-                <div class="document-status">
-                    <span class="collab-indicator">✍️ Mode collaboration - Tapez ou utilisez la barre de chat</span>
-                </div>
-            </div>
-        `;
-
-        this.canvas.appendChild(cardElement);
-        this.setupCardEvents(cardElement, cardData);
-        this.cards.push({ element: cardElement, data: cardData });
-        this.loadCardDocument(cardData.id);
-    }
-
-    setupCardEvents(cardElement, cardData) {
-        cardElement.addEventListener('click', (e) => {
-            if (!this.isDragging) {
-                this.selectCard(cardElement);
+        defaultCards.forEach(cardData => {
+            const card = this.cardSystem.createCard(cardData);
+            if (card) {
+                this.cards.push({ element: card.element, data: card.data, cardInstance: card });
             }
         });
-        
-        // CORRECTION : Events de drag avec compensation zoom
-        cardElement.addEventListener('mousedown', (e) => this.handleMouseDown(e, cardElement));
-        
-        const pinBtn = cardElement.querySelector('.pin-btn');
-        const deleteBtn = cardElement.querySelector('.delete-btn');
-        const chatToggleBtn = cardElement.querySelector('.chat-toggle-btn');
-        const clearContentBtn = cardElement.querySelector('.clear-content-btn');
-        
-        pinBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.togglePin(cardElement);
-        });
-        
-        deleteBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.deleteCard(cardElement);
-        });
-        
-        chatToggleBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleDocumentMode(cardElement, cardData.id);
-        });
-        
-        clearContentBtn?.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.clearDocumentContent(cardData.id);
-        });
-
-        const docContent = cardElement.querySelector('.document-content');
-        if (docContent) {
-            docContent.addEventListener('input', () => {
-                this.saveDocumentContent(cardData.id);
-            });
-        }
     }
 
-    // ========== UTILITAIRES (IDENTIQUES) ==========
-
-    togglePin(cardElement) {
-        const isPinned = cardElement.classList.toggle('pinned');
-        const pinBtn = cardElement.querySelector('.pin-btn');
-        
-        if (isPinned) {
-            pinBtn.classList.add('pinned');
-            pinBtn.title = 'Désépingler';
-        } else {
-            pinBtn.classList.remove('pinned');
-            pinBtn.title = 'Épingler';
-        }
-    }
-
-    deleteCard(cardElement) {
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette carte ?')) {
-            cardElement.remove();
-            this.cards = this.cards.filter(card => card.element !== cardElement);
-        }
-    }
+    // ========== MÉTHODES UTILITAIRES ADAPTÉES ==========
 
     selectCard(cardElement) {
         this.cards.forEach(card => {
-            card.element.classList.remove('selected');
+            if (card.element) {
+                card.element.classList.remove('selected');
+            }
         });
         
         cardElement.classList.add('selected');
         this.selectedCard = cardElement;
     }
 
-    showAddCardDialog() {
-        const newCardData = {
-            id: 'card-' + Date.now(),
-            title: 'Nouvelle carte',
-            theme: 'Personnalisé',
-            description: 'Description de la nouvelle carte',
-            position: { x: 200, y: 200 },
-            stats: { documents: 0, lastUpdate: 'maintenant' },
-            pinned: false
-        };
-        
-        this.createCard(newCardData);
-    }
-
     saveLayout() {
-        const layout = this.cards.map(card => ({
-            id: card.data.id,
-            position: {
-                x: parseInt(card.element.style.left),
-                y: parseInt(card.element.style.top)
-            },
-            pinned: card.element.classList.contains('pinned')
-        }));
+        const layout = this.cards.map(card => {
+            if (!card.cardInstance) return null;
+            
+            return {
+                id: card.cardInstance.data.id,
+                type: card.cardInstance.data.type,
+                position: {
+                    x: parseInt(card.element.style.left) || 0,
+                    y: parseInt(card.element.style.top) || 0
+                },
+                pinned: card.element.classList.contains('pinned')
+            };
+        }).filter(Boolean);
         
         localStorage.setItem('workspace-layout', JSON.stringify(layout));
         
@@ -488,7 +478,7 @@ class WorkspaceManager {
         setTimeout(() => notification.remove(), 2000);
     }
 
-    // ========== INTÉGRATION CHAT (CONSERVÉ INTÉGRALEMENT) ==========
+    // ========== INTÉGRATION CHAT ADAPTÉE ==========
     
     setupChatIntegration() {
         if (window.location.pathname.includes('/workspace')) {
@@ -512,41 +502,6 @@ class WorkspaceManager {
         console.log('Chat functions intercepted for workspace');
     }
 
-    toggleDocumentMode(cardElement, cardId) {
-        const documentView = cardElement.querySelector('.card-document-view');
-        const contentView = cardElement.querySelector('.card-content-view');
-        const toggleBtn = cardElement.querySelector('.chat-toggle-btn');
-        
-        const isCurrentlyInDocMode = documentView.style.display !== 'none';
-        
-        if (isCurrentlyInDocMode) {
-            documentView.style.display = 'none';
-            contentView.style.display = 'block';
-            cardElement.classList.remove('document-mode');
-            toggleBtn.classList.remove('active');
-            toggleBtn.innerHTML = '<i class="fas fa-edit"></i>';
-            toggleBtn.title = 'Mode Collaboration';
-            
-            if (this.activeCardChat === cardId) {
-                this.disconnectFromMainChat();
-            }
-        } else {
-            documentView.style.display = 'block';
-            contentView.style.display = 'none';
-            cardElement.classList.add('document-mode');
-            toggleBtn.classList.add('active');
-            toggleBtn.innerHTML = '<i class="fas fa-file-alt"></i>';
-            toggleBtn.title = 'Retour vue normale';
-            
-            this.connectToMainChat(cardId, cardElement);
-            
-            const docContent = cardElement.querySelector('.document-content');
-            if (docContent) {
-                docContent.focus();
-            }
-        }
-    }
-    
     connectToMainChat(cardId, cardElement) {
         if (this.activeCardChat && this.activeCardChat !== cardId) {
             this.disconnectFromMainChat();
@@ -562,7 +517,6 @@ class WorkspaceManager {
         }
         
         this.showChatIndicator(cardElement.querySelector('.card-title').textContent);
-        this.displayCardConversation(cardId);
         
         console.log(`Carte ${cardId} connectée au chat principal`);
     }
@@ -580,8 +534,9 @@ class WorkspaceManager {
             indicator.remove();
         }
         
-        const prevCard = this.cards.find(c => c.data.id === this.activeCardChat);
-        if (prevCard) {
+        // Désactiver le bouton chat de l'ancienne carte
+        const prevCard = this.cards.find(c => c.data && c.data.id === this.activeCardChat);
+        if (prevCard && prevCard.element) {
             const chatToggleBtn = prevCard.element.querySelector('.chat-toggle-btn');
             chatToggleBtn?.classList.remove('active');
         }
@@ -614,152 +569,32 @@ class WorkspaceManager {
         }
     }
     
-    async handleDocumentMessage(message, cardId) {
+    async handleCardChatMessage(message, cardId) {
         try {
-            const cardElement = this.cards.find(c => c.data.id === cardId)?.element;
-            if (!cardElement) return;
-            
+            const card = this.cardSystem.getCard(cardId);
+            if (!card || card.type !== 'text') {
+                return window.original_ask_gpt(message);
+            }
+
+            // Utiliser les méthodes de la carte texte
             const sectionTitle = this.generateSectionTitle(message);
-            this.showDocumentGenerating(cardId, sectionTitle);
+            const token = this.generateMessageId();
+            
+            card.addDocumentSection(sectionTitle, token);
             
             const documentPrompt = this.buildDocumentPrompt(message, cardId);
-            const token = this.generateMessageId();
-            await this.streamToDocument(documentPrompt, cardId, sectionTitle, token);
+            await this.streamToDocument(documentPrompt, cardId, token, card);
             
         } catch (error) {
             console.error('Erreur génération document:', error);
-            this.addToDocument(cardId, `<p class="error">Erreur lors de la génération du contenu.</p>`);
-        }
-    }
-
-    buildDocumentPrompt(userMessage, cardId) {
-        const cardTitle = this.getCardTitle(cardId);
-        const existingContent = this.getDocumentContent(cardId);
-        
-        return `Tu es un assistant spécialisé dans la rédaction de documents professionnels.
-    
-Contexte : Document "${cardTitle}"
-Contenu existant : ${existingContent}
-
-Instruction : ${userMessage}
-
-Génère du contenu de document professionnel avec :
-- Des titres et sous-titres appropriés (utilise ##, ###)
-- Du texte structuré et professionnel
-- Des listes à puces si pertinent
-- Un style document de travail, pas de chat
-
-Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion de chatbot.`;
-    }
-
-    generateSectionTitle(message) {
-        let title = message.trim();
-        title = title.replace(/^(qu'est-ce que|comment|pourquoi|quand|où|qui|quoi)\s*/i, '');
-        title = title.replace(/\?$/, '');
-        title = title.charAt(0).toUpperCase() + title.slice(1);
-        
-        if (title.length > 60) {
-            title = title.substring(0, 57) + '...';
-        }
-        
-        return title || 'Nouvelle section';
-    }
-
-    showDocumentGenerating(cardId, sectionTitle) {
-        const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (!docBody) return;
-        
-        const placeholder = docBody.querySelector('.document-placeholder');
-        if (placeholder) {
-            placeholder.remove();
-        }
-        
-        const generatingHTML = `
-            <div class="generating-section" id="generating-${cardId}">
-                <h2 class="section-title">${sectionTitle}</h2>
-                <p class="generating-text">
-                    <i class="fas fa-spinner fa-spin"></i> 
-                    Génération en cours...
-                </p>
-            </div>
-        `;
-        
-        docBody.insertAdjacentHTML('beforeend', generatingHTML);
-        docBody.scrollTop = docBody.scrollHeight;
-    }
-
-    finalizeDocumentSection(cardId, token, content) {
-        const sectionContent = document.getElementById(`content-${token}`);
-        if (!sectionContent) return;
-        
-        const formattedContent = this.formatDocumentContent(content);
-        sectionContent.innerHTML = formattedContent;
-    }
-
-    formatDocumentContent(content) {
-        if (!content) return '';
-        
-        if (window.marked) {
-            return window.marked.parse(content);
-        }
-        
-        return content
-            .replace(/\n\n+/g, '</p><p>')
-            .replace(/\n/g, '<br>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
-    }
-
-    saveDocumentContent(cardId) {
-        const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (!docBody) return;
-        
-        const content = docBody.innerHTML;
-        localStorage.setItem(`workspace-doc-${cardId}`, content);
-    }
-
-    loadCardDocument(cardId) {
-        const content = localStorage.getItem(`workspace-doc-${cardId}`);
-        if (content) {
-            const docBody = document.getElementById(`doc-body-${cardId}`);
-            if (docBody) {
-                docBody.innerHTML = content;
+            const card = this.cardSystem.getCard(cardId);
+            if (card && card.type === 'text') {
+                card.addDocumentSection('Erreur', 'error-' + Date.now());
             }
         }
     }
 
-    getDocumentContent(cardId) {
-        const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (!docBody) return '';
-        
-        return docBody.textContent || docBody.innerText || '';
-    }
-
-    clearDocumentContent(cardId) {
-        if (confirm('Vider tout le contenu de ce document ?')) {
-            const docBody = document.getElementById(`doc-body-${cardId}`);
-            if (docBody) {
-                docBody.innerHTML = '<p class="document-placeholder">Commencez à taper ou utilisez l\'IA pour générer du contenu...</p>';
-            }
-            localStorage.removeItem(`workspace-doc-${cardId}`);
-            console.log(`Document vidé pour la carte ${cardId}`);
-        }
-    }
-
-    getCardTitle(cardId) {
-        const card = this.cards.find(c => c.data.id === cardId);
-        return card ? card.data.title : 'Carte inconnue';
-    }
-
-    displayCardConversation(cardId) {
-        console.log(`Affichage conversation pour carte ${cardId}`);
-    }
-
-    generateMessageId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    async streamToDocument(prompt, cardId, sectionTitle, token) {
+    async streamToDocument(prompt, cardId, token, cardInstance) {
         try {
             const response = await fetch(`/backend-api/v2/conversation`, {
                 method: 'POST',
@@ -787,9 +622,6 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
             let buffer = '';
             let generatedContent = '';
             
-            this.hideDocumentGenerating(cardId);
-            this.startDocumentSection(cardId, sectionTitle, token);
-            
             while (true) {
                 const { value, done } = await reader.read();
                 if (done) break;
@@ -802,8 +634,7 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
                     if (line.startsWith('data: ')) {
                         const eventData = line.slice(6).trim();
                         if (eventData === '[DONE]') {
-                            this.finalizeDocumentSection(cardId, token, generatedContent);
-                            this.saveDocumentContent(cardId);
+                            cardInstance.finalizeDocumentSection(token, generatedContent);
                             return;
                         }
                         
@@ -811,7 +642,7 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
                             const dataObject = JSON.parse(eventData);
                             if (dataObject.response) {
                                 generatedContent += dataObject.response;
-                                this.updateDocumentSection(cardId, token, generatedContent);
+                                cardInstance.updateDocumentSection(token, generatedContent);
                             }
                         } catch (e) {
                             console.error('Erreur parsing JSON:', e);
@@ -821,50 +652,272 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
             }
         } catch (error) {
             console.error('Erreur streaming document:', error);
-            this.hideDocumentGenerating(cardId);
-            this.addToDocument(cardId, `<p class="error">Erreur de connexion.</p>`);
+            cardInstance.finalizeDocumentSection(token, 'Erreur de connexion.');
         }
     }
 
-    hideDocumentGenerating(cardId) {
-        const indicator = document.getElementById(`generating-${cardId}`);
-        if (indicator) {
-            indicator.remove();
+    buildDocumentPrompt(userMessage, cardId) {
+        const card = this.cardSystem.getCard(cardId);
+        const cardTitle = card ? card.data.title : 'Document';
+        const existingContent = card ? card.getDocumentContent() : '';
+        
+        return `Tu es un assistant spécialisé dans la rédaction de documents professionnels.
+
+Contexte : Document "${cardTitle}"
+Contenu existant : ${existingContent}
+
+Instruction : ${userMessage}
+
+Génère du contenu de document professionnel avec :
+- Des titres et sous-titres appropriés (utilise ##, ###)
+- Du texte structuré et professionnel
+- Des listes à puces si pertinent
+- Un style document de travail, pas de chat
+
+Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion de chatbot.`;
+    }
+
+    generateSectionTitle(message) {
+        let title = message.trim();
+        title = title.replace(/^(qu'est-ce que|comment|pourquoi|quand|où|qui|quoi)\s*/i, '');
+        title = title.replace(/\?$/, '');
+        title = title.charAt(0).toUpperCase() + title.slice(1);
+        
+        if (title.length > 60) {
+            title = title.substring(0, 57) + '...';
+        }
+        
+        return title || 'Nouvelle section';
+    }
+
+    generateMessageId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // ========== MÉTHODES DE COMPATIBILITÉ AVEC L'ANCIEN SYSTÈME ==========
+
+    addCard(cardData = null) {
+        // Méthode de compatibilité - redirige vers le nouveau système
+        if (cardData) {
+            const card = this.cardSystem.createCard(cardData);
+            if (card) {
+                this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+                return card;
+            }
+        } else {
+            // Si pas de données, afficher le sélecteur
+            this.showCardTypeSelector();
         }
     }
 
-    startDocumentSection(cardId, sectionTitle, token) {
-        const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (!docBody) return;
-        
-        const sectionHTML = `
-            <div class="document-section" id="section-${token}">
-                <h2 class="section-title">${sectionTitle}</h2>
-                <div class="section-content" id="content-${token}">
-                    <span class="typing-cursor">▊</span>
-                </div>
-            </div>
-        `;
-        
-        docBody.insertAdjacentHTML('beforeend', sectionHTML);
-        docBody.scrollTop = docBody.scrollHeight;
+    // ========== MÉTHODES POUR LA SAUVEGARDE/CHARGEMENT ==========
+
+    loadLayout() {
+        try {
+            const saved = localStorage.getItem('workspace-layout');
+            if (!saved) return;
+
+            const layout = JSON.parse(saved);
+            
+            // Vider les cartes actuelles
+            this.cards.forEach(card => {
+                if (card.cardInstance) {
+                    card.cardInstance.destroy();
+                }
+            });
+            this.cards = [];
+
+            // Recréer les cartes depuis la sauvegarde
+            layout.forEach(savedCard => {
+                const card = this.cardSystem.createCard(savedCard);
+                if (card) {
+                    this.cards.push({ 
+                        element: card.element, 
+                        data: card.data, 
+                        cardInstance: card 
+                    });
+                }
+            });
+
+            console.log(`${layout.length} cartes rechargées depuis la sauvegarde`);
+            
+        } catch (error) {
+            console.error('Erreur chargement layout:', error);
+        }
     }
 
-    updateDocumentSection(cardId, token, content) {
-        const sectionContent = document.getElementById(`content-${token}`);
-        if (!sectionContent) return;
+    exportWorkspace() {
+        const workspace = {
+            cards: this.cards.map(card => card.cardInstance ? card.cardInstance.data : null).filter(Boolean),
+            canvasOffset: this.canvasOffset,
+            zoomLevel: this.zoomLevel,
+            exportDate: new Date().toISOString()
+        };
+
+        const blob = new Blob([JSON.stringify(workspace, null, 2)], { 
+            type: 'application/json' 
+        });
         
-        const formattedContent = this.formatDocumentContent(content);
-        sectionContent.innerHTML = formattedContent + '<span class="typing-cursor">▊</span>';
-        
-        const docBody = document.getElementById(`doc-body-${cardId}`);
-        if (docBody) {
-            docBody.scrollTop = docBody.scrollHeight;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `workspace-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    importWorkspace(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const workspace = JSON.parse(e.target.result);
+                
+                // Vider l'espace de travail actuel
+                this.cards.forEach(card => {
+                    if (card.cardInstance) {
+                        card.cardInstance.destroy();
+                    }
+                });
+                this.cards = [];
+
+                // Importer les cartes
+                workspace.cards.forEach(cardData => {
+                    const card = this.cardSystem.createCard(cardData);
+                    if (card) {
+                        this.cards.push({ 
+                            element: card.element, 
+                            data: card.data, 
+                            cardInstance: card 
+                        });
+                    }
+                });
+
+                // Restaurer la vue
+                if (workspace.canvasOffset) {
+                    this.canvasOffset = workspace.canvasOffset;
+                }
+                if (workspace.zoomLevel) {
+                    this.setZoom(workspace.zoomLevel);
+                }
+
+                this.applyCanvasTransform();
+                this.updateCanvasBackground();
+
+                console.log('Workspace importé avec succès');
+                
+            } catch (error) {
+                console.error('Erreur import workspace:', error);
+                alert('Erreur lors de l\'importation du workspace');
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    // ========== MÉTHODES UTILITAIRES SUPPLÉMENTAIRES ==========
+
+    clearWorkspace() {
+        if (!confirm('Êtes-vous sûr de vouloir supprimer toutes les cartes ?')) {
+            return;
         }
+
+        this.cards.forEach(card => {
+            if (card.cardInstance) {
+                card.cardInstance.destroy();
+            }
+        });
+        
+        this.cards = [];
+        this.disconnectFromMainChat();
+        
+        // Nettoyer localStorage
+        Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('workspace-card-') || key.startsWith('workspace-doc-') || key.startsWith('workspace-file-')) {
+                localStorage.removeItem(key);
+            }
+        });
+        
+        console.log('Workspace vidé');
+    }
+
+    getWorkspaceStats() {
+        const textCards = this.cardSystem.getCardsByType('text');
+        const fileCards = this.cardSystem.getCardsByType('file');
+        const pinnedCards = this.cards.filter(card => 
+            card.element && card.element.classList.contains('pinned')
+        );
+
+        return {
+            totalCards: this.cards.length,
+            textCards: textCards.length,
+            fileCards: fileCards.length,
+            pinnedCards: pinnedCards.length,
+            activeChat: !!this.activeCardChat,
+            zoomLevel: this.zoomLevel,
+            canvasPosition: this.canvasOffset
+        };
+    }
+
+    // ========== MÉTHODES D'AIDE AU DÉVELOPPEMENT ==========
+
+    debugWorkspace() {
+        console.group('🔍 Workspace Debug Info');
+        console.log('Stats:', this.getWorkspaceStats());
+        console.log('Cards système:', this.cardSystem.cards);
+        console.log('Cards manager:', this.cards);
+        console.log('Canvas state:', {
+            offset: this.canvasOffset,
+            zoom: this.zoomLevel,
+            dragging: this.canvasIsDragging
+        });
+        console.log('Chat state:', {
+            activeCard: this.activeCardChat,
+            conversations: this.cardConversations
+        });
+        console.groupEnd();
+    }
+
+    // ========== EVENTS PERSONNALISÉS ==========
+
+    dispatchWorkspaceEvent(eventName, detail = {}) {
+        const event = new CustomEvent(`workspace:${eventName}`, {
+            detail: { workspaceManager: this, ...detail }
+        });
+        document.dispatchEvent(event);
+    }
+
+    // Dispatcher les événements importants
+    onCardAdded(card) {
+        this.dispatchWorkspaceEvent('cardAdded', { card });
+    }
+
+    onCardDeleted(cardId) {
+        this.dispatchWorkspaceEvent('cardDeleted', { cardId });
+    }
+
+    onChatConnected(cardId) {
+        this.dispatchWorkspaceEvent('chatConnected', { cardId });
+    }
+
+    onChatDisconnected() {
+        this.dispatchWorkspaceEvent('chatDisconnected');
     }
 }
+
+// ========== INITIALISATION GLOBALE ==========
 
 // Initialiser le workspace
 document.addEventListener('DOMContentLoaded', () => {
     window.workspaceManager = new WorkspaceManager();
+    
+    // Debug helper global
+    window.debugWorkspace = () => window.workspaceManager.debugWorkspace();
+    
+    console.log('🚀 Workspace Manager with modular cards system initialized');
 });
+
+// Export pour utilisation en module si nécessaire
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = WorkspaceManager;
+}
