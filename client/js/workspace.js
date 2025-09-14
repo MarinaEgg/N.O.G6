@@ -1,4 +1,4 @@
-// ========== WORKSPACE MANAGER AVEC SYSTÈME MODULAIRE ==========
+// ========== WORKSPACE MANAGER AVEC SYSTÈME MODULAIRE - VERSION FIXÉE ==========
 
 class WorkspaceManager {
     constructor() {
@@ -55,7 +55,7 @@ class WorkspaceManager {
             return;
         }
 
-        // Initialiser le système de cartes
+        // 🔧 FIX : Initialiser le système de cartes AVANT les event listeners
         this.cardSystem = new CardSystem(this);
         
         this.setupEventListeners();
@@ -69,7 +69,14 @@ class WorkspaceManager {
     }
 
     setupEventListeners() {
-        this.addCardBtn?.addEventListener('click', () => this.showCardTypeSelector());
+        // 🔧 FIX : Appeler la bonne méthode avec debug
+        this.addCardBtn?.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('🎯 Bouton ajouter carte cliqué');
+            this.showCardTypeSelector();
+        });
+        
         this.saveLayoutBtn?.addEventListener('click', () => this.saveLayout());
         
         // Canvas drag (panneau)
@@ -78,11 +85,26 @@ class WorkspaceManager {
         // Events globaux
         document.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
         document.addEventListener('mouseup', () => this.handleGlobalMouseUp());
+        
+        // 🔧 FIX : Escape pour fermer les modals
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideCardTypeSelector();
+            }
+        });
     }
 
-    // ========== NOUVEAU : SÉLECTEUR DE TYPE DE CARTE ==========
+    // ========== FIX : SÉLECTEUR DE TYPE DE CARTE - VERSION CORRIGÉE ==========
     
     showCardTypeSelector() {
+        console.log('🎯 showCardTypeSelector appelée');
+        
+        // Supprimer l'ancien overlay s'il existe
+        const existingOverlay = document.querySelector('.modal-overlay');
+        if (existingOverlay) {
+            existingOverlay.remove();
+        }
+        
         // Créer l'overlay
         const overlay = document.createElement('div');
         overlay.className = 'modal-overlay';
@@ -118,16 +140,25 @@ class WorkspaceManager {
         `;
         
         // Events
-        overlay.addEventListener('click', () => this.hideCardTypeSelector());
-        selector.addEventListener('click', (e) => e.stopPropagation());
-        
-        selector.querySelector('.selector-cancel').addEventListener('click', () => {
+        overlay.addEventListener('click', () => {
+            console.log('🎯 Overlay cliqué - fermeture');
             this.hideCardTypeSelector();
         });
         
+        selector.addEventListener('click', (e) => e.stopPropagation());
+        
+        // Bouton fermer
+        const cancelBtn = selector.querySelector('.selector-cancel');
+        cancelBtn.addEventListener('click', () => {
+            console.log('🎯 Bouton cancel cliqué');
+            this.hideCardTypeSelector();
+        });
+        
+        // Options de type
         selector.querySelectorAll('.card-type-option').forEach(option => {
             option.addEventListener('click', () => {
                 const cardType = option.getAttribute('data-type');
+                console.log('🎯 Type sélectionné:', cardType);
                 this.createCardOfType(cardType);
                 this.hideCardTypeSelector();
             });
@@ -137,33 +168,58 @@ class WorkspaceManager {
         document.body.appendChild(overlay);
         overlay.appendChild(selector);
         
-        // Focus sur le sélecteur
-        selector.focus();
+        console.log('🎯 Modal ajoutée au DOM');
     }
 
     hideCardTypeSelector() {
+        console.log('🎯 hideCardTypeSelector appelée');
         const overlay = document.querySelector('.modal-overlay');
         if (overlay) {
             overlay.remove();
+            console.log('🎯 Modal supprimée');
         }
     }
 
     createCardOfType(type) {
+        console.log('🎯 Création carte type:', type);
+        
+        // 🔧 FIX : Vérifier que le système de cartes est initialisé
+        if (!this.cardSystem) {
+            console.error('❌ Card system not initialized');
+            return;
+        }
+        
         let cardData;
         const position = this.getNewCardPosition();
         
+        // 🔧 FIX : Vérifier que les classes existent
         if (type === 'text') {
+            if (typeof TextCard === 'undefined') {
+                console.error('❌ TextCard class not found - script pas chargé');
+                alert('Erreur: TextCard non trouvée. Vérifiez que text-card.js est chargé.');
+                return;
+            }
             cardData = TextCard.createDefaultTextCard(position);
         } else if (type === 'file') {
+            if (typeof FileCard === 'undefined') {
+                console.error('❌ FileCard class not found - script pas chargé');
+                alert('Erreur: FileCard non trouvée. Vérifiez que file-card.js est chargé.');
+                return;
+            }
             cardData = FileCard.createDefaultFileCard(position);
         } else {
-            console.error('Type de carte inconnu:', type);
+            console.error('❌ Type de carte inconnu:', type);
             return;
         }
+        
+        console.log('🎯 Données carte:', cardData);
         
         const card = this.cardSystem.createCard(cardData);
         if (card) {
             this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+            console.log('✅ Carte créée avec succès:', type);
+        } else {
+            console.error('❌ Échec création carte');
         }
     }
 
@@ -388,6 +444,14 @@ class WorkspaceManager {
     // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
 
     loadDefaultCards() {
+        console.log('🎯 Chargement cartes par défaut...');
+        
+        // 🔧 FIX : Vérifier que le système est prêt
+        if (!this.cardSystem) {
+            console.error('❌ Card system not ready for default cards');
+            return;
+        }
+        
         const defaultCards = [
             {
                 id: 'card-1',
@@ -428,12 +492,20 @@ class WorkspaceManager {
             }
         ];
 
+        let cardsCreated = 0;
         defaultCards.forEach(cardData => {
+            console.log('🎯 Tentative création carte:', cardData.id, cardData.type);
             const card = this.cardSystem.createCard(cardData);
             if (card) {
                 this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+                cardsCreated++;
+                console.log('✅ Carte créée:', cardData.id);
+            } else {
+                console.error('❌ Échec création carte:', cardData.id);
             }
         });
+        
+        console.log(`🎯 ${cardsCreated}/${defaultCards.length} cartes créées`);
     }
 
     // ========== MÉTHODES UTILITAIRES ADAPTÉES ==========
@@ -710,198 +782,21 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
         }
     }
 
-    // ========== MÉTHODES POUR LA SAUVEGARDE/CHARGEMENT ==========
-
-    loadLayout() {
-        try {
-            const saved = localStorage.getItem('workspace-layout');
-            if (!saved) return;
-
-            const layout = JSON.parse(saved);
-            
-            // Vider les cartes actuelles
-            this.cards.forEach(card => {
-                if (card.cardInstance) {
-                    card.cardInstance.destroy();
-                }
-            });
-            this.cards = [];
-
-            // Recréer les cartes depuis la sauvegarde
-            layout.forEach(savedCard => {
-                const card = this.cardSystem.createCard(savedCard);
-                if (card) {
-                    this.cards.push({ 
-                        element: card.element, 
-                        data: card.data, 
-                        cardInstance: card 
-                    });
-                }
-            });
-
-            console.log(`${layout.length} cartes rechargées depuis la sauvegarde`);
-            
-        } catch (error) {
-            console.error('Erreur chargement layout:', error);
-        }
-    }
-
-    exportWorkspace() {
-        const workspace = {
-            cards: this.cards.map(card => card.cardInstance ? card.cardInstance.data : null).filter(Boolean),
-            canvasOffset: this.canvasOffset,
-            zoomLevel: this.zoomLevel,
-            exportDate: new Date().toISOString()
-        };
-
-        const blob = new Blob([JSON.stringify(workspace, null, 2)], { 
-            type: 'application/json' 
-        });
-        
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `workspace-${new Date().toISOString().split('T')[0]}.json`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    importWorkspace(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const workspace = JSON.parse(e.target.result);
-                
-                // Vider l'espace de travail actuel
-                this.cards.forEach(card => {
-                    if (card.cardInstance) {
-                        card.cardInstance.destroy();
-                    }
-                });
-                this.cards = [];
-
-                // Importer les cartes
-                workspace.cards.forEach(cardData => {
-                    const card = this.cardSystem.createCard(cardData);
-                    if (card) {
-                        this.cards.push({ 
-                            element: card.element, 
-                            data: card.data, 
-                            cardInstance: card 
-                        });
-                    }
-                });
-
-                // Restaurer la vue
-                if (workspace.canvasOffset) {
-                    this.canvasOffset = workspace.canvasOffset;
-                }
-                if (workspace.zoomLevel) {
-                    this.setZoom(workspace.zoomLevel);
-                }
-
-                this.applyCanvasTransform();
-                this.updateCanvasBackground();
-
-                console.log('Workspace importé avec succès');
-                
-            } catch (error) {
-                console.error('Erreur import workspace:', error);
-                alert('Erreur lors de l\'importation du workspace');
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    // ========== MÉTHODES UTILITAIRES SUPPLÉMENTAIRES ==========
-
-    clearWorkspace() {
-        if (!confirm('Êtes-vous sûr de vouloir supprimer toutes les cartes ?')) {
-            return;
-        }
-
-        this.cards.forEach(card => {
-            if (card.cardInstance) {
-                card.cardInstance.destroy();
-            }
-        });
-        
-        this.cards = [];
-        this.disconnectFromMainChat();
-        
-        // Nettoyer localStorage
-        Object.keys(localStorage).forEach(key => {
-            if (key.startsWith('workspace-card-') || key.startsWith('workspace-doc-') || key.startsWith('workspace-file-')) {
-                localStorage.removeItem(key);
-            }
-        });
-        
-        console.log('Workspace vidé');
-    }
-
-    getWorkspaceStats() {
-        const textCards = this.cardSystem.getCardsByType('text');
-        const fileCards = this.cardSystem.getCardsByType('file');
-        const pinnedCards = this.cards.filter(card => 
-            card.element && card.element.classList.contains('pinned')
-        );
-
-        return {
-            totalCards: this.cards.length,
-            textCards: textCards.length,
-            fileCards: fileCards.length,
-            pinnedCards: pinnedCards.length,
-            activeChat: !!this.activeCardChat,
-            zoomLevel: this.zoomLevel,
-            canvasPosition: this.canvasOffset
-        };
-    }
-
-    // ========== MÉTHODES D'AIDE AU DÉVELOPPEMENT ==========
+    // ========== MÉTHODES DEBUG ==========
 
     debugWorkspace() {
         console.group('🔍 Workspace Debug Info');
-        console.log('Stats:', this.getWorkspaceStats());
-        console.log('Cards système:', this.cardSystem.cards);
+        console.log('Cards count:', this.cards.length);
+        console.log('Card system:', this.cardSystem);
+        console.log('Cards système:', this.cardSystem ? this.cardSystem.cards : 'not initialized');
         console.log('Cards manager:', this.cards);
-        console.log('Canvas state:', {
-            offset: this.canvasOffset,
-            zoom: this.zoomLevel,
-            dragging: this.canvasIsDragging
-        });
-        console.log('Chat state:', {
-            activeCard: this.activeCardChat,
-            conversations: this.cardConversations
+        console.log('Classes disponibles:', {
+            CardSystem: typeof CardSystem !== 'undefined',
+            BaseCard: typeof BaseCard !== 'undefined',
+            TextCard: typeof TextCard !== 'undefined',
+            FileCard: typeof FileCard !== 'undefined'
         });
         console.groupEnd();
-    }
-
-    // ========== EVENTS PERSONNALISÉS ==========
-
-    dispatchWorkspaceEvent(eventName, detail = {}) {
-        const event = new CustomEvent(`workspace:${eventName}`, {
-            detail: { workspaceManager: this, ...detail }
-        });
-        document.dispatchEvent(event);
-    }
-
-    // Dispatcher les événements importants
-    onCardAdded(card) {
-        this.dispatchWorkspaceEvent('cardAdded', { card });
-    }
-
-    onCardDeleted(cardId) {
-        this.dispatchWorkspaceEvent('cardDeleted', { cardId });
-    }
-
-    onChatConnected(cardId) {
-        this.dispatchWorkspaceEvent('chatConnected', { cardId });
-    }
-
-    onChatDisconnected() {
-        this.dispatchWorkspaceEvent('chatDisconnected');
     }
 }
 
@@ -915,6 +810,20 @@ document.addEventListener('DOMContentLoaded', () => {
     window.debugWorkspace = () => window.workspaceManager.debugWorkspace();
     
     console.log('🚀 Workspace Manager with modular cards system initialized');
+    
+    // 🔧 DEBUG : Vérifier que tous les scripts sont chargés
+    setTimeout(() => {
+        console.log('🔍 Scripts check:', {
+            CardSystem: typeof CardSystem !== 'undefined',
+            BaseCard: typeof BaseCard !== 'undefined', 
+            TextCard: typeof TextCard !== 'undefined',
+            FileCard: typeof FileCard !== 'undefined'
+        });
+        
+        if (window.workspaceManager) {
+            window.workspaceManager.debugWorkspace();
+        }
+    }, 1000);
 });
 
 // Export pour utilisation en module si nécessaire
