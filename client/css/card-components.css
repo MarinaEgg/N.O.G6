@@ -111,24 +111,14 @@
 
 /* ========== PREVIEW STYLES ========== */
 
-/* Preview d'image */
+/* Image Preview Container */
 .image-preview {
     padding: 16px;
     text-align: center;
-}
-
-.preview-img {
-    max-width: 100%;
-    max-height: 400px;
-    object-fit: contain;
-    border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-/* Image Preview */
-.image-preview {
-    padding: 16px;
-    text-align: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .image-container {
@@ -143,25 +133,57 @@
     object-fit: contain;
     border-radius: 8px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    display: block;
+    margin: 0 auto;
     opacity: 0;
     transition: opacity 300ms ease-in;
-    transform: translate(-50%, -50%);
-    position: absolute;
-    top: 50%;
-    left: 50%;
 }
 
 .preview-img.loaded {
     opacity: 1;
-    position: relative;
-    transform: none;
-    top: auto;
-    left: auto;
 }
 
-/* Preview PDF */
+/* Preview error state */
+.preview-error {
+    padding: 20px;
+    text-align: center;
+    color: #e74c3c;
+}
+
+.preview-error i {
+    font-size: 32px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+.preview-error p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* PDF Preview Container */
 .pdf-preview {
     padding: 16px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.pdf-canvas-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+    min-height: 200px;
+}
+
+canvas.pdf-canvas {
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
 }
 
 .pdf-controls {
@@ -170,9 +192,12 @@
     justify-content: center;
     gap: 16px;
     margin-bottom: 16px;
-    padding: 8px;
+    padding: 8px 16px;
     background: rgba(47, 47, 46, 0.05);
     border-radius: 8px;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .pdf-btn {
@@ -199,6 +224,26 @@
 .pdf-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+
+.card-action-btn.file-preview-btn {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.card-action-btn.file-preview-btn:not([disabled]) {
+    opacity: 1;
+    cursor: pointer;
+}
+
+.card-action-btn.file-preview-btn:hover:not([disabled]) {
+    transform: translateY(-1px);
+}
+
+.card-action-btn.file-preview-btn.active {
+    background: rgba(249, 228, 121, 0.2);
+    color: #2f2f2e;
 }
 
 [class*="page-info-"] {
