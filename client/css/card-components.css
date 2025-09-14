@@ -503,3 +503,264 @@
 .pdf-canvas.loading {
     opacity: 0.5;
 }
+
+/* ========== STYLES MODAL SÉLECTEUR ========== */
+
+/* ========== OVERLAY ET MODAL BASE ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    animation: overlayFadeIn 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ========== SÉLECTEUR DE TYPE DE CARTE ========== */
+.card-type-selector {
+    position: relative;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 
+        0 16px 48px rgba(0, 0, 0, 0.12),
+        0 4px 16px rgba(0, 0, 0, 0.08);
+    z-index: 10000;
+    animation: modalFadeIn 0.3s ease;
+    max-width: 500px;
+    width: 90vw;
+}
+
+.card-type-selector::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg, 
+        rgba(255, 255, 255, 0.3) 0%, 
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0.2) 100%
+    );
+    border-radius: 16px;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.selector-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2f2f2e;
+    margin: 0 0 24px 0;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+}
+
+/* ========== BOUTON FERMER ========== */
+.selector-cancel {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: rgba(47, 47, 46, 0.1);
+    cursor: pointer;
+    font-size: 16px;
+    color: rgba(47, 47, 46, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.selector-cancel:hover {
+    background: rgba(47, 47, 46, 0.2);
+    color: #2f2f2e;
+    transform: scale(1.05);
+}
+
+/* ========== OPTIONS DE TYPE ========== */
+.card-type-options {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.card-type-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    border: 2px solid rgba(47, 47, 46, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.5);
+    min-width: 140px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-type-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        rgba(249, 228, 121, 0.05) 0%,
+        rgba(249, 228, 121, 0.02) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 0;
+}
+
+.card-type-option:hover::before {
+    opacity: 1;
+}
+
+.card-type-option:hover {
+    border-color: rgba(249, 228, 121, 0.6);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.card-type-option > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* ========== ICÔNE ET CONTENU ========== */
+.card-type-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+    color: rgba(47, 47, 46, 0.6);
+    transition: all 0.3s ease;
+}
+
+.card-type-option:hover .card-type-icon {
+    color: rgba(249, 228, 121, 0.9);
+    transform: scale(1.1);
+}
+
+.card-type-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2f2f2e;
+    margin: 0 0 8px 0;
+    font-family: "Inter", sans-serif;
+}
+
+.card-type-desc {
+    font-size: 12px;
+    color: rgba(47, 47, 46, 0.6);
+    text-align: center;
+    margin: 0;
+    line-height: 1.4;
+    font-family: "Inter", sans-serif;
+}
+
+/* ========== ANIMATIONS ========== */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes overlayFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 600px) {
+    .card-type-selector {
+        padding: 24px 20px;
+        margin: 20px;
+        width: calc(100vw - 40px);
+    }
+    
+    .card-type-options {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .card-type-option {
+        flex-direction: row;
+        text-align: left;
+        min-width: unset;
+        padding: 20px;
+        gap: 16px;
+    }
+    
+    .card-type-icon {
+        margin-bottom: 0;
+        font-size: 28px;
+        min-width: 40px;
+    }
+    
+    .selector-title {
+        font-size: 18px;
+        margin-bottom: 20px;
+    }
+}
+
+/* ========== ACCESSIBILITÉ ========== */
+.card-type-option:focus-visible {
+    outline: 2px solid rgba(249, 228, 121, 0.8);
+    outline-offset: 2px;
+}
+
+.selector-cancel:focus-visible {
+    outline: 2px solid rgba(47, 47, 46, 0.4);
+    outline-offset: 2px;
+}
+
+/* ========== ÉTATS ACTIFS ========== */
+.card-type-option:active {
+    transform: translateY(-2px) scale(0.98);
+}
+
+.selector-cancel:active {
+    transform: scale(0.95);
+}
+
+/* ========== SUPPORT RÉDUCTION MOUVEMENT ========== */
+@media (prefers-reduced-motion: reduce) {
+    .card-type-option,
+    .card-type-icon,
+    .modal-overlay,
+    .card-type-selector {
+        animation: none;
+        transition: none;
+    }
+    
+    .card-type-option:hover {
+        transform: none;
+    }
+    
+    .card-type-option:hover .card-type-icon {
+        transform: none;
+    }
+}
