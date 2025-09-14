@@ -219,6 +219,11 @@ class TextCard extends BaseCard {
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent;
         
+        // Mettre à jour le titre de la carte si c'est une nouvelle section
+        if (token.startsWith('section-') && !token.includes('error')) {
+            this.updateCardTitle(content);
+        }
+        
         this.saveDocumentContent();
     }
 
@@ -237,6 +242,30 @@ class TextCard extends BaseCard {
             .replace(/\*(.*?)\*/g, '<em>$1</em>');
     }
 
+    // Auto-génération du titre de carte
+    updateCardTitle(content) {
+        if (!content) return;
+        
+        // Extraire les 3-4 premiers mots significatifs
+        const words = content.trim().split(/\s+/);
+        const significantWords = words
+            .filter(word => word.length > 2 && !/^(le|la|les|de|du|des|un|une|et|ou|à|dans|pour|avec|sur|par)$/i.test(word))
+            .slice(0, 3);
+        
+        if (significantWords.length > 0) {
+            const newTitle = significantWords.join(' ');
+            this.data.title = newTitle;
+            
+            // Mettre à jour le DOM
+            const titleElement = this.element.querySelector('.card-title');
+            if (titleElement) {
+                titleElement.textContent = newTitle;
+            }
+            
+            this.saveData();
+        }
+    }
+    
     cleanup() {
         // Nettoyage spécifique aux cartes texte
         if (this.workspaceManager.activeCardChat === this.data.id) {
