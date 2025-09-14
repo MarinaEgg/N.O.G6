@@ -73,7 +73,7 @@ class WorkspaceManager {
         this.addCardBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('🎯 Bouton ajouter carte cliqué');
+            console.log('🎯 Bouton ajouter carte cliqué - addCardBtn trouvé:', !!this.addCardBtn);
             this.showCardTypeSelector();
         });
         
