@@ -648,10 +648,11 @@ class WorkspaceManager {
                 return window.original_ask_gpt(message);
             }
 
-            // Utiliser les méthodes de la carte texte
+            // Générer titre de section et token
             const sectionTitle = this.generateSectionTitle(message);
             const token = this.generateMessageId();
             
+            // CORRECTION : Appeler la bonne méthode d'instance
             card.addDocumentSection(sectionTitle, token);
             
             const documentPrompt = this.buildDocumentPrompt(message, cardId);
@@ -659,14 +660,16 @@ class WorkspaceManager {
             
         } catch (error) {
             console.error('Erreur génération document:', error);
+            // Affichage d'erreur dans la carte
             const card = this.cardSystem.getCard(cardId);
-            if (card && card.type === 'text') {
+            if (card) {
                 card.addDocumentSection('Erreur', 'error-' + Date.now());
+                card.finalizeDocumentSection('error-' + Date.now(), 'Erreur de connexion au service IA.');
             }
         }
     }
 
-    async streamToDocument(prompt, cardId, token, cardInstance) {
+    async streamToDocument(prompt, cardId, token, card) {
         try {
             const response = await fetch(`/backend-api/v2/conversation`, {
                 method: 'POST',
@@ -706,7 +709,7 @@ class WorkspaceManager {
                     if (line.startsWith('data: ')) {
                         const eventData = line.slice(6).trim();
                         if (eventData === '[DONE]') {
-                            cardInstance.finalizeDocumentSection(token, generatedContent);
+                            card.finalizeDocumentSection(token, generatedContent);
                             return;
                         }
                         
@@ -714,7 +717,7 @@ class WorkspaceManager {
                             const dataObject = JSON.parse(eventData);
                             if (dataObject.response) {
                                 generatedContent += dataObject.response;
-                                cardInstance.updateDocumentSection(token, generatedContent);
+                                card.updateDocumentSection(token, generatedContent);
                             }
                         } catch (e) {
                             console.error('Erreur parsing JSON:', e);
@@ -724,7 +727,7 @@ class WorkspaceManager {
             }
         } catch (error) {
             console.error('Erreur streaming document:', error);
-            cardInstance.finalizeDocumentSection(token, 'Erreur de connexion.');
+            card.finalizeDocumentSection(token, 'Erreur de connexion.');
         }
     }
 
