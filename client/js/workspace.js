@@ -343,18 +343,7 @@ class WorkspaceManager {
             </div>
             
             <div class="card-content-view" id="content-${cardData.id}">
-                <div class="card-theme">${cardData.theme}</div>
-                <p class="card-description">${cardData.description}</p>
-                <div class="card-stats">
-                    <div class="card-stat">
-                        <i class="fas fa-file"></i>
-                        <span>${cardData.stats.documents} docs</span>
-                    </div>
-                    <div class="card-stat">
-                        <i class="fas fa-clock"></i>
-                        <span>Mis à jour il y a ${cardData.stats.lastUpdate}</span>
-                    </div>
-                </div>
+                ${cardData.type === 'file-upload' ? this.generateFileUploadContent(cardData) : this.generateTextContent(cardData)}
             </div>
             
             <div class="card-document-view" id="document-${cardData.id}" style="display: none;">
@@ -451,8 +440,60 @@ class WorkspaceManager {
     }
 
     showAddCardDialog() {
-        const newCardData = {
+        this.showCardTypeSelector();
+    }
+
+    showCardTypeSelector() {
+        // Créer l'overlay du sélecteur
+        const overlay = document.createElement('div');
+        overlay.className = 'card-type-overlay';
+        overlay.innerHTML = `
+            <div class="card-type-selector">
+                <div class="selector-header">
+                    <h3>Nouvelle carte</h3>
+                    <button class="selector-close" onclick="this.parentElement.parentElement.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="card-type-options">
+                    <div class="card-type-option" onclick="window.workspaceManager.createTextCard()">
+                        <div class="option-icon">
+                            <i class="fas fa-file-text"></i>
+                        </div>
+                        <div class="option-content">
+                            <h4>Texte</h4>
+                            <p>Document collaboratif avec IA</p>
+                        </div>
+                    </div>
+                    <div class="card-type-option" onclick="window.workspaceManager.createFileUploadCard()">
+                        <div class="option-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="option-content">
+                            <h4>File Upload</h4>
+                            <p>PDF, Word, Excel, PowerPoint, images</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        // Fermer en cliquant sur l'overlay
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
+
+    createTextCard() {
+        document.querySelector('.card-type-overlay')?.remove();
+        
+        const cardData = {
             id: 'card-' + Date.now(),
+            type: 'text',
             title: 'Nouvelle carte',
             theme: 'Personnalisé',
             description: 'Description de la nouvelle carte',
@@ -461,7 +502,58 @@ class WorkspaceManager {
             pinned: false
         };
         
-        this.createCard(newCardData);
+        this.createCard(cardData);
+    }
+
+    createFileUploadCard() {
+        document.querySelector('.card-type-overlay')?.remove();
+        
+        const cardData = {
+            id: 'upload-card-' + Date.now(),
+            type: 'file-upload',
+            title: 'Upload File',
+            theme: 'File Upload',
+            description: 'Glissez-déposez vos fichiers ici',
+            position: { x: 200, y: 200 },
+            stats: { documents: 0, lastUpdate: 'maintenant' },
+            pinned: false
+        };
+        
+        this.createCard(cardData);
+    }
+
+    generateTextContent(cardData) {
+        return `
+            <div class="card-theme">${cardData.theme}</div>
+            <p class="card-description">${cardData.description}</p>
+            <div class="card-stats">
+                <div class="card-stat">
+                    <i class="fas fa-file"></i>
+                    <span>${cardData.stats.documents} docs</span>
+                </div>
+                <div class="card-stat">
+                    <i class="fas fa-clock"></i>
+                    <span>Mis à jour il y a ${cardData.stats.lastUpdate}</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateFileUploadContent(cardData) {
+        return `
+            <div class="file-upload-container">
+                <div class="file-upload-area" id="drop-area-${cardData.id}">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-instruction">Glissez-déposez vos fichiers ici</p>
+                    <p class="upload-subtext">ou</p>
+                    <button class="browse-btn" id="browse-btn-${cardData.id}">Parcourir les fichiers</button>
+                    <input type="file" id="file-input-${cardData.id}" class="file-input" multiple>
+                </div>
+                <div class="file-list" id="file-list-${cardData.id}">
+                    <!-- Les fichiers téléversés apparaîtront ici -->
+                </div>
+            </div>
+        `;
     }
 
     saveLayout() {
@@ -862,9 +954,302 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
             docBody.scrollTop = docBody.scrollHeight;
         }
     }
+
+    generateTextContent(cardData) {
+        return `
+            <div class="card-content-view" id="content-${cardData.id}">
+                <div class="card-theme">${cardData.theme}</div>
+                <p class="card-description">${cardData.description}</p>
+                <div class="card-stats">
+                    <div class="card-stat">
+                        <i class="fas fa-file"></i>
+                        <span>${cardData.stats.documents} docs</span>
+                    </div>
+                    <div class="card-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>Mis à jour il y a ${cardData.stats.lastUpdate}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-document-view" id="document-${cardData.id}" style="display: none;">
+                <div class="document-content" contenteditable="true" id="doc-content-${cardData.id}">
+                    <h1 class="document-title">${cardData.title}</h1>
+                    <div class="document-body" id="doc-body-${cardData.id}">
+                        <p class="document-placeholder">Commencez à taper ou utilisez l'IA pour générer du contenu...</p>
+                    </div>
+                </div>
+                <div class="document-status">
+                    <span class="collab-indicator">✍️ Mode collaboration - Tapez ou utilisez la barre de chat</span>
+                </div>
+            </div>
+        `;
+    }
+
+    generateFileUploadContent(cardData) {
+        return `
+            <div class="card-content-view file-upload-view" id="content-${cardData.id}">
+                <div class="upload-zone" ondrop="window.workspaceManager.handleDrop(event, '${cardData.id}')" 
+                     ondragover="window.workspaceManager.handleDragOver(event)"
+                     ondragleave="window.workspaceManager.handleDragLeave(event)"
+                     onclick="window.workspaceManager.triggerFileSelect('${cardData.id}')">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <div class="upload-text">Upload File</div>
+                    <div class="upload-subtext">PDF, DOCX, XLSX, PPTX, CSV, TXT, images</div>
+                    <div class="upload-hint">Cliquez ou glissez-déposez</div>
+                </div>
+                <input type="file" id="file-input-${cardData.id}" style="display: none" 
+                       accept=".pdf,.docx,.xlsx,.pptx,.csv,.txt,.jpg,.jpeg,.png,.gif,.bmp,.webp"
+                       onchange="window.workspaceManager.handleFileSelect(event, '${cardData.id}')">
+            </div>
+            
+            <div class="file-preview-view" id="preview-${cardData.id}" style="display: none;">
+                <div class="file-preview-content" id="preview-content-${cardData.id}">
+                    <!-- Le contenu du preview sera injecté ici -->
+                </div>
+            </div>
+        `;
+    }
+
+    // ========== GESTION DES FICHIERS ==========
+
+    triggerFileSelect(cardId) {
+        const fileInput = document.getElementById(`file-input-${cardId}`);
+        fileInput?.click();
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.add('drag-over');
+    }
+
+    handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+    }
+
+    handleDrop(e, cardId) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.currentTarget.classList.remove('drag-over');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            this.processFile(files[0], cardId);
+        }
+    }
+
+    handleFileSelect(e, cardId) {
+        const file = e.target.files[0];
+        if (file) {
+            this.processFile(file, cardId);
+        }
+    }
+
+    async processFile(file, cardId) {
+        const cardElement = document.getElementById(cardId);
+        const uploadView = cardElement?.querySelector('.card-content-view');
+        const previewView = cardElement?.querySelector('.file-preview-view');
+        
+        if (!cardElement || !uploadView || !previewView) return;
+        
+        // Afficher le loader avec animation
+        this.showFileLoader(cardId, file.name);
+        
+        try {
+            const fileType = this.getFileType(file);
+            let previewContent = '';
+            
+            switch (fileType) {
+                case 'image':
+                    previewContent = await this.generateImagePreview(file);
+                    break;
+                case 'pdf':
+                    previewContent = await this.generatePdfPreview(file);
+                    break;
+                default:
+                    previewContent = this.generateFilePreview(file);
+            }
+            
+            // Masquer upload, afficher preview
+            uploadView.style.display = 'none';
+            previewView.style.display = 'block';
+            previewView.querySelector('.file-preview-content').innerHTML = previewContent;
+            
+            // Mettre à jour le titre de la carte
+            const titleElement = cardElement.querySelector('.card-title');
+            if (titleElement) {
+                titleElement.textContent = file.name;
+            }
+            
+        } catch (error) {
+            console.error('Erreur traitement fichier:', error);
+            this.showFileError(cardId, 'Erreur lors du traitement du fichier');
+        }
+    }
+
+    showFileLoader(cardId, fileName) {
+        const uploadZone = document.querySelector(`#content-${cardId} .upload-zone`);
+        if (uploadZone) {
+            uploadZone.innerHTML = `
+                <div class="beautiful-loader">
+                    <div class="file-loader-container">
+                        <div class="leftEye"></div>
+                        <div class="rightEye"></div>
+                        <div class="mouth"></div>
+                    </div>
+                    <div class="loader-text">Traitement en cours...</div>
+                    <div class="loader-subtext">${fileName}</div>
+                </div>
+            `;
+        }
+    }
+
+    getFileType(file) {
+        const name = file.name.toLowerCase();
+        if (name.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/)) {
+            return 'image';
+        } else if (name.endsWith('.pdf')) {
+            return 'pdf';
+        } else {
+            return 'document';
+        }
+    }
+
+    async generateImagePreview(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                resolve(`
+                    <div class="image-preview">
+                        <div class="image-container">
+                            <img src="${e.target.result}" 
+                                 alt="${file.name}" 
+                                 class="preview-image"
+                                 onload="this.classList.add('loaded')">
+                            <div class="image-overlay">
+                                <button class="zoom-image-btn" onclick="window.workspaceManager.openImageModal('${e.target.result}', '${file.name}')" title="Agrandir">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-details">${this.formatFileSize(file.size)} • Image</div>
+                        </div>
+                    </div>
+                `);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    async generatePdfPreview(file) {
+        return `
+            <div class="pdf-preview">
+                <div class="pdf-header">
+                    <div class="pdf-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-details">${this.formatFileSize(file.size)} • PDF</div>
+                    </div>
+                </div>
+                <div class="pdf-content">
+                    <div class="pdf-text-content">
+                        <p>Extraction de texte PDF en cours de développement...</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    generateFilePreview(file) {
+        const iconMap = {
+            'docx': 'fa-file-word',
+            'doc': 'fa-file-word',
+            'xlsx': 'fa-file-excel',
+            'xls': 'fa-file-excel',
+            'pptx': 'fa-file-powerpoint',
+            'ppt': 'fa-file-powerpoint',
+            'txt': 'fa-file-text',
+            'csv': 'fa-file-csv'
+        };
+        
+        const extension = file.name.split('.').pop().toLowerCase();
+        const icon = iconMap[extension] || 'fa-file';
+        
+        return `
+            <div class="file-preview">
+                <div class="file-icon">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <div class="file-info">
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-details">${this.formatFileSize(file.size)} • ${extension.toUpperCase()}</div>
+                </div>
+            </div>
+        `;
+    }
+
+    openImageModal(src, fileName) {
+        const modal = document.createElement('div');
+        modal.className = 'image-modal';
+        modal.innerHTML = `
+            <div class="image-modal-content">
+                <div class="image-modal-header">
+                    <h3>${fileName}</h3>
+                    <button class="close-modal" onclick="this.closest('.image-modal').remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="image-modal-body">
+                    <img src="${src}" alt="${fileName}" class="modal-image">
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    showFileError(cardId, message) {
+        const uploadZone = document.querySelector(`#content-${cardId} .upload-zone`);
+        if (uploadZone) {
+            uploadZone.innerHTML = `
+                <div class="beautiful-loader">
+                    <div class="file-loader-container sad" style="opacity: 0.5;">
+                        <div class="leftEye"></div>
+                        <div class="rightEye"></div>
+                        <div class="mouth"></div>
+                    </div>
+                    <div class="loader-text error">${message}</div>
+                    <div class="loader-subtext">Cliquez pour réessayer</div>
+                </div>
+            `;
+        }
+    }
 }
 
-// Initialiser le workspace
+// Initialize the workspace when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.workspaceManager = new WorkspaceManager();
 });
