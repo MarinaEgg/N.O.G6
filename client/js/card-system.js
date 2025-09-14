@@ -137,8 +137,8 @@ class BaseCard {
         this.type = cardData.type;
         
         this.createElement();
-        this.setupEvents();
-        this.render();
+        this.render();        // D'ABORD le HTML
+        this.setupEvents();   // ENSUITE les événements
     }
 
     createElement() {
