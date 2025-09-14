@@ -648,11 +648,9 @@ class WorkspaceManager {
                 return window.original_ask_gpt(message);
             }
 
-            // Générer titre de section et token
             const sectionTitle = this.generateSectionTitle(message);
             const token = this.generateMessageId();
             
-            // CORRECTION : Appeler la bonne méthode d'instance
             card.addDocumentSection(sectionTitle, token);
             
             const documentPrompt = this.buildDocumentPrompt(message, cardId);
@@ -660,7 +658,6 @@ class WorkspaceManager {
             
         } catch (error) {
             console.error('Erreur génération document:', error);
-            // Affichage d'erreur dans la carte
             const card = this.cardSystem.getCard(cardId);
             if (card) {
                 card.addDocumentSection('Erreur', 'error-' + Date.now());
@@ -787,20 +784,6 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     // ========== MÉTHODES DEBUG ==========
 
-    debugWorkspace() {
-        console.group('🔍 Workspace Debug Info');
-        console.log('Cards count:', this.cards.length);
-        console.log('Card system:', this.cardSystem);
-        console.log('Cards système:', this.cardSystem ? this.cardSystem.cards : 'not initialized');
-        console.log('Cards manager:', this.cards);
-        console.log('Classes disponibles:', {
-            CardSystem: typeof CardSystem !== 'undefined',
-            BaseCard: typeof BaseCard !== 'undefined',
-            TextCard: typeof TextCard !== 'undefined',
-            FileCard: typeof FileCard !== 'undefined'
-        });
-        console.groupEnd();
-    }
 }
 
 // ========== INITIALISATION GLOBALE ==========
@@ -809,23 +792,9 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 document.addEventListener('DOMContentLoaded', () => {
     window.workspaceManager = new WorkspaceManager();
     
-    // Debug helper global
-    window.debugWorkspace = () => window.workspaceManager.debugWorkspace();
-    
-    console.log('🚀 Workspace Manager with modular cards system initialized');
-    
-    // 🔧 DEBUG : Vérifier que tous les scripts sont chargés
+    // Initialize workspace
     setTimeout(() => {
-        console.log('🔍 Scripts check:', {
-            CardSystem: typeof CardSystem !== 'undefined',
-            BaseCard: typeof BaseCard !== 'undefined', 
-            TextCard: typeof TextCard !== 'undefined',
-            FileCard: typeof FileCard !== 'undefined'
-        });
-        
-        if (window.workspaceManager) {
-            window.workspaceManager.debugWorkspace();
-        }
+        // Initialization code here
     }, 1000);
 });
 
