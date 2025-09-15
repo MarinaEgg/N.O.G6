@@ -5,8 +5,12 @@ class TextCard extends BaseCard {
         // Données par défaut pour les cartes texte
         const textDefaults = {
             type: 'text',
-            theme: cardData.theme || 'Personnalisé',
-            description: cardData.description || 'Description de la carte',
+            client: cardData.client || 'Client',
+            dossier: cardData.dossier || 'Nouveau dossier',
+            departement: cardData.departement || 'Département',
+            repertoires: cardData.repertoires || [],
+            theme: cardData.theme || cardData.client || 'Personnalisé',
+            description: cardData.description || cardData.dossier || 'Description de la carte',
             stats: cardData.stats || { documents: 0, lastUpdate: 'maintenant' },
             documentContent: cardData.documentContent || null
         };
