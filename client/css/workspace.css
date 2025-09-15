@@ -28,6 +28,27 @@
     font-weight: 700;
     color: #2f2f2e;
     margin: 0;
+    margin-left: 60px; /* Décalage pour éviter le hamburger */
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.workspace-header h1::before {
+    content: '📁';
+    font-size: 20px;
+}
+
+/* Responsive - réduire le décalage sur mobile */
+@media (max-width: 990px) {
+    .workspace-header h1 {
+        margin-left: 50px;
+        font-size: 20px;
+    }
+    
+    .workspace-header h1::before {
+        font-size: 18px;
+    }
 }
 
 .workspace-actions {
