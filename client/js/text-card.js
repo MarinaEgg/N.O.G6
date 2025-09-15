@@ -34,16 +34,16 @@ class TextCard extends BaseCard {
             ${CardSystem.createCardHeader(this.data, actions)}
             
             <div class="card-content-view" id="content-${this.data.id}">
-                <div class="card-theme">${this.data.theme}</div>
-                <p class="card-description">${this.data.description}</p>
-                <div class="card-stats">
-                    <div class="card-stat">
-                        <i class="fas fa-file"></i>
-                        <span>${this.data.stats.documents} docs</span>
+                <div class="card-theme">${this.data.client || 'Client'}</div>
+                <p class="card-description">${this.data.dossier || this.data.title}</p>
+                
+                <div class="card-juridique-info">
+                    <div class="repertoires-list">
+                        ${this.getRepertoiresHTML()}
                     </div>
-                    <div class="card-stat">
-                        <i class="fas fa-clock"></i>
-                        <span>Mis à jour il y a ${this.data.stats.lastUpdate}</span>
+                    <div class="departement-info">
+                        <i class="fas fa-building"></i>
+                        <span>${this.data.departement || 'Département'}</span>
                     </div>
                 </div>
             </div>
@@ -60,6 +60,17 @@ class TextCard extends BaseCard {
                 </div>
             </div>
         `;
+    }
+
+    getRepertoiresHTML() {
+        if (!this.data.repertoires || !Array.isArray(this.data.repertoires)) return '';
+        
+        return this.data.repertoires.map(rep => `
+            <div class="repertoire-item">
+                <i class="fas fa-folder" style="color: #f1c40f;"></i>
+                <span>${rep}</span>
+            </div>
+        `).join('');
     }
 
     setupSpecificEvents() {
