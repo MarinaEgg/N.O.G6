@@ -292,7 +292,10 @@ class TextCard extends BaseCard {
                 this.data.mainTitle = newTitle;
                 
                 // Mettre à jour le DOM directement
-                titleElement.textContent = newTitle;
+                const headerTitle = this.element.querySelector('.card-title');
+                if (headerTitle) {
+                    headerTitle.textContent = newTitle;
+                }
                 
                 this.saveData();
             }
@@ -310,12 +313,13 @@ class TextCard extends BaseCard {
     }
 
     // Méthodes statiques pour la création de cartes texte
-    static createDefaultTextCard(position = { x: 200, y: 200 }) {
+    static createDefaultTextCard(cardData = {}) {
+        const position = cardData.position || { x: 200, y: 200 };
         return {
             id: CardSystem.generateCardId('text'),
             type: 'text',
-            title: 'Nouvelle carte texte',
-            mainTitle: 'TITRE',
+            title: cardData.title || 'Nouvelle carte texte',
+            mainTitle: cardData.title || 'TITRE',
             theme: 'Personnalisé',
             description: 'Description de la nouvelle carte',
             position,
