@@ -84,7 +84,7 @@ class CardSystem {
 
         return `
             <div class="card-header">
-                <h3 class="card-title">${cardData.title}</h3>
+                <h3 class="card-title" contenteditable="true" id="main-title-${cardData.id}">${cardData.mainTitle || cardData.title || 'TITRE'}</h3>
                 <div class="card-actions">
                     ${allActions.map(action => `
                         <button class="card-action-btn ${action.class} ${action.pinned ? 'pinned' : ''}" 
