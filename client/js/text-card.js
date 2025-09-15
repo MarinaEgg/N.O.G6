@@ -5,6 +5,7 @@ class TextCard extends BaseCard {
         // Données par défaut pour les cartes texte
         const textDefaults = {
             type: 'text',
+            mainTitle: cardData.mainTitle || cardData.title || 'TITRE',
             client: cardData.client || 'Client',
             dossier: cardData.dossier || 'Nouveau dossier',
             departement: cardData.departement || 'Département',
@@ -36,6 +37,10 @@ class TextCard extends BaseCard {
 
         return `
             ${CardSystem.createCardHeader(this.data, actions)}
+            
+            <div class="card-main-title" contenteditable="true" id="main-title-${this.data.id}">
+                ${this.data.mainTitle || this.data.title || 'TITRE'}
+            </div>
             
             <div class="card-content-view" id="content-${this.data.id}">
                 <div class="card-theme">${this.data.client || 'Client'}</div>
@@ -97,6 +102,22 @@ class TextCard extends BaseCard {
         if (docContent) {
             docContent.addEventListener('input', () => {
                 this.saveDocumentContent();
+            });
+        }
+
+        // Event pour le titre principal modifiable
+        const mainTitle = this.element.querySelector(`#main-title-${this.data.id}`);
+        if (mainTitle) {
+            mainTitle.addEventListener('blur', () => {
+                this.data.mainTitle = mainTitle.textContent.trim() || 'TITRE';
+                this.saveData();
+            });
+            
+            mainTitle.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    mainTitle.blur();
+                }
             });
         }
     }
@@ -261,23 +282,27 @@ class TextCard extends BaseCard {
     updateCardTitle(content) {
         if (!content) return;
         
-        // Extraire les 3-4 premiers mots significatifs
-        const words = content.trim().split(/\s+/);
-        const significantWords = words
-            .filter(word => word.length > 2 && !/^(le|la|les|de|du|des|un|une|et|ou|à|dans|pour|avec|sur|par)$/i.test(word))
-            .slice(0, 3);
-        
-        if (significantWords.length > 0) {
-            const newTitle = significantWords.join(' ');
-            this.data.title = newTitle;
+        const currentTitle = this.data.mainTitle || '';
+        // Ne générer que si titre vide ou par défaut
+        if (currentTitle === 'TITRE' || currentTitle === '' || currentTitle === this.data.title) {
+            // Extraire les 3-4 premiers mots significatifs
+            const words = content.trim().split(/\s+/);
+            const significantWords = words
+                .filter(word => word.length > 2 && !/^(le|la|les|de|du|des|un|une|et|ou|à|dans|pour|avec|sur|par)$/i.test(word))
+                .slice(0, 3);
             
-            // Mettre à jour le DOM
-            const titleElement = this.element.querySelector('.card-title');
-            if (titleElement) {
-                titleElement.textContent = newTitle;
+            if (significantWords.length > 0) {
+                const newTitle = significantWords.join(' ');
+                this.data.mainTitle = newTitle;
+                
+                // Mettre à jour le DOM
+                const titleElement = this.element.querySelector(`#main-title-${this.data.id}`);
+                if (titleElement) {
+                    titleElement.textContent = newTitle;
+                }
+                
+                this.saveData();
             }
-            
-            this.saveData();
         }
     }
     
@@ -297,6 +322,7 @@ class TextCard extends BaseCard {
             id: CardSystem.generateCardId('text'),
             type: 'text',
             title: 'Nouvelle carte texte',
+            mainTitle: 'TITRE',
             theme: 'Personnalisé',
             description: 'Description de la nouvelle carte',
             position,
