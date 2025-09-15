@@ -446,7 +446,6 @@ class WorkspaceManager {
     loadDefaultCards() {
         console.log('🎯 Chargement cartes par défaut...');
         
-        // 🔧 FIX : Vérifier que le système est prêt
         if (!this.cardSystem) {
             console.error('❌ Card system not ready for default cards');
             return;
@@ -457,36 +456,43 @@ class WorkspaceManager {
                 id: 'card-1',
                 type: 'text',
                 title: 'Due Diligence',
-                theme: 'Analyse Juridique',
-                description: 'Documents et analyses pour les opérations de due diligence',
+                client: 'TECH Innov',
+                dossier: 'TECH Innov – Acquisition',
+                departement: 'MARQUE',
+                repertoires: ['Contrats', 'Correspondance', 'Documents de travail'],
                 position: { x: 50, y: 50 },
-                stats: { documents: 24, lastUpdate: '2 heures' },
                 pinned: false
             },
             {
                 id: 'card-2', 
                 type: 'text',
                 title: 'Contrats Commerciaux',
-                theme: 'Rédaction',
-                description: 'Modèles et révisions de contrats commerciaux',
+                client: 'TECH Innov',
+                dossier: 'TECH Innov – Commercial',
+                departement: 'CORPORATE',
+                repertoires: ['Contrats', 'Factures de fournisseurs', 'Registraire'],
                 position: { x: 350, y: 50 },
-                stats: { documents: 18, lastUpdate: '1 jour' },
                 pinned: true
             },
             {
                 id: 'card-3',
                 type: 'text',
                 title: 'Compliance',
-                theme: 'Conformité',
-                description: 'Suivi réglementaire et conformité juridique',
+                client: 'BIO Pharma',
+                dossier: 'BIO Pharma – Conformité',
+                departement: 'REGULATORY',
+                repertoires: ['Preuve', 'Procédures', 'Documents de travail'],
                 position: { x: 50, y: 300 },
-                stats: { documents: 31, lastUpdate: '3 heures' },
                 pinned: false
             },
             {
                 id: 'card-4',
                 type: 'file',
                 title: 'Documents Administratifs',
+                client: 'FINANCE Corp',
+                dossier: 'FINANCE Corp – Admin',
+                departement: 'ADMIN',
+                repertoires: ['Correspondance', 'Factures de fournisseurs'],
                 position: { x: 350, y: 300 },
                 pinned: false
             }
