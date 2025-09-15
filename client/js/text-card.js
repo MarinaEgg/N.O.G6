@@ -38,14 +38,7 @@ class TextCard extends BaseCard {
         return `
             ${CardSystem.createCardHeader(this.data, actions)}
             
-            <div class="card-main-title" contenteditable="true" id="main-title-${this.data.id}">
-                ${this.data.mainTitle || this.data.title || 'TITRE'}
-            </div>
-            
             <div class="card-content-view" id="content-${this.data.id}">
-                <div class="card-theme">${this.data.client || 'Client'}</div>
-                <p class="card-description">${this.data.dossier || this.data.title}</p>
-                
                 <div class="card-juridique-info">
                     <div class="repertoires-list">
                         ${this.getRepertoiresHTML()}
@@ -105,8 +98,8 @@ class TextCard extends BaseCard {
             });
         }
 
-        // Event pour le titre principal modifiable
-        const mainTitle = this.element.querySelector(`#main-title-${this.data.id}`);
+        // Event pour le titre principal modifiable dans le header
+        const mainTitle = this.element.querySelector('.card-title');
         if (mainTitle) {
             mainTitle.addEventListener('blur', () => {
                 this.data.mainTitle = mainTitle.textContent.trim() || 'TITRE';
