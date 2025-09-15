@@ -736,7 +736,7 @@ class WorkspaceManager {
 
     buildDocumentPrompt(userMessage, cardId) {
         const card = this.cardSystem.getCard(cardId);
-        const cardTitle = card ? card.data.title : 'Document';
+        const cardTitle = card ? (card.data.mainTitle || 'Document') : 'Document';
         const existingContent = card ? card.getDocumentContent() : '';
         
         return `Tu es un assistant spécialisé dans la rédaction de documents professionnels.
