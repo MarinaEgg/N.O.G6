@@ -5,7 +5,7 @@ class TextCard extends BaseCard {
         // Données par défaut pour les cartes texte
         const textDefaults = {
             type: 'text',
-            mainTitle: cardData.mainTitle || cardData.title || 'TITRE',
+            mainTitle: cardData.mainTitle || 'TITRE',
             client: cardData.client || 'Client',
             dossier: cardData.dossier || 'Nouveau dossier',
             departement: cardData.departement || 'Département',
@@ -52,7 +52,6 @@ class TextCard extends BaseCard {
             
             <div class="card-document-view" id="document-${this.data.id}" style="display: none;">
                 <div class="document-content" contenteditable="true" id="doc-content-${this.data.id}">
-                    <h1 class="document-title">${this.data.title}</h1>
                     <div class="document-body" id="doc-body-${this.data.id}">
                         <p class="document-placeholder">Commencez à taper ou utilisez l'IA pour générer du contenu...</p>
                     </div>
@@ -275,9 +274,13 @@ class TextCard extends BaseCard {
     updateCardTitle(content) {
         if (!content) return;
         
-        const currentTitle = this.data.mainTitle || '';
+        const titleElement = this.element.querySelector('.card-title');
+        if (!titleElement) return;
+        
+        const currentTitle = titleElement.textContent.trim();
+        
         // Ne générer que si titre vide ou par défaut
-        if (currentTitle === 'TITRE' || currentTitle === '' || currentTitle === this.data.title) {
+        if (currentTitle === 'TITRE' || currentTitle === '' || currentTitle === 'Nouvelle carte texte' || currentTitle.startsWith('Due Diligence') || currentTitle.startsWith('Compliance') || currentTitle.startsWith('Contrats')) {
             // Extraire les 3-4 premiers mots significatifs
             const words = content.trim().split(/\s+/);
             const significantWords = words
@@ -288,11 +291,8 @@ class TextCard extends BaseCard {
                 const newTitle = significantWords.join(' ');
                 this.data.mainTitle = newTitle;
                 
-                // Mettre à jour le DOM
-                const titleElement = this.element.querySelector(`#main-title-${this.data.id}`);
-                if (titleElement) {
-                    titleElement.textContent = newTitle;
-                }
+                // Mettre à jour le DOM directement
+                titleElement.textContent = newTitle;
                 
                 this.saveData();
             }
