@@ -124,6 +124,18 @@ class CardSystem {
             e.stopPropagation();
             card.delete();
         });
+
+        // Empêcher le drag sur le titre contenteditable
+        const cardTitle = cardElement.querySelector('.card-title');
+        if (cardTitle) {
+            cardTitle.addEventListener('mousedown', (e) => {
+                e.stopPropagation(); // Empêche le drag
+            });
+            
+            cardTitle.addEventListener('click', (e) => {
+                e.stopPropagation(); // Empêche la sélection de carte
+            });
+        }
     }
 }
 
