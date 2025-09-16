@@ -845,8 +845,9 @@ class WorkspaceManager {
             }
 
             const token = this.generateMessageId();
-            card.addDocumentSection("", token); // Empty section title as it's no longer used
+            card.addDocumentSection("", token);
             
+            // ⚡ VERSION SIMPLIFIÉE - pas d'enrichissement
             const documentPrompt = this.buildDocumentPrompt(message, cardId);
             await this.streamToDocument(documentPrompt, cardId, token, card);
             
@@ -934,14 +935,19 @@ Contenu existant : ${existingContent}
 
 Instruction : ${userMessage}
 
-Génère du contenu de document professionnel avec :
-- IMPORTANT: Commence toujours par un titre principal avec ## au début
-- Des sous-titres appropriés (utilise ###, ####)
-- Du texte structuré et professionnel
-- Des listes à puces si pertinent
-- Un style document de travail, pas de chat
+⚡ IMPORTANTE - NOUVELLE APPROCHE TITRE :
+- Si tu veux changer le titre du document, utilise cette fonction JavaScript : card.setTitle("Nouveau Titre")
+- Cette fonction mettra à jour le titre dans le header de la carte
+- Exemple : card.setTitle("Contrat de Vente") 
 
-Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion de chatbot.`;
+Pour le contenu du document :
+- Génère du contenu professionnel structuré  
+- Utilise des titres avec ## et ###
+- Du texte bien formaté
+- Des listes si pertinent
+- Style document de travail
+
+Réponds UNIQUEMENT avec le contenu du document. Si tu veux changer le titre, appelle d'abord card.setTitle().`;
     }
 
     generateSectionTitle(message) {
