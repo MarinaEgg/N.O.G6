@@ -1,7 +1,32 @@
-// ========== SYSTÈME DE CARTES MODULAIRE ==========
+// ========== SYSTÈME DE CARTES MODULAIRE - VERSION CORRIGÉE ==========
 
-// Import card models
-import { createCardData } from './card-models.js';
+// ========== FONCTION UTILITAIRE INTÉGRÉE ==========
+
+/**
+ * Creates a new card data object with default values
+ * @param {Object} overrides - Values to override defaults
+ * @returns {Object} Complete card data object
+ */
+function createCardData(overrides = {}) {
+    const defaults = {
+        id: CardSystem.generateCardId(),
+        type: 'text',
+        title: 'New Document',
+        position: { x: 100, y: 100 },
+        pinned: false,
+        folders: [],
+        documentType: 'other',
+        classification: 'Internal',
+        syncStatus: 'synced',
+        lastModified: new Date().toISOString(),
+        lastSync: new Date().toISOString(),
+        metadata: {}
+    };
+
+    return { ...defaults, ...overrides };
+}
+
+// ========== SYSTÈME DE CARTES PRINCIPAL ==========
 
 class CardSystem {
     constructor(workspaceManager) {
@@ -20,7 +45,7 @@ class CardSystem {
 
     /**
      * Creates a new card with the given data
-     * @param {Partial<import('./card-models').ExtendedCardData>} cardData - Card data
+     * @param {Object} cardData - Card data
      * @returns {BaseCard|null} The created card instance or null if failed
      */
     createCard(cardData) {
@@ -154,11 +179,10 @@ class CardSystem {
 
 /**
  * Base class for all card types
- * @implements {import('./card-models').ExtendedCardData}
  */
 class BaseCard {
     /**
-     * @param {import('./card-models').ExtendedCardData} cardData 
+     * @param {Object} cardData 
      * @param {WorkspaceManager} workspaceManager 
      */
     constructor(cardData, workspaceManager) {
@@ -188,6 +212,25 @@ class BaseCard {
         this.element.appendChild(statusIndicator);
         
         this.workspaceManager.canvas.appendChild(this.element);
+    }
+
+    getSyncStatusText() {
+        const statusTexts = {
+            'synced': 'Synchronisé',
+            'modified': 'Modifié localement',
+            'conflict': 'Conflit de version',
+            'pending': 'Synchronisation en cours...'
+        };
+        return statusTexts[this.data.syncStatus] || 'Statut inconnu';
+    }
+
+    updateSyncStatus(status) {
+        this.data.syncStatus = status;
+        const indicator = this.element.querySelector('.sync-status');
+        if (indicator) {
+            indicator.className = `sync-status ${status}`;
+            indicator.title = this.getSyncStatusText();
+        }
     }
 
     setupEvents() {
@@ -278,7 +321,16 @@ class BaseCard {
 
     saveData() {
         // Sauvegarder les données de la carte
-        localStorage.setItem(`workspace-card-${this.data.id}`, JSON.stringify(this.data));
+        try {
+            localStorage.setItem(`workspace-card-${this.data.id}`, JSON.stringify(this.data));
+        } catch (error) {
+            if (error.name === 'QuotaExceededError') {
+                console.warn('⚠️ LocalStorage quota exceeded, saving in memory only');
+                // Les données restent en mémoire dans this.data
+            } else {
+                console.error('❌ Error saving card data:', error);
+            }
+        }
     }
 
     updatePosition(x, y) {
@@ -292,12 +344,21 @@ class BaseCard {
     select() {
         this.workspaceManager.selectCard(this.element);
     }
+
+    // Méthode pour récupérer le contenu pour sync (à implémenter dans les classes filles)
+    getContentForSync() {
+        return this.data.title || '';
+    }
 }
+
+// ========== EXPORT GLOBAL ==========
 
 // Export pour utilisation dans d'autres fichiers
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { CardSystem, BaseCard };
+    module.exports = { CardSystem, BaseCard, createCardData };
 } else {
+    // Variables globales pour utilisation dans le browser
     window.CardSystem = CardSystem;
     window.BaseCard = BaseCard;
+    window.createCardData = createCardData;
 }
