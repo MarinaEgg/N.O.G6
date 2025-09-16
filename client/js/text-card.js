@@ -277,12 +277,81 @@ class TextCard extends BaseCard {
             return;
         }
         
-        const formattedContent = this.formatDocumentContent(content);
+        // ⚡ Détecter et exécuter le JavaScript dans le contenu
+        this.executeJavaScriptCommands(content);
+        
+        // ⚡ Nettoyer le contenu des blocs JS pour l'affichage
+        const cleanContent = this.removeJavaScriptBlocks(content);
+        const formattedContent = this.formatDocumentContent(cleanContent);
         sectionContent.innerHTML = formattedContent;
         
-        // ⚡ PLUS d'extraction de titre - GPT écrira directement via setTitle()
-        
         this.saveDocumentContent();
+    }
+    
+    /**
+     * Exécute les commandes JavaScript trouvées dans le contenu
+     * @param {string} content - Le contenu à analyser
+     */
+    executeJavaScriptCommands(content) {
+        console.log(`🔧 [${this.data.id}] Recherche de commandes JavaScript...`);
+        
+        // Regex pour détecter les blocs ```javascript ... ```
+        const jsBlockRegex = /```javascript\s*\n([\s\S]*?)\n```/g;
+        let match;
+        
+        while ((match = jsBlockRegex.exec(content)) !== null) {
+            const jsCode = match[1].trim();
+            console.log(`🎯 [${this.data.id}] Code JS détecté:`, jsCode);
+            
+            try {
+                // Remplacer "card" par "this" dans le contexte de la carte
+                const contextualCode = jsCode.replace(/\bcard\./g, 'this.');
+                
+                // Exécuter le code dans le contexte de la carte
+                eval(contextualCode);
+                
+                console.log(`✅ [${this.data.id}] Code JS exécuté avec succès:`, jsCode);
+            } catch (error) {
+                console.error(`❌ [${this.data.id}] Erreur exécution JS:`, error, 'Code:', jsCode);
+            }
+        }
+        
+        // Détecter aussi les lignes simples comme card.setTitle("...")
+        const singleLineRegex = /card\.setTitle\s*\(\s*["']([^"']+)["']\s*\)/g;
+        let singleMatch;
+        
+        while ((singleMatch = singleLineRegex.exec(content)) !== null) {
+            const titleValue = singleMatch[1];
+            console.log(`🎯 [${this.data.id}] setTitle détecté:`, titleValue);
+            
+            try {
+                this.setTitle(titleValue);
+                console.log(`✅ [${this.data.id}] setTitle exécuté:`, titleValue);
+            } catch (error) {
+                console.error(`❌ [${this.data.id}] Erreur setTitle:`, error);
+            }
+        }
+    }
+    
+    /**
+     * Nettoie le contenu en supprimant les blocs JavaScript et les commandes isolées
+     * @param {string} content - Le contenu à nettoyer
+     * @returns {string} Le contenu nettoyé
+     */
+    removeJavaScriptBlocks(content) {
+        // Supprimer les blocs ```javascript ... ```
+        let cleanContent = content.replace(/```javascript\s*\n[\s\S]*?\n```/gs, '');
+        
+        // Supprimer les lignes card.setTitle isolées
+        cleanContent = cleanContent.replace(/^\s*card\.setTitle\s*\([^)]+\)\s*;?\s*$/gm, '');
+        
+        // Nettoyer les lignes vides en trop
+        cleanContent = cleanContent.replace(/\n\n\n+/g, '\n\n');
+        
+        // Supprimer également les anciennes balises script au cas où
+        cleanContent = cleanContent.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
+        
+        return cleanContent.trim();
     }
 
     formatDocumentContent(content) {
