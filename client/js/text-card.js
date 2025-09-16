@@ -280,12 +280,6 @@ class TextCard extends BaseCard {
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent;
         
-        // ⚡ POINT CRUCIAL : Extraire et mettre à jour le titre du HEADER
-        if (token.startsWith('section-') && !token.includes('error')) {
-            console.log(`🎯 [${this.data.id}] Tentative extraction titre depuis:`, content.substring(0, 200));
-            this.updateHeaderTitle(content);
-        }
-        
         this.saveDocumentContent();
     }
 
@@ -302,134 +296,31 @@ class TextCard extends BaseCard {
             .replace(/#{1,3}\s*(.+?)(<br>|$)/g, '<strong>$1</strong>$2'); // Transformer ## en gras
     }
 
-    updateHeaderTitle(content) {
-        console.log(`🎯 [${this.data.id}] updateHeaderTitle appelée`);
-        
-        if (!content) {
-            console.warn(`⚠️ [${this.data.id}] Pas de contenu pour extraction titre`);
-            return;
-        }
-        
-        const titleElement = this.element.querySelector('.card-title');
-        if (!titleElement) {
-            console.error(`❌ [${this.data.id}] Élément titre non trouvé !`);
-            return;
-        }
-        
-        const currentTitle = titleElement.textContent.trim();
-        console.log(`🎯 [${this.data.id}] Titre actuel:`, currentTitle);
-        
-        // CONDITION SIMPLIFIÉE : Toujours essayer d'extraire si titre par défaut
-        if (currentTitle === 'TITRE' || currentTitle === 'New Document' || 
-            currentTitle === 'Nouvelle carte texte' || currentTitle.length < 5) {
-            
-            console.log(`🎯 [${this.data.id}] Extraction du titre...`);
-            
-            const newTitle = this.extractTitleFromContent(content);
-            console.log(`🎯 [${this.data.id}] Titre extrait:`, newTitle);
-            
-            if (newTitle && newTitle !== currentTitle) {
-                console.log(`✅ [${this.data.id}] Mise à jour titre: "${currentTitle}" → "${newTitle}"`);
-                
-                // ⚡ CORRECTION CRITIQUE : Mettre à jour TOUS les champs de titre
-                this.data.title = newTitle;        // Titre principal
-                this.data.mainTitle = newTitle;    // Titre spécifique TextCard
-                
-                // Mettre à jour le DOM
-                titleElement.textContent = newTitle;
-                
-                // Animation visuelle
-                titleElement.style.backgroundColor = 'rgba(34, 197, 94, 0.3)';
-                titleElement.style.transition = 'background-color 0.5s ease';
-                setTimeout(() => {
-                    titleElement.style.backgroundColor = '';
-                }, 2000);
-                
-                this.saveData();
-                console.log(`🎉 [${this.data.id}] TITRE MIS À JOUR AVEC SUCCÈS !`);
-            }
-        }
-    }
-
-    extractTitleFromContent(content) {
-        console.log(`🔍 [${this.data.id}] extractTitleFromContent - Début extraction`);
-        
-        if (!content || content.length < 10) {
-            console.warn(`⚠️ [${this.data.id}] Contenu trop court`);
-            return null;
-        }
-        
-        // Nettoyer le contenu des balises HTML
-        let cleanContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-        console.log(`🔍 [${this.data.id}] Contenu nettoyé:`, cleanContent.substring(0, 100));
-        
-        // ⚡ MÉTHODE 1 : Chercher les titres markdown (priorité absolue)
-        const markdownTitlePatterns = [
-            /^##\s*([^#\n\r]+?)(?:\s*\n|\s*\r|$)/im,   // ## Titre Principal
-            /^###\s*([^#\n\r]+?)(?:\s*\n|\s*\r|$)/im,  // ### Sous-titre
-            /^#\s*([^#\n\r]+?)(?:\s*\n|\s*\r|$)/im     // # Titre simple
-        ];
-        
-        for (const pattern of markdownTitlePatterns) {
-            const match = cleanContent.match(pattern);
-            if (match) {
-                let title = match[1].trim();
-                console.log(`🎯 [${this.data.id}] Titre markdown trouvé:`, title);
-                
-                // Nettoyer le titre
-                title = title.replace(/[*_`]/g, ''); // Supprimer markdown
-                
-                if (title.length >= 3 && title.length <= 60) {
-                    return title;
-                }
-            }
-        }
-        
-        // ⚡ MÉTHODE 2 : Première phrase significative
-        const sentences = cleanContent.split(/[.!?]+/);
-        for (const sentence of sentences.slice(0, 3)) { // Tester les 3 premières phrases
-            if (!sentence) continue;
-            
-            let title = sentence.trim();
-            
-            // Supprimer les mots d'introduction courants
-            title = title.replace(/^(voici|voilà|dans|pour|selon|il s'agit de|ceci est|c'est|bonjour|salut|alors|donc|ainsi|enfin)\s+/i, '');
-            
-            // Vérifier si c'est un bon titre
-            if (title.length >= 5 && title.length <= 50) {
-                // Ne pas prendre des phrases trop génériques
-                const genericPhrases = /^(je|nous|vous|il|elle|on|cela|ceci|cette|ce)/i;
-                if (!genericPhrases.test(title)) {
-                    console.log(`🎯 [${this.data.id}] Titre par phrase:`, title);
-                    return title.charAt(0).toUpperCase() + title.slice(1);
-                }
-            }
-        }
-        
-        // ⚡ MÉTHODE 3 : Première ligne non vide
-        const lines = cleanContent.split(/[\n\r]+/);
-        for (const line of lines.slice(0, 3)) {
-            if (!line) continue;
-            
-            let title = line.trim();
-            title = title.replace(/^(voici|voilà|dans|pour|selon|il s'agit de|ceci est|c'est)\s+/i, '');
-            title = title.replace(/[.!?]+$/, ''); // Supprimer ponctuation finale
-            
-            if (title.length >= 5 && title.length <= 60) {
-                console.log(`🎯 [${this.data.id}] Titre par ligne:`, title);
-                return title.charAt(0).toUpperCase() + title.slice(1);
-            }
-        }
-        
-        console.warn(`⚠️ [${this.data.id}] Aucun titre extrait`);
-        return null;
-    }
 
     
     cleanup() {
         // Nettoyage spécifique aux cartes texte
         if (this.workspaceManager.activeCardChat === this.data.id) {
             this.workspaceManager.disconnectFromMainChat();
+        }
+    }
+    
+    /**
+     * Définit le titre de la carte et met à jour l'affichage
+     * @param {string} newTitle - Le nouveau titre à définir
+     */
+    setTitle(newTitle) {
+        if (newTitle && newTitle.trim().length > 0) {
+            this.data.title = newTitle.trim();
+            this.data.mainTitle = newTitle.trim();
+            
+            const titleElement = this.element.querySelector('.card-title');
+            if (titleElement) {
+                titleElement.textContent = newTitle.trim();
+            }
+            
+            this.saveData();
+            console.log(`✅ [${this.data.id}] Titre défini: "${newTitle.trim()}"`);
         }
     }
 
