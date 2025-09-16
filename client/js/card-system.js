@@ -11,7 +11,7 @@ function createCardData(overrides = {}) {
     const defaults = {
         id: CardSystem.generateCardId(),
         type: 'text',
-        title: 'New Document',
+        title: 'TITRE',                    // ⚡ Cohérent avec TextCard
         position: { x: 100, y: 100 },
         pinned: false,
         folders: [],
