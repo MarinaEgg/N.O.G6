@@ -444,74 +444,264 @@ class WorkspaceManager {
     // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
 
     loadDefaultCards() {
-        console.log('🎯 Chargement cartes par défaut...');
+        console.log('🎯 Workspace vierge - prêt pour création manuelle');
         
         if (!this.cardSystem) {
-            console.error('❌ Card system not ready for default cards');
+            console.error('❌ Card system not ready');
             return;
         }
         
-        const defaultCards = [
-            {
-                id: 'card-1',
-                type: 'text',
-                title: 'Due Diligence',
-                client: 'TECH Innov',
-                dossier: 'TECH Innov – Acquisition',
-                departement: 'MARQUE',
-                repertoires: ['Contrats', 'Correspondance', 'Documents de travail'],
-                position: { x: 50, y: 50 },
-                pinned: false
-            },
-            {
-                id: 'card-2', 
-                type: 'text',
-                title: 'Contrats Commerciaux',
-                client: 'TECH Innov',
-                dossier: 'TECH Innov – Commercial',
-                departement: 'CORPORATE',
-                repertoires: ['Contrats', 'Factures de fournisseurs', 'Registraire'],
-                position: { x: 350, y: 50 },
-                pinned: true
-            },
-            {
-                id: 'card-3',
-                type: 'text',
-                title: 'Compliance',
-                client: 'BIO Pharma',
-                dossier: 'BIO Pharma – Conformité',
-                departement: 'REGULATORY',
-                repertoires: ['Preuve', 'Procédures', 'Documents de travail'],
-                position: { x: 50, y: 300 },
-                pinned: false
-            },
-            {
-                id: 'card-4',
-                type: 'file',
-                title: 'Documents Administratifs',
-                client: 'FINANCE Corp',
-                dossier: 'FINANCE Corp – Admin',
-                departement: 'ADMIN',
-                repertoires: ['Correspondance', 'Factures de fournisseurs'],
-                position: { x: 350, y: 300 },
-                pinned: false
-            }
-        ];
-
-        let cardsCreated = 0;
-        defaultCards.forEach(cardData => {
-            console.log('🎯 Tentative création carte:', cardData.id, cardData.type);
-            const card = this.cardSystem.createCard(cardData);
-            if (card) {
-                this.cards.push({ element: card.element, data: card.data, cardInstance: card });
-                cardsCreated++;
-                console.log('✅ Carte créée:', cardData.id);
-            } else {
-                console.error('❌ Échec création carte:', cardData.id);
-            }
-        });
+        // TODO: Future intégration iManage
+        // Structure attendue :
+        // - Custom1 = Client level
+        // - Custom2 = Workspace/Dossier level  
+        // - Folders = Répertoires (tags sur cartes)
+        // - Documents = Cartes individuelles
+        // this.loadFromiManageWorkspace(workspaceId);
         
-        console.log(`🎯 ${cardsCreated}/${defaultCards.length} cartes créées`);
+        console.log('✅ Workspace prêt - 0 cartes chargées');
+    }
+
+    // ========== IMANAGE INTEGRATION ==========
+
+    /**
+     * Loads documents from iManage workspace and creates corresponding cards
+     * @param {string} workspaceId - ID of the iManage workspace
+     * @param {string} customerId - ID of the customer in iManage
+     * @param {string} libraryId - ID of the library in iManage
+     * @returns {Promise<void>}
+     */
+    async loadFromiManageWorkspace(workspaceId, customerId, libraryId) {
+        try {
+            console.log(`🔄 Loading documents from iManage workspace ${workspaceId}...`);
+            
+            // Show loading state
+            this.showLoadingState(true);
+            
+            // Call iManage API to get workspace documents
+            const response = await fetch(`/api/v2/customers/${customerId}/libraries/${libraryId}/workspaces/${workspaceId}`);
+            
+            if (!response.ok) {
+                throw new Error(`Failed to load workspace: ${response.statusText}`);
+            }
+            
+            const workspaceData = await response.json();
+            
+            // Clear existing cards if needed
+            // this.clearWorkspace();
+            
+            // Create cards for each document
+            const createCardPromises = workspaceData.documents.map(async (doc) => {
+                const cardData = {
+                    id: `imanage-${doc.id}`,
+                    type: this.mapDocumentTypeToCardType(doc.type),
+                    title: doc.name || 'Sans titre',
+                    iManageId: doc.id,
+                    iManageVersion: doc.version,
+                    clientLevel: doc.custom1, // Custom1 = Client level
+                    workspaceLevel: doc.custom2, // Custom2 = Workspace level
+                    documentType: doc.type,
+                    author: doc.author,
+                    lastModified: doc.modifiedDate,
+                    size: doc.size,
+                    classification: doc.classification || 'Internal',
+                    syncStatus: 'synced',
+                    lastSync: new Date().toISOString(),
+                    metadata: {
+                        documentNumber: doc.documentNumber,
+                        description: doc.description
+                    },
+                    // Map iManage folders to our folders/tags
+                    folders: doc.folders || []
+                };
+                
+                return this.cardSystem.createCard(cardData);
+            });
+            
+            await Promise.all(createCardPromises);
+            console.log(`✅ Successfully loaded ${workspaceData.documents.length} documents from iManage`);
+            
+        } catch (error) {
+            console.error('❌ Error loading from iManage:', error);
+            this.showError(`Erreur lors du chargement depuis iManage: ${error.message}`);
+            throw error;
+        } finally {
+            this.showLoadingState(false);
+        }
+    }
+    
+    /**
+     * Maps iManage document types to our card types
+     * @private
+     * @param {string} imanageType - iManage document type
+     * @returns {string} Our card type
+     */
+    mapDocumentTypeToCardType(imanageType) {
+        const typeMap = {
+            'word': 'text',
+            'excel': 'file',
+            'pdf': 'file',
+            'email': 'email',
+            'powerpoint': 'file'
+        };
+        
+        return typeMap[imanageType?.toLowerCase()] || 'file';
+    }
+    
+    /**
+     * Synchronizes local changes with iManage
+     * @returns {Promise<void>}
+     */
+    async syncWithiManage() {
+        try {
+            console.log('🔄 Syncing with iManage...');
+            this.showLoadingState(true, 'Synchronisation avec iManage en cours...');
+            
+            // Get all modified or conflicted cards
+            const cardsToSync = Array.from(this.cardSystem.cards.values())
+                .filter(card => 
+                    card.data.syncStatus === 'modified' || 
+                    card.data.syncStatus === 'conflict'
+                );
+            
+            if (cardsToSync.length === 0) {
+                console.log('✅ No changes to sync with iManage');
+                return;
+            }
+            
+            // Process each modified/conflicted card
+            for (const card of cardsToSync) {
+                try {
+                    // Update sync status to pending
+                    card.updateSyncStatus('pending');
+                    
+                    // Prepare document data for iManage
+                    const documentData = {
+                        id: card.data.iManageId,
+                        name: card.data.title,
+                        content: card.getContentForSync(), // Card class should implement this
+                        metadata: {
+                            ...card.data.metadata,
+                            custom1: card.data.clientLevel,
+                            custom2: card.data.workspaceLevel,
+                            folders: card.data.folders
+                        }
+                    };
+                    
+                    // Call iManage API to update document
+                    const response = await fetch(`/api/v2/documents/${card.data.iManageId}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(documentData)
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to sync document ${card.data.id}: ${response.statusText}`);
+                    }
+                    
+                    // Update sync status and timestamp
+                    card.updateSyncStatus('synced');
+                    card.data.lastSync = new Date().toISOString();
+                    
+                } catch (error) {
+                    console.error(`❌ Error syncing card ${card.data.id}:`, error);
+                    card.updateSyncStatus('conflict');
+                    throw error;
+                }
+            }
+            
+            console.log(`✅ Successfully synced ${cardsToSync.length} documents with iManage`);
+            
+        } catch (error) {
+            console.error('❌ Error during iManage sync:', error);
+            this.showError(`Erreur lors de la synchronisation avec iManage: ${error.message}`);
+            throw error;
+        } finally {
+            this.showLoadingState(false);
+        }
+    }
+    
+    /**
+     * Resolves version conflicts between local and iManage versions
+     * @param {string} cardId - ID of the card with conflicts
+     * @param {'local'|'remote'|'merge'} resolution - Resolution strategy
+     * @returns {Promise<void>}
+     */
+    async resolveConflicts(cardId, resolution) {
+        const card = this.cardSystem.getCard(cardId);
+        if (!card) {
+            throw new Error(`Card not found: ${cardId}`);
+        }
+        
+        try {
+            card.updateSyncStatus('pending');
+            
+            switch (resolution) {
+                case 'local':
+                    // Keep local version and force push to iManage
+                    await this.syncWithiManage();
+                    break;
+                    
+                case 'remote':
+                    // Discard local changes and reload from iManage
+                    await this.loadFromiManageWorkspace(
+                        card.data.workspaceId,
+                        card.data.customerId,
+                        card.data.libraryId
+                    );
+                    break;
+                    
+                case 'merge':
+                    // Advanced merge logic would go here
+                    // This is a placeholder for actual merge implementation
+                    console.log('Merge resolution not yet implemented');
+                    break;
+                    
+                default:
+                    throw new Error(`Invalid resolution strategy: ${resolution}`);
+            }
+            
+            card.updateSyncStatus('synced');
+            
+        } catch (error) {
+            console.error(`❌ Error resolving conflicts for card ${cardId}:`, error);
+            card.updateSyncStatus('conflict');
+            throw error;
+        }
+    }
+    
+    /**
+     * Shows a loading state in the UI
+     * @private
+     * @param {boolean} isLoading - Whether to show or hide loading state
+     * @param {string} [message] - Optional loading message
+     */
+    showLoadingState(isLoading, message = '') {
+        // Implement loading state UI updates here
+        const loadingElement = document.getElementById('loading-indicator');
+        if (loadingElement) {
+            loadingElement.style.display = isLoading ? 'flex' : 'none';
+            if (message) {
+                const messageElement = loadingElement.querySelector('.loading-message');
+                if (messageElement) {
+                    messageElement.textContent = message;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Shows an error message in the UI
+     * @private
+     * @param {string} message - Error message to display
+     */
+    showError(message) {
+        // Implement error display logic here
+        console.error('Error:', message);
+        // Example: Show a toast notification
+        if (window.showToast) {
+            window.showToast(message, 'error');
+        }
     }
 
     // ========== MÉTHODES UTILITAIRES ADAPTÉES ==========
