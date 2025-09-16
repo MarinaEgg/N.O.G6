@@ -847,9 +847,7 @@ class WorkspaceManager {
             const token = this.generateMessageId();
             card.addDocumentSection("", token); // Empty section title as it's no longer used
             
-            // Enrich the message with title instructions if needed
-            const enrichedMessage = this.enrichMessageWithTitleInstruction(message);
-            const documentPrompt = this.buildDocumentPrompt(enrichedMessage, cardId);
+            const documentPrompt = this.buildDocumentPrompt(message, cardId);
             await this.streamToDocument(documentPrompt, cardId, token, card);
             
         } catch (error) {
@@ -952,21 +950,6 @@ Réponds UNIQUEMENT avec le contenu du document, sans introduction ni conclusion
 
     generateMessageId() {
         return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-
-    /**
-     * Instruit GPT à inclure un titre principal dans son contenu
-     * @param {string} userMessage - Message de l'utilisateur
-     * @returns {string} Message enrichi avec instruction de titre
-     */
-    enrichMessageWithTitleInstruction(userMessage) {
-        // Si le message ne demande pas explicitement un titre, l'ajouter
-        if (!userMessage.toLowerCase().includes('titre') && 
-            !userMessage.toLowerCase().includes('appelle') &&
-            !userMessage.toLowerCase().includes('nomme')) {
-            return `${userMessage}\n\nCommence ta réponse par un titre principal (avec ##) qui résume le sujet traité.`;
-        }
-        return userMessage;
     }
 
     // ========== MÉTHODES DE COMPATIBILITÉ AVEC L'ANCIEN SYSTÈME ==========
