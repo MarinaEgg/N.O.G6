@@ -280,6 +280,8 @@ class TextCard extends BaseCard {
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent;
         
+        // ⚡ PLUS d'extraction de titre - GPT écrira directement via setTitle()
+        
         this.saveDocumentContent();
     }
 
@@ -320,7 +322,7 @@ class TextCard extends BaseCard {
             }
             
             this.saveData();
-            console.log(`✅ [${this.data.id}] Titre défini: "${newTitle.trim()}"`);
+            console.log(`✅ [${this.data.id}] Titre défini par GPT: "${newTitle.trim()}"`);
         }
     }
 
