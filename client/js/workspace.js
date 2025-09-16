@@ -928,26 +928,28 @@ class WorkspaceManager {
         const cardTitle = card ? (card.data.mainTitle || 'Document') : 'Document';
         const existingContent = card ? card.getDocumentContent() : '';
         
-        return `Tu es un assistant spécialisé dans la rédaction de documents professionnels.
-
-Contexte : Document "${cardTitle}"
-Contenu existant : ${existingContent}
-
-Instruction : ${userMessage}
-
-⚡ IMPORTANTE - NOUVELLE APPROCHE TITRE :
-- Si tu veux changer le titre du document, utilise cette fonction JavaScript : card.setTitle("Nouveau Titre")
-- Cette fonction mettra à jour le titre dans le header de la carte
-- Exemple : card.setTitle("Contrat de Vente") 
-
-Pour le contenu du document :
-- Génère du contenu professionnel structuré  
-- Utilise des titres avec ## et ###
-- Du texte bien formaté
-- Des listes si pertinent
-- Style document de travail
-
-Réponds UNIQUEMENT avec le contenu du document. Si tu veux changer le titre, appelle d'abord card.setTitle().`;
+        const prompt = "Tu es un assistant spécialisé dans la rédaction de documents professionnels.\n\n" +
+            "Contexte : Document \"" + cardTitle + "\"\n" +
+            "Contenu existant : " + existingContent + "\n\n" +
+            "Instruction : " + userMessage + "\n\n" +
+            "⚡ IMPORTANTE - COMMANDES JAVASCRIPT :\n" +
+            "- Pour changer le titre du document, utilise EXACTEMENT ce format :\n" +
+            "```javascript\n" +
+            "card.setTitle(\"Nouveau Titre\");\n" +
+            "```\n\n" +
+            "- Le code JavaScript sera automatiquement exécuté\n" +
+            "- Exemple complet :\n" +
+            "```javascript\n" +
+            "card.setTitle(\"Contrat de Vente\");\n" +
+            "```\n\n" +
+            "Pour le contenu du document :\n" +
+            "- Génère du contenu professionnel structuré\n" +
+            "- Utilise des titres avec ## et ###\n" +
+            "- Du texte bien formaté\n" +
+            "- Style document de travail\n\n" +
+            "Si tu veux changer le titre, mets le code JavaScript AU DÉBUT de ta réponse.";
+            
+        return prompt;
     }
 
     generateSectionTitle(message) {
