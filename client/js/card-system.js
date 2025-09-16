@@ -1,5 +1,8 @@
 // ========== SYSTÈME DE CARTES MODULAIRE ==========
 
+// Import card models
+import { createCardData } from './card-models.js';
+
 class CardSystem {
     constructor(workspaceManager) {
         this.workspaceManager = workspaceManager;
@@ -15,15 +18,23 @@ class CardSystem {
         this.cardTypes.set('file', FileCard);
     }
 
+    /**
+     * Creates a new card with the given data
+     * @param {Partial<import('./card-models').ExtendedCardData>} cardData - Card data
+     * @returns {BaseCard|null} The created card instance or null if failed
+     */
     createCard(cardData) {
-        const CardClass = this.cardTypes.get(cardData.type);
+        // Merge with default values
+        const fullCardData = createCardData(cardData);
+        
+        const CardClass = this.cardTypes.get(fullCardData.type);
         if (!CardClass) {
-            console.error(`Type de carte inconnu: ${cardData.type}`);
+            console.error(`Type de carte inconnu: ${fullCardData.type}`);
             return null;
         }
 
-        const card = new CardClass(cardData, this.workspaceManager);
-        this.cards.set(cardData.id, card);
+        const card = new CardClass(fullCardData, this.workspaceManager);
+        this.cards.set(fullCardData.id, card);
         
         return card;
     }
@@ -141,12 +152,26 @@ class CardSystem {
 
 // ========== CLASSE DE BASE POUR LES CARTES ==========
 
+/**
+ * Base class for all card types
+ * @implements {import('./card-models').ExtendedCardData}
+ */
 class BaseCard {
+    /**
+     * @param {import('./card-models').ExtendedCardData} cardData 
+     * @param {WorkspaceManager} workspaceManager 
+     */
     constructor(cardData, workspaceManager) {
-        this.data = cardData;
+        // Merge with default values to ensure all properties are present
+        this.data = createCardData(cardData);
         this.workspaceManager = workspaceManager;
         this.element = null;
-        this.type = cardData.type;
+        this.type = this.data.type;
+        
+        // Initialize sync status if not provided
+        if (!this.data.syncStatus) {
+            this.data.syncStatus = 'synced';
+        }
         
         this.createElement();
         this.render();        // D'ABORD le HTML
@@ -155,11 +180,41 @@ class BaseCard {
 
     createElement() {
         this.element = CardSystem.createBaseCardElement(this.data);
+        
+        // Add sync status indicator
+        const statusIndicator = document.createElement('div');
+        statusIndicator.className = `sync-status ${this.data.syncStatus}`;
+        statusIndicator.title = this.getSyncStatusText();
+        this.element.appendChild(statusIndicator);
+        
         this.workspaceManager.canvas.appendChild(this.element);
     }
 
     setupEvents() {
-        CardSystem.setupCommonCardEvents(this.element, this);
+        if (!this.element) return;
+        
+        // Gestion du drag
+        this.element.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.card-action-btn')) return;
+            this.workspaceManager.handleMouseDown(e, this.element);
+        });
+        
+        // Gestion du clic pour sélection
+        this.element.addEventListener('click', (e) => {
+            if (e.target.closest('.card-action-btn')) return;
+            this.workspaceManager.selectCard(this.element);
+        });
+        
+        // Update sync status on title edit
+        const titleElement = this.element.querySelector('.card-title');
+        if (titleElement) {
+            titleElement.addEventListener('input', () => {
+                if (this.data.syncStatus === 'synced') {
+                    this.updateSyncStatus('modified');
+                }
+            });
+        }
+        
         this.setupSpecificEvents();
     }
 
