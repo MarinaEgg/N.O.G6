@@ -1,5 +1,51 @@
 /* ========== STYLES CARTES MODULAIRES ========== */
 
+/* Sync Status Indicator */
+.sync-status {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.sync-status.synced {
+    background-color: #4CAF50; /* Green */
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+}
+
+.sync-status.modified {
+    background-color: #FFC107; /* Amber */
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.6);
+    animation: pulse 2s infinite;
+}
+
+.sync-status.conflict {
+    background-color: #F44336; /* Red */
+    box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+    animation: pulse 1s infinite;
+}
+
+.sync-status.pending {
+    background-color: #2196F3; /* Blue */
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.6);
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 0.8; }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 /* ========== CARTE FICHIER - STYLES SPÉCIFIQUES ========== */
 
 .workspace-card.card-file {
