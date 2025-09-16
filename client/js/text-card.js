@@ -1,4 +1,4 @@
-// ========== CARTE TEXTE COLLABORATIVE - TITRE GPT DANS HEADER ==========
+// ========== TEXTCARD - FIX DÉFINITIF TITRE HEADER ==========
 
 class TextCard extends BaseCard {
     constructor(cardData, workspaceManager) {
@@ -97,10 +97,10 @@ class TextCard extends BaseCard {
             });
         }
 
-        // 🔧 FIX : Event pour le titre principal modifiable dans le header
+        // Event pour le titre principal modifiable dans le header
         const mainTitle = this.element.querySelector('.card-title');
         if (mainTitle) {
-            // 🔧 NOUVEAU : Autoriser l'édition manuelle du titre
+            // Autoriser l'édition manuelle du titre
             mainTitle.addEventListener('input', () => {
                 this.data.mainTitle = mainTitle.textContent.trim() || 'TITRE';
                 this.data.title = this.data.mainTitle; // Sync pour compatibilité
@@ -114,7 +114,7 @@ class TextCard extends BaseCard {
                 }
             });
             
-            // 🔧 NOUVEAU : Empêcher le drag quand on édite le titre
+            // Empêcher le drag quand on édite le titre
             mainTitle.addEventListener('mousedown', (e) => {
                 e.stopPropagation(); // Empêche le drag de la carte
             });
@@ -214,19 +214,25 @@ class TextCard extends BaseCard {
         return docBody.textContent || docBody.innerText || '';
     }
 
-    // 🔧 MODIFICATION MAJEURE : Méthodes pour l'intégration avec le système de chat
-    // Le contenu est ajouté directement dans le document, SANS créer de sections avec titres
+    // ========== MÉTHODES GPT - VERSION SIMPLIFIÉE ET DEBUGGÉE ==========
+
     addDocumentSection(sectionTitle, token) {
+        console.log(`🔧 [${this.data.id}] addDocumentSection appelée avec token: ${token}`);
+        
         const docBody = this.element.querySelector(`#doc-body-${this.data.id}`);
-        if (!docBody) return;
+        if (!docBody) {
+            console.error(`❌ [${this.data.id}] docBody non trouvé !`);
+            return;
+        }
         
         // Supprimer le placeholder s'il existe
         const placeholder = docBody.querySelector('.document-placeholder');
         if (placeholder) {
             placeholder.remove();
+            console.log(`🔧 [${this.data.id}] Placeholder supprimé`);
         }
         
-        // 🔧 NOUVEAU : Créer juste une div de contenu, SANS titre de section
+        // Créer juste une div de contenu, SANS titre de section
         const sectionHTML = `
             <div class="document-section" id="section-${token}">
                 <div class="section-content" id="content-${token}">
@@ -237,11 +243,18 @@ class TextCard extends BaseCard {
         
         docBody.insertAdjacentHTML('beforeend', sectionHTML);
         docBody.scrollTop = docBody.scrollHeight;
+        
+        console.log(`✅ [${this.data.id}] Section créée pour token: ${token}`);
     }
 
     updateDocumentSection(token, content) {
+        console.log(`🔧 [${this.data.id}] updateDocumentSection - token: ${token}, content: ${content.substring(0, 50)}...`);
+        
         const sectionContent = this.element.querySelector(`#content-${token}`);
-        if (!sectionContent) return;
+        if (!sectionContent) {
+            console.error(`❌ [${this.data.id}] Section content non trouvée pour token: ${token}`);
+            return;
+        }
         
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent + '<span class="typing-cursor">▊</span>';
@@ -253,14 +266,21 @@ class TextCard extends BaseCard {
     }
 
     finalizeDocumentSection(token, content) {
+        console.log(`🔧 [${this.data.id}] finalizeDocumentSection - token: ${token}`);
+        console.log(`🔧 [${this.data.id}] Contenu final (100 premiers caractères):`, content.substring(0, 100));
+        
         const sectionContent = this.element.querySelector(`#content-${token}`);
-        if (!sectionContent) return;
+        if (!sectionContent) {
+            console.error(`❌ [${this.data.id}] Section content non trouvée pour finalisation !`);
+            return;
+        }
         
         const formattedContent = this.formatDocumentContent(content);
         sectionContent.innerHTML = formattedContent;
         
-        // 🔧 MODIFICATION MAJEURE : Mettre à jour le titre du HEADER au lieu du contenu
+        // ⚡ POINT CRUCIAL : Extraire et mettre à jour le titre du HEADER
         if (token.startsWith('section-') && !token.includes('error')) {
+            console.log(`🎯 [${this.data.id}] Tentative extraction titre depuis:`, content.substring(0, 200));
             this.updateHeaderTitle(content);
         }
         
@@ -270,115 +290,173 @@ class TextCard extends BaseCard {
     formatDocumentContent(content) {
         if (!content) return '';
         
-        // Utiliser marked si disponible, sinon formatage basique
-        if (window.marked) {
-            return window.marked.parse(content);
-        }
-        
+        // ⚡ IMPORTANT : Garder le contenu brut pour l'extraction de titre
+        // mais formater pour l'affichage
         return content
             .replace(/\n\n+/g, '</p><p>')
             .replace(/\n/g, '<br>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/#{1,3}\s*(.+?)(<br>|$)/g, '<strong>$1</strong>$2'); // Transformer ## en gras
     }
 
-    // 🔧 NOUVELLE MÉTHODE : Générer titre dans le header au lieu du contenu
+    // ⚡ MÉTHODE CRITIQUE - VERSION DEBUGGÉE ET SIMPLIFIÉE
     updateHeaderTitle(content) {
-        if (!content) return;
+        console.log(`🎯 [${this.data.id}] updateHeaderTitle appelée`);
+        console.log(`🎯 [${this.data.id}] Contenu reçu:`, content);
+        
+        if (!content) {
+            console.warn(`⚠️ [${this.data.id}] Pas de contenu pour extraction titre`);
+            return;
+        }
         
         const titleElement = this.element.querySelector('.card-title');
-        if (!titleElement) return;
+        if (!titleElement) {
+            console.error(`❌ [${this.data.id}] Élément titre non trouvé !`);
+            return;
+        }
         
         const currentTitle = titleElement.textContent.trim();
+        console.log(`🎯 [${this.data.id}] Titre actuel:`, currentTitle);
         
-        // Ne générer que si titre vide ou par défaut
-        if (currentTitle === 'TITRE' || currentTitle === '' || currentTitle === 'Nouvelle carte texte' || 
-            currentTitle.startsWith('Due Diligence') || currentTitle.startsWith('Compliance') || 
-            currentTitle.startsWith('Contrats')) {
+        // ⚡ CONDITION SIMPLIFIÉE : Toujours essayer d'extraire si titre par défaut
+        if (currentTitle === 'TITRE' || currentTitle === '' || 
+            currentTitle === 'Nouvelle carte texte' || currentTitle.length < 5) {
             
-            // 🔧 AMÉLIORATION : Extraction plus intelligente du titre
+            console.log(`🎯 [${this.data.id}] Conditions remplies, extraction du titre...`);
+            
             const newTitle = this.extractTitleFromContent(content);
+            console.log(`🎯 [${this.data.id}] Titre extrait:`, newTitle);
             
-            if (newTitle) {
+            if (newTitle && newTitle !== currentTitle) {
+                console.log(`✅ [${this.data.id}] Mise à jour titre: "${currentTitle}" → "${newTitle}"`);
+                
                 // Mettre à jour les données
                 this.data.mainTitle = newTitle;
-                this.data.title = newTitle; // Sync pour compatibilité
+                this.data.title = newTitle;
                 
                 // Mettre à jour le DOM directement
                 titleElement.textContent = newTitle;
                 
-                // 🔧 NOUVEAU : Animation de mise à jour du titre
-                titleElement.style.backgroundColor = 'rgba(249, 228, 121, 0.3)';
+                // Animation visuelle
+                titleElement.style.backgroundColor = 'rgba(249, 228, 121, 0.5)';
+                titleElement.style.transition = 'background-color 0.5s ease';
                 setTimeout(() => {
                     titleElement.style.backgroundColor = '';
-                }, 1000);
+                }, 2000);
                 
                 this.saveData();
                 
-                console.log(`📝 Titre généré par GPT: "${newTitle}"`);
+                console.log(`🎉 [${this.data.id}] TITRE MIS À JOUR AVEC SUCCÈS !`);
+            } else {
+                console.warn(`⚠️ [${this.data.id}] Aucun titre extrait ou titre identique`);
             }
+        } else {
+            console.log(`🚫 [${this.data.id}] Titre déjà défini, pas de mise à jour`);
         }
     }
 
-    // 🔧 NOUVELLE MÉTHODE : Extraction intelligente du titre depuis le contenu GPT
+    // ⚡ EXTRACTION ROBUSTE ET DEBUGGÉE
     extractTitleFromContent(content) {
-        if (!content || content.length < 10) return null;
+        console.log(`🔍 [${this.data.id}] extractTitleFromContent - Début extraction`);
+        console.log(`🔍 [${this.data.id}] Contenu brut:`, content.substring(0, 200));
         
-        // Nettoyer le contenu des balises HTML
-        const cleanContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        if (!content || content.length < 10) {
+            console.warn(`⚠️ [${this.data.id}] Contenu trop court`);
+            return null;
+        }
         
-        // Chercher d'abord les titres markdown (## Titre)
-        const markdownTitleMatch = cleanContent.match(/^#{1,3}\s*(.+?)(?:\n|$)/m);
-        if (markdownTitleMatch) {
-            const title = markdownTitleMatch[1].trim();
-            if (title.length <= 50) {
-                return title;
+        // Nettoyer le contenu des balises HTML mais garder les retours à la ligne
+        let cleanContent = content.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+        console.log(`🔍 [${this.data.id}] Contenu nettoyé:`, cleanContent.substring(0, 100));
+        
+        // ⚡ MÉTHODE 1 : Chercher les titres markdown ## ou ###
+        const markdownPatterns = [
+            /^##\s*([^#\n\r]+?)(?:\n|\r|$)/im,  // ## Titre
+            /^###\s*([^#\n\r]+?)(?:\n|\r|$)/im, // ### Titre
+            /^#\s*([^#\n\r]+?)(?:\n|\r|$)/im    // # Titre
+        ];
+        
+        for (const pattern of markdownPatterns) {
+            const match = cleanContent.match(pattern);
+            if (match) {
+                const title = match[1].trim();
+                console.log(`🎯 [${this.data.id}] Titre markdown trouvé:`, title);
+                if (title.length > 3 && title.length <= 60) {
+                    return title;
+                }
             }
         }
         
-        // Sinon, extraire la première phrase significative
+        // ⚡ MÉTHODE 2 : Première ligne significative
+        const lines = cleanContent.split(/[\n\r]+/);
+        const firstLine = lines[0]?.trim();
+        
+        if (firstLine && firstLine.length > 5 && firstLine.length <= 80) {
+            // Nettoyer la première ligne
+            let title = firstLine;
+            title = title.replace(/^(voici|voilà|dans|pour|selon|il s'agit de|ceci est|c'est|bonjour|salut)\s+/i, '');
+            title = title.replace(/[.!?]+$/, ''); // Supprimer ponctuation finale
+            
+            console.log(`🎯 [${this.data.id}] Première ligne nettoyée:`, title);
+            
+            if (title.length > 5 && title.length <= 50) {
+                return title.charAt(0).toUpperCase() + title.slice(1);
+            }
+        }
+        
+        // ⚡ MÉTHODE 3 : Première phrase
         const sentences = cleanContent.split(/[.!?]+/);
         const firstSentence = sentences[0]?.trim();
         
-        if (firstSentence && firstSentence.length > 5) {
-            // Limiter à 40 caractères et nettoyer
+        if (firstSentence && firstSentence.length > 10 && firstSentence.length <= 60) {
             let title = firstSentence;
-            
-            // Supprimer les mots de début typiques
             title = title.replace(/^(voici|voilà|dans|pour|selon|il s'agit de|ceci est|c'est)\s+/i, '');
             
-            // Limiter la longueur
-            if (title.length > 40) {
-                const words = title.split(' ');
-                let shortTitle = '';
-                for (const word of words) {
-                    if ((shortTitle + ' ' + word).length > 37) break;
-                    shortTitle += (shortTitle ? ' ' : '') + word;
-                }
-                title = shortTitle + '...';
-            }
-            
-            // Capitaliser la première lettre
-            title = title.charAt(0).toUpperCase() + title.slice(1);
-            
-            return title;
-        }
-        
-        // Fallback : extraire les premiers mots significatifs
-        const words = cleanContent.split(/\s+/);
-        const significantWords = words
-            .filter(word => word.length > 2 && !/^(le|la|les|de|du|des|un|une|et|ou|à|dans|pour|avec|sur|par|ce|cette|ces|son|sa|ses)$/i.test(word))
-            .slice(0, 3);
-        
-        if (significantWords.length > 0) {
-            const title = significantWords.join(' ');
+            console.log(`🎯 [${this.data.id}] Première phrase nettoyée:`, title);
             return title.charAt(0).toUpperCase() + title.slice(1);
         }
         
+        // ⚡ MÉTHODE 4 : Mots-clés significatifs (fallback)
+        const words = cleanContent.split(/\s+/);
+        const significantWords = words
+            .filter(word => word.length > 2 && !/^(le|la|les|de|du|des|un|une|et|ou|à|dans|pour|avec|sur|par|ce|cette|ces|son|sa|ses|qui|que|quoi|comment|pourquoi)$/i.test(word))
+            .slice(0, 4);
+        
+        if (significantWords.length >= 2) {
+            const title = significantWords.join(' ');
+            console.log(`🎯 [${this.data.id}] Titre par mots-clés:`, title);
+            return title.charAt(0).toUpperCase() + title.slice(1);
+        }
+        
+        console.warn(`⚠️ [${this.data.id}] Aucun titre extrait par toutes les méthodes`);
         return null;
     }
 
-    // 🔧 NOUVELLE MÉTHODE : Réinitialiser le titre
+    // Méthode debug pour forcer la mise à jour du titre
+    forceUpdateTitle(newTitle) {
+        console.log(`🔧 [${this.data.id}] FORCE UPDATE TITRE:`, newTitle);
+        
+        const titleElement = this.element.querySelector('.card-title');
+        if (titleElement) {
+            this.data.mainTitle = newTitle;
+            this.data.title = newTitle;
+            titleElement.textContent = newTitle;
+            
+            // Animation forte pour debug
+            titleElement.style.backgroundColor = 'red';
+            titleElement.style.color = 'white';
+            setTimeout(() => {
+                titleElement.style.backgroundColor = '';
+                titleElement.style.color = '';
+            }, 3000);
+            
+            this.saveData();
+            console.log(`🎉 [${this.data.id}] TITRE FORCÉ MIS À JOUR !`);
+        }
+    }
+
+    // Méthode de réinitialisation du titre
     resetTitle() {
         this.data.mainTitle = 'TITRE';
         this.data.title = 'TITRE';
@@ -396,9 +474,6 @@ class TextCard extends BaseCard {
         if (this.workspaceManager.activeCardChat === this.data.id) {
             this.workspaceManager.disconnectFromMainChat();
         }
-        
-        // Supprimer les données de localStorage si nécessaire
-        // localStorage.removeItem(`workspace-doc-${this.data.id}`);
     }
 
     // Méthodes statiques pour la création de cartes texte
@@ -407,7 +482,7 @@ class TextCard extends BaseCard {
         return {
             id: CardSystem.generateCardId('text'),
             type: 'text',
-            title: 'TITRE', // 🔧 CHANGEMENT : Titre par défaut unifié
+            title: 'TITRE',
             mainTitle: 'TITRE',
             theme: 'Personnalisé',
             description: 'Description de la nouvelle carte',
