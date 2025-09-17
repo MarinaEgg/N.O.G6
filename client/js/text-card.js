@@ -39,13 +39,27 @@ class TextCard extends BaseCard {
             ${CardSystem.createCardHeader(this.data, actions)}
             
             <div class="card-content-view" id="content-${this.data.id}">
-                <div class="card-juridique-info">
-                    <div class="repertoires-list">
-                        ${this.getRepertoiresHTML()}
+                <div class="card-category-section">
+                    <div class="category-tag" id="category-${this.data.id}">
+                        ${this.data.category || 'Document de travail'}
                     </div>
-                    <div class="departement-info">
-                        <i class="fas fa-building"></i>
-                        <span>${this.data.departement || 'Département'}</span>
+                </div>
+                
+                <div class="card-summary-section">
+                    <div class="card-summary-text" id="summary-${this.data.id}">
+                        ${this.generateSummary()}
+                    </div>
+                </div>
+                
+                <div class="card-filing-section">
+                    <div class="filing-folder">
+                        <svg class="folder-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24">
+                            <path d="M10 4l2 2h8a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6z"
+                                  fill="rgba(253, 224, 71, 0.6)" />
+                        </svg>
+                        <select class="filing-select" id="filing-select-${this.data.id}">
+                            ${this.getFilingOptionsHTML()}
+                        </select>
                     </div>
                 </div>
             </div>
@@ -56,8 +70,17 @@ class TextCard extends BaseCard {
                         <p class="document-placeholder">Commencez à taper ou utilisez l'IA pour générer du contenu...</p>
                     </div>
                 </div>
-                <div class="document-status">
-                    <span class="collab-indicator">✍️ Mode collaboration - Tapez ou utilisez la barre de chat</span>
+                
+                <div class="collaboration-indicator" id="collab-indicator-${this.data.id}" style="display: none;">
+                    <svg class="collab-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                        <circle cx="9" cy="8" r="2.5" fill="rgba(59,130,246,0.4)" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>
+                        <path d="M4.5 19c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" stroke="rgba(255,255,255,0.8)" stroke-width="1" fill="none"/>
+                        <rect x="15" y="7" width="4" height="4" rx="1" fill="rgba(16,185,129,0.4)" stroke="rgba(255,255,255,0.8)" stroke-width="1"/>
+                        <circle cx="16" cy="8.5" r="0.5" fill="rgba(255,255,255,0.9)"/>
+                        <circle cx="18" cy="8.5" r="0.5" fill="rgba(255,255,255,0.9)"/>
+                        <path d="M15 11v2c0 1 2 2 2s2-1 2-2v-2" stroke="rgba(255,255,255,0.8)" stroke-width="1" fill="none"/>
+                    </svg>
+                    <span class="collab-text">Collaboration active</span>
                 </div>
             </div>
         `;
@@ -125,6 +148,21 @@ class TextCard extends BaseCard {
                 e.stopPropagation();
             });
         }
+
+        // Event pour changement de répertoire
+        const filingSelect = this.element.querySelector(`#filing-select-${this.data.id}`);
+        if (filingSelect) {
+            filingSelect.addEventListener('change', (e) => {
+                const newFolder = e.target.value;
+                this.data.filingFolder = newFolder;
+                this.saveData();
+                console.log(`📁 Répertoire changé manuellement: ${newFolder}`);
+            });
+            
+            // Empêcher le drag sur la dropdown
+            filingSelect.addEventListener('mousedown', (e) => e.stopPropagation());
+            filingSelect.addEventListener('click', (e) => e.stopPropagation());
+        }
     }
 
     toggleDocumentMode() {
@@ -142,6 +180,11 @@ class TextCard extends BaseCard {
             toggleBtn.classList.remove('active');
             toggleBtn.innerHTML = '<i class="fas fa-edit"></i>';
             toggleBtn.title = 'Mode Collaboration';
+            // Masquer l'indicateur de collaboration
+            const collabIndicatorHide = this.element.querySelector(`#collab-indicator-${this.data.id}`);
+            if (collabIndicatorHide) {
+                collabIndicatorHide.style.display = 'none';
+            }
             
             if (this.workspaceManager.activeCardChat === this.data.id) {
                 this.workspaceManager.disconnectFromMainChat();
@@ -154,6 +197,11 @@ class TextCard extends BaseCard {
             toggleBtn.classList.add('active');
             toggleBtn.innerHTML = '<i class="fas fa-file-alt"></i>';
             toggleBtn.title = 'Retour vue normale';
+            // Afficher l'indicateur de collaboration
+            const collabIndicatorShow = this.element.querySelector(`#collab-indicator-${this.data.id}`);
+            if (collabIndicatorShow) {
+                collabIndicatorShow.style.display = 'flex';
+            }
             
             this.workspaceManager.connectToMainChat(this.data.id, this.element);
             
@@ -289,6 +337,9 @@ class TextCard extends BaseCard {
         
         // Enregistrer le contenu
         this.saveDocumentContent();
+        
+        // Mettre à jour le résumé
+        this.updateSummary();
     }
     
     /**
@@ -426,6 +477,108 @@ class TextCard extends BaseCard {
         }
     }
 
+    // Définit la catégorie de la carte et met à jour l'affichage
+    setCategory(category) {
+        if (category && category.trim().length > 0) {
+            this.data.category = category.trim();
+            
+            const categoryElement = this.element.querySelector(`#category-${this.data.id}`);
+            if (categoryElement) {
+                categoryElement.textContent = category.trim();
+            }
+            
+            this.saveData();
+            console.log(`✅ [${this.data.id}] Catégorie définie par GPT: "${category.trim()}"`);
+        }
+    }
+
+    // Définit le répertoire de classement (folder) et met à jour l'affichage
+    setFolder(folder) {
+        if (folder && folder.trim().length > 0) {
+            this.data.filingFolder = folder.trim();
+            
+            // Mettre à jour la dropdown
+            const filingSelect = this.element.querySelector(`#filing-select-${this.data.id}`);
+            if (filingSelect) {
+                filingSelect.value = folder.trim();
+            }
+            
+            this.saveData();
+            console.log(`✅ [${this.data.id}] Répertoire défini par GPT: "${folder.trim()}"`);
+        }
+    }
+
+    // Génère un résumé textuel du contenu du document
+    generateSummary() {
+        const content = this.getDocumentContent();
+        
+        if (!content || content.trim().length === 0) {
+            return "Document vide - Cliquez pour ajouter du contenu";
+        }
+        
+        // Extraire les premiers mots significatifs (ignorer les titres)
+        const cleanContent = content
+            .replace(/^#{1,6}\s+/gm, '') // Supprimer les # des titres
+            .replace(/\*\*(.*?)\*\*/g, '$1') // Supprimer le gras
+            .replace(/\*(.*?)\*/g, '$1') // Supprimer l'italique
+            .trim();
+        
+        // Prendre les 100 premiers caractères
+        let summary = cleanContent.substring(0, 100);
+        
+        // Couper au dernier mot complet
+        if (summary.length === 100) {
+            const lastSpace = summary.lastIndexOf(' ');
+            if (lastSpace > 50) { // Minimum 50 caractères
+                summary = summary.substring(0, lastSpace);
+            }
+            summary += '...';
+        }
+        
+        return summary || "Contenu en cours de rédaction...";
+    }
+
+    // Met à jour l'élément d'aperçu de résumé dans l'UI
+    updateSummary() {
+        const summaryElement = this.element.querySelector(`#summary-${this.data.id}`);
+        if (summaryElement) {
+            summaryElement.textContent = this.generateSummary();
+            console.log(`✅ [${this.data.id}] Résumé mis à jour`);
+        }
+    }
+
+    // Retourne les options HTML pour la liste de sélection du répertoire de classement
+    getFilingOptionsHTML() {
+        const allFolders = TextCard.getAllFolders();
+        const currentFolder = this.data.filingFolder || 'Documents de travail';
+        
+        return allFolders.map(folder => 
+            `<option value="${folder}" ${folder === currentFolder ? 'selected' : ''}>${folder}</option>` 
+        ).join('');
+    }
+
+    // Méthodes statiques utilitaires pour les répertoires
+    static getAllFolders() {
+        return [
+            "Contrats", "Correspondance", "Documents de travail", "Factures de fournisseurs",
+            "Office", "Portefeuilles", "Recherches", "Surveillance", "Contre-interrogatoire",
+            "Preuve", "Rapports de recherches", "Registraire", "Procédures", 
+            "Rapports de surveillance", "Contrats et formulaires", "Transferts de dossiers",
+            "Arbitrage", "Cour d'appel du Québec", "Cour d'appel fédérale", 
+            "Cour fédérale (Demandes)", "Cours provinciales", "Procès", "Règlement",
+            "Autorité Réglementaire", "Concours", "Conditions générales de vente",
+            "Incident", "Matériel publicitaire", "Opinions", "Mises en demeure",
+            "Opérationnalisation", "Documents de clôture", "Vérification diligente",
+            "Livre Corporatif", "Gouvernance", "Réunions", "Incidents", "Opinion / Avis"
+        ];
+    }
+
+    static getRandomFolder() {
+        const folders = TextCard.getAllFolders();
+        const randomIndex = Math.floor(Math.random() * folders.length);
+        return folders[randomIndex];
+    }
+
     // Méthodes statiques pour la création de cartes texte
     static createDefaultTextCard(cardData = {}) {
         const position = cardData.position || { x: 200, y: 200 };
@@ -440,6 +593,11 @@ class TextCard extends BaseCard {
             stats: { documents: 0, lastUpdate: 'maintenant' },
             pinned: false,
             documentContent: null,
+            // Champs de classement et catégorisation
+            category: 'Document de travail',
+            filingDepartment: 'AVOCAT',
+            filingCategory: 'GÉNÉRAL (AVOCAT)',
+            filingFolder: TextCard.getRandomFolder(),
             // ⚡ Ajout des champs manquants
             client: 'Client',
             dossier: 'Nouveau dossier', 
