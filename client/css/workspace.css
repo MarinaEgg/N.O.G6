@@ -79,20 +79,21 @@
 
 /* ========== CANVAS DRAGGABLE - AMÉLIORÉ ========== */
 
-/* CORRECTION 2 : Canvas draggable avec fond à pois réactif */
+/* CORRECTION 2 : Canvas draggable avec fond à pois infini */
 .workspace-canvas {
     flex: 1;
     position: relative;
     cursor: grab;
-    min-width: 200vw;
-    min-height: 200vh; /* AUGMENTATION : Plus de hauteur pour scroll vertical */
+    min-width: 400vw; /* AUGMENTATION : Plus large pour effet infini */
+    min-height: 400vh; /* AUGMENTATION : Plus haut pour effet infini */
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
     overflow: visible;
-    /* NOUVEAU : Fond à pois géré dynamiquement par JS */
+    /* NOUVEAU : Fond à pois géré dynamiquement par JS avec répétition infinie */
     background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
     background-size: 30px 30px; /* Taille par défaut, sera modifiée par JS */
     background-position: 0 0; /* Position par défaut, sera modifiée par JS */
+    background-repeat: repeat; /* AJOUT : Assurer la répétition infinie */
 }
 
 .workspace-canvas:active {
