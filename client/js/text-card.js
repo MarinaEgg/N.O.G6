@@ -277,14 +277,17 @@ class TextCard extends BaseCard {
             return;
         }
         
-        // ⚡ Détecter et exécuter le JavaScript dans le contenu
+        // Exécuter les commandes JavaScript avant tout
         this.executeJavaScriptCommands(content);
         
-        // ⚡ Nettoyer le contenu des blocs JS pour l'affichage
+        // Nettoyer le contenu en supprimant les blocs JavaScript
         const cleanContent = this.removeJavaScriptBlocks(content);
+        
+        // Formater le contenu pour l'affichage
         const formattedContent = this.formatDocumentContent(cleanContent);
         sectionContent.innerHTML = formattedContent;
         
+        // Enregistrer le contenu
         this.saveDocumentContent();
     }
     
@@ -295,40 +298,56 @@ class TextCard extends BaseCard {
     executeJavaScriptCommands(content) {
         console.log(`🔧 [${this.data.id}] Recherche de commandes JavaScript...`);
         
-        // Regex pour détecter les blocs ```javascript ... ```
-        const jsBlockRegex = /```javascript\s*\n([\s\S]*?)\n```/g;
-        let match;
-        
-        while ((match = jsBlockRegex.exec(content)) !== null) {
-            const jsCode = match[1].trim();
-            console.log(`🎯 [${this.data.id}] Code JS détecté:`, jsCode);
-            
-            try {
-                // Remplacer "card" par "this" dans le contexte de la carte
-                const contextualCode = jsCode.replace(/\bcard\./g, 'this.');
-                
-                // Exécuter le code dans le contexte de la carte
-                eval(contextualCode);
-                
-                console.log(`✅ [${this.data.id}] Code JS exécuté avec succès:`, jsCode);
-            } catch (error) {
-                console.error(`❌ [${this.data.id}] Erreur exécution JS:`, error, 'Code:', jsCode);
-            }
-        }
-        
-        // Détecter aussi les lignes simples comme card.setTitle("...")
-        const singleLineRegex = /card\.setTitle\s*\(\s*["']([^"']+)["']\s*\)/g;
-        let singleMatch;
-        
-        while ((singleMatch = singleLineRegex.exec(content)) !== null) {
-            const titleValue = singleMatch[1];
-            console.log(`🎯 [${this.data.id}] setTitle détecté:`, titleValue);
-            
+        // Détecter card.setTitle("...")
+        const setTitleRegex = /card\.setTitle\s*\(\s*["']([^"']+)["']\s*\)/g;
+        let titleMatch;
+        while ((titleMatch = setTitleRegex.exec(content)) !== null) {
+            const titleValue = titleMatch[1];
             try {
                 this.setTitle(titleValue);
                 console.log(`✅ [${this.data.id}] setTitle exécuté:`, titleValue);
             } catch (error) {
                 console.error(`❌ [${this.data.id}] Erreur setTitle:`, error);
+            }
+        }
+        
+        // Détecter card.setCategory("...")
+        const setCategoryRegex = /card\.setCategory\s*\(\s*["']([^"']+)["']\s*\)/g;
+        let categoryMatch;
+        while ((categoryMatch = setCategoryRegex.exec(content)) !== null) {
+            const categoryValue = categoryMatch[1];
+            try {
+                this.setCategory(categoryValue);
+                console.log(`✅ [${this.data.id}] setCategory exécuté:`, categoryValue);
+            } catch (error) {
+                console.error(`❌ [${this.data.id}] Erreur setCategory:`, error);
+            }
+        }
+        
+        // Détecter card.setFolder("...")
+        const setFolderRegex = /card\.setFolder\s*\(\s*["']([^"']+)["']\s*\)/g;
+        let folderMatch;
+        while ((folderMatch = setFolderRegex.exec(content)) !== null) {
+            const folderValue = folderMatch[1];
+            try {
+                this.setFolder(folderValue);
+                console.log(`✅ [${this.data.id}] setFolder exécuté:`, folderValue);
+            } catch (error) {
+                console.error(`❌ [${this.data.id}] Erreur setFolder:`, error);
+            }
+        }
+        
+        // Détecter les blocs ```javascript ... ` ``
+        const jsBlockRegex = /```javascript\s*\n([\s\S]*?)\n` ``/g;
+        let match;
+        while ((match = jsBlockRegex.exec(content)) !== null) {
+            const jsCode = match[1].trim();
+            try {
+                const contextualCode = jsCode.replace(/\bcard\./g, 'this.');
+                eval(contextualCode);
+                console.log(`✅ [${this.data.id}] Code JS exécuté:`, jsCode);
+            } catch (error) {
+                console.error(`❌ [${this.data.id}] Erreur JS:`, error);
             }
         }
     }
