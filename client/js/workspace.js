@@ -45,11 +45,12 @@ class WorkspaceManager {
 
     setupElements() {
         this.canvas = document.getElementById('workspaceCanvas');
+        this.background = document.getElementById('workspaceBackground');
         this.addCardBtn = document.getElementById('addCardBtn');
         this.saveLayoutBtn = document.getElementById('saveLayoutBtn');
         this.originalMessageBox = document.getElementById('messages');
 
-        if (!this.canvas) {
+        if (!this.canvas || !this.background) {
             console.warn('Workspace elements not found, retrying...');
             setTimeout(() => this.setupElements(), 100);
             return;
@@ -352,29 +353,27 @@ class WorkspaceManager {
     }
 
     updateCanvasBackground() {
-        if (!this.canvas) return;
+        if (!this.background) return;
 
-        // CORRECTION 1 : Taille minimale des points pour visibilité à tous les zooms
+        // SOLUTION : Taille des points adaptée au zoom mais avec minimum
         const baseDotSize = 30;
-        const minDotSize = 20; // Taille minimale pour rester visible
+        const minDotSize = 15; // Minimum pour rester visible
         const dotSize = Math.max(minDotSize, baseDotSize * this.zoomLevel);
 
-        // CORRECTION 2 : Modulo euclidien pour gérer les valeurs négatives
-        // Cela assure un effet infini sans coupures
+        // SOLUTION : Modulo euclidien pour effet infini parfait
         const euclideanMod = (a, b) => ((a % b) + b) % b;
 
-        const offsetX = this.canvasOffset.x * this.zoomLevel;
-        const offsetY = this.canvasOffset.y * this.zoomLevel;
+        // Position du background qui suit le déplacement
+        const bgX = euclideanMod(this.canvasOffset.x, dotSize);
+        const bgY = euclideanMod(this.canvasOffset.y, dotSize);
 
-        const bgX = euclideanMod(offsetX, dotSize);
-        const bgY = euclideanMod(offsetY, dotSize);
+        // Appliquer au background séparé
+        this.background.style.backgroundSize = `${dotSize}px ${dotSize}px`;
+        this.background.style.backgroundPosition = `${bgX}px ${bgY}px`;
 
-        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
-        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
-
-        // CORRECTION 3 : Ajuster l'opacité des points selon le zoom pour meilleure visibilité
-        const opacity = Math.max(0.05, Math.min(0.15, 0.1 * this.zoomLevel + 0.05));
-        this.canvas.style.backgroundImage = `radial-gradient(circle, rgba(0, 0, 0, ${opacity}) 1px, transparent 1px)`;
+        // Ajuster l'opacité selon le zoom pour meilleure visibilité
+        const opacity = Math.max(0.06, Math.min(0.12, 0.1));
+        this.background.style.backgroundImage = `radial-gradient(circle, rgba(0, 0, 0, ${opacity}) 1px, transparent 1px)`;
     }
 
     // ========== MÉTHODES ZOOM INCHANGÉES ==========
