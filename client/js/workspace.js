@@ -795,6 +795,7 @@ class WorkspaceManager {
         const textarea = document.getElementById('message-input');
         if (textarea) {
             textarea.placeholder = 'Posez votre question à N.O.G';
+            textarea.style.borderColor = '';
         }
         
         const indicator = document.querySelector('.chat-card-indicator');
@@ -807,6 +808,11 @@ class WorkspaceManager {
         if (prevCard && prevCard.element) {
             const chatToggleBtn = prevCard.element.querySelector('.chat-toggle-btn');
             chatToggleBtn?.classList.remove('active');
+            // Masquer l'indicateur de collaboration sur l'ancienne carte
+            const collabIndicator = prevCard.element.querySelector(`#collab-indicator-${this.activeCardChat}`);
+            if (collabIndicator) {
+                collabIndicator.style.display = 'none';
+            }
         }
         
         this.activeCardChat = null;
@@ -816,24 +822,10 @@ class WorkspaceManager {
     }
     
     showChatIndicator(cardTitle) {
-        const existingIndicator = document.querySelector('.chat-card-indicator');
-        if (existingIndicator) {
-            existingIndicator.remove();
-        }
-        
-        const indicator = document.createElement('div');
-        indicator.className = 'chat-card-indicator';
-        indicator.innerHTML = `
-            <i class="fas fa-link"></i>
-            <span>Connecté à: ${cardTitle}</span>
-            <button onclick="window.workspaceManager.disconnectFromMainChat()" title="Déconnecter">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        const chatContainer = document.querySelector('.modern-chat-container');
-        if (chatContainer) {
-            chatContainer.parentNode.insertBefore(indicator, chatContainer);
+        const textarea = document.getElementById('message-input');
+        if (textarea) {
+            textarea.placeholder = `💬 Collaboration avec "${cardTitle}"`;
+            textarea.style.borderColor = 'rgba(34, 197, 94, 0.5)';
         }
     }
     
@@ -928,32 +920,42 @@ class WorkspaceManager {
         const cardTitle = card ? (card.data.mainTitle || 'Document') : 'Document';
         const existingContent = card ? card.getDocumentContent() : '';
         
-        const prompt = "Tu es un assistant spécialisé dans la rédaction de documents professionnels.\n\n" +
+        const availableFolders = [
+            'Contrats', 'Correspondance', 'Documents de travail', 'Factures de fournisseurs',
+            'Office', 'Arbitrage', 'Procès', 'Opinions', 'Livre Corporatif', 'Gouvernance',
+            'Incidents', 'Matériel publicitaire', 'Surveillance', 'Recherches'
+        ];
+        
+        const prompt = "Tu es un assistant juridique spécialisé.\n\n" +
             "Contexte : Document \"" + cardTitle + "\"\n" +
             "Contenu existant : " + existingContent + "\n\n" +
             "Instruction : " + userMessage + "\n\n" +
-            "⚡ IMPORTANTE - COMMANDES JAVASCRIPT :\n" +
-            "- Pour changer le titre du document, utilise EXACTEMENT ce format :\n" +
+            "⚡ COMMANDES JAVASCRIPT DISPONIBLES :\n\n" +
+            "1. Définir le titre :\n" +
             "```javascript\n" +
-            "card.setTitle(\"Nouveau Titre\");\n" +
+            "card.setTitle(\"Contrat de Vente Immobilière\");\n" +
             "```\n\n" +
-            "- Le code JavaScript sera automatiquement exécuté\n" +
-            "- Exemple complet :\n" +
+            "2. Catégoriser le document :\n" +
             "```javascript\n" +
-            "card.setTitle(\"Contrat de Vente\");\n" +
-            "```\n\n" +
-            "Pour le contenu du document :\n" +
-            "- Génère du contenu professionnel structuré\n" +
-            "- Utilise des titres avec ## et ###\n" +
-            "- Du texte bien formaté\n" +
-            "- Style document de travail\n\n" +
-            "Si tu veux changer le titre, mets le code JavaScript AU DÉBUT de ta réponse.";
+            "card.setCategory(\"Contrat commercial\");\n" +
+            "```\n" +
+            "Catégories : Contrat commercial, Document de litige, Propriété intellectuelle, Document corporatif, Avis juridique, Correspondance, Document réglementaire, Procédure judiciaire, Document transactionnel, Mémo interne, Recherche juridique, Document de conformité\n\n" +
+            "3. Classer dans un répertoire :\n" +
+            "```javascript\n" +
+            "card.setFolder(\"Contrats\");\n" +
+            "```\n" +
+            "Répertoires disponibles : " + availableFolders.join(', ') + "\n\n" +
+            "⚡ IMPORTANT : Analyse le contenu et assigne automatiquement :\n" +
+            "- Le bon titre descriptif\n" +
+            "- La catégorie business appropriée  \n" +
+            "- Le répertoire de classement approprié\n\n" +
+            "Pour le contenu :\n" +
+            "- Génère du contenu juridique professionnel\n" +
+            "- Structure avec ## et ###\n" +
+            "- Style formel et précis\n\n" +
+            "Si tu veux changer titre/catégorie/répertoire, mets les commandes JavaScript AU DÉBUT de ta réponse.";
             
         return prompt;
-    }
-
-    generateSectionTitle(message) {
-        return "Contenu généré"; // Titre générique car plus affiché
     }
 
     generateMessageId() {
