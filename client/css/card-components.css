@@ -598,15 +598,148 @@ canvas.pdf-canvas {
 
 /* ========== STYLES POUR CARTES TEXTE (COMPLÉMENTAIRES) ========== */
 
-.workspace-card.card-text {
-    /* Conserver les styles existants */
-}
+/* Styles spécifiques pour les cartes texte sont définis ci-dessous */
 
 .workspace-card.card-text .card-action-btn.chat-toggle-btn.active {
     color: rgba(249, 228, 121, 0.9);
     background: rgba(249, 228, 121, 0.1);
 }
 
+/* ========== TEXT CARD: NEW SECTIONS (CATEGORY / SUMMARY / FILING) ========== */
+
+/* Category section */
+.workspace-card.card-text .card-category-section {
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.workspace-card.card-text .category-tag {
+    display: inline-block;
+    padding: 4px 12px;
+    background: rgba(47, 47, 46, 0.08);
+    color: #2f2f2e;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Summary section */
+.workspace-card.card-text .card-summary-section {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.workspace-card.card-text .card-summary-text {
+    font-size: 13px;
+    line-height: 1.4;
+    color: rgba(47, 47, 46, 0.75);
+    font-style: italic;
+    max-height: 60px;
+    overflow: hidden;
+}
+
+/* Filing section */
+.workspace-card.card-text .card-filing-section {
+    padding: 10px 16px;
+}
+
+.workspace-card.card-text .filing-folder {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.workspace-card.card-text .folder-icon {
+    flex-shrink: 0;
+    opacity: 0.8;
+}
+
+.workspace-card.card-text .filing-select {
+    background: rgba(47, 47, 46, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+    color: #2f2f2e;
+    font-size: 11px;
+    padding: 4px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s ease;
+    min-width: 140px;
+}
+
+.workspace-card.card-text .filing-select:hover {
+    background: rgba(47, 47, 46, 0.06);
+    border-color: rgba(249, 228, 121, 0.4);
+}
+
+.workspace-card.card-text .filing-select:focus {
+    background: rgba(47, 47, 46, 0.08);
+    border-color: rgba(249, 228, 121, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 228, 121, 0.15);
+}
+
+.workspace-card.card-text .filing-select option {
+    background: #ffffff;
+    color: #2f2f2e;
+    padding: 4px;
+}
+
+/* ========== COLLABORATION INDICATOR ========== */
+.workspace-card.card-text .collaboration-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 24px; /* leave space for .sync-status bubble at bottom-right */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    opacity: 0.9;
+    transition: opacity 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.workspace-card.card-text .collaboration-indicator:hover { opacity: 1; }
+
+.workspace-card.card-text .collab-icon { flex-shrink: 0; }
+
+.workspace-card.card-text .collab-text {
+    font-size: 10px;
+    color: #2f2f2e;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+@keyframes collaboration-pulse {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+}
+
+.workspace-card.card-text .collaboration-indicator .collab-icon {
+    animation: collaboration-pulse 2s infinite ease-in-out;
+}
+
+/* ========== DOCUMENT VIEW SCOPE (avoid conflicts with workspace.css) ========== */
+.workspace-card.card-text .card-document-view {
+    position: relative;
+}
+
+.workspace-card.card-text .document-content {
+    /* inherit from workspace.css but ensure overflow when constrained */
+    overflow-y: auto;
+}
+
+/* ========== CLEANUP OF OLD BORDERS INSIDE TEXT CARDS ========== */
+.workspace-card.card-text .card-content-view,
+.workspace-card.card-text .card-content-view > div {
+    border: none !important;
+}
 /* ========== TRANSITIONS ET ANIMATIONS ========== */
 
 .workspace-card {
