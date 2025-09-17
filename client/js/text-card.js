@@ -358,17 +358,29 @@ class TextCard extends BaseCard {
      * @returns {string} Le contenu nettoyé
      */
     removeJavaScriptBlocks(content) {
-        // Supprimer les blocs ```javascript ... ```
-        let cleanContent = content.replace(/```javascript\s*\n[\s\S]*?\n```/gs, '');
+        console.log(`🔧 [${this.data.id}] Contenu AVANT nettoyage:` , content.substring(0, 200));
+        
+        // Supprimer les blocs ```javascript ... ` ``
+        let cleanContent = content.replace(/```javascript\s*\n[\s\S]*?\n` ``/gs, '');
+        cleanContent = cleanContent.replace(/```javascript[\s\S]*?` ``/gs, '');
         
         // Supprimer les lignes card.setTitle isolées
         cleanContent = cleanContent.replace(/^\s*card\.setTitle\s*\([^)]+\)\s*;?\s*$/gm, '');
         
-        // Nettoyer les lignes vides en trop
-        cleanContent = cleanContent.replace(/\n\n\n+/g, '\n\n');
+        // Supprimer les lignes card.setCategory isolées
+        cleanContent = cleanContent.replace(/^\s*card\.setCategory\s*\([^)]+\)\s*;?\s*$/gm, '');
         
-        // Supprimer également les anciennes balises script au cas où
-        cleanContent = cleanContent.replace(/<script[^>]*>[\s\S]*?<\/script>/g, '');
+        // Supprimer les lignes card.setFolder isolées
+        cleanContent = cleanContent.replace(/^\s*card\.setFolder\s*\([^)]+\)\s*;?\s*$/gm, '');
+        
+        // Supprimer les balises <script>
+        cleanContent = cleanContent.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+        
+        // Nettoyer les lignes vides
+        cleanContent = cleanContent.replace(/^\s*$/gm, '');
+        cleanContent = cleanContent.replace(/\n{3,}/g, '\n\n');
+        
+        console.log(`✅ [${this.data.id}] Contenu APRÈS nettoyage:` , cleanContent.substring(0, 200));
         
         return cleanContent.trim();
     }
