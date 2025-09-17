@@ -79,21 +79,36 @@
 
 /* ========== CANVAS DRAGGABLE - AMÉLIORÉ ========== */
 
-/* CORRECTION 2 : Canvas draggable avec fond à pois infini */
-.workspace-canvas {
+/* SOLUTION : Container pour séparer background et canvas */
+.workspace-canvas-container {
     flex: 1;
     position: relative;
+    overflow: hidden;
+}
+
+/* SOLUTION : Background fixe qui ne bouge pas avec les transformations */
+.workspace-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-position: 0 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* SOLUTION : Canvas sans background, juste pour les cartes */
+.workspace-canvas {
+    position: relative;
     cursor: grab;
-    min-width: 400vw; /* AUGMENTATION : Plus large pour effet infini */
-    min-height: 400vh; /* AUGMENTATION : Plus haut pour effet infini */
+    min-width: 200vw;
+    min-height: 200vh;
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
-    overflow: visible;
-    /* NOUVEAU : Fond à pois géré dynamiquement par JS avec répétition infinie */
-    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px; /* Taille par défaut, sera modifiée par JS */
-    background-position: 0 0; /* Position par défaut, sera modifiée par JS */
-    background-repeat: repeat; /* AJOUT : Assurer la répétition infinie */
+    z-index: 2;
 }
 
 .workspace-canvas:active {
