@@ -368,45 +368,37 @@ class WorkspaceManager {
         const vhHeight = Math.max(200, (minHeight / window.innerHeight) * 100);
         
         // Appliquer les nouvelles dimensions
-        this.canvas.style.minWidth = `${vwWidth}vw` ;
-        this.canvas.style.minHeight = `${vhHeight}vh` ;
+        this.canvas.style.minWidth = `${vwWidth}vw`;
+        this.canvas.style.minHeight = `${vhHeight}vh`;
     }
-
+    
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        // 🔧 FIX : Taille des points qui s'adapte au zoom
         const baseDotSize = 30;
         const dotSize = baseDotSize * this.zoomLevel;
 
-        // 🔧 FIX : Modulo PARFAIT pour infini (compatible négatif)
-        const safeModulo = (value, modulus) => {
-            const result = value % modulus;
-            return result < 0 ? result + modulus : result;
-        };
-
-        // 🔧 FIX : Positions avec arrondi pour éviter sub-pixels
-        const bgX = Math.round(safeModulo(this.canvasOffset.x, dotSize));
-        const bgY = Math.round(safeModulo(this.canvasOffset.y, dotSize));
-
-        // Appliquer avec des valeurs arrondies
-        this.canvas.style.backgroundSize = `${Math.round(dotSize)}px ${Math.round(dotSize)}px` ;
-        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px` ;
-        
-        // S'assurer que le background est présent
-        if (!this.canvas.style.backgroundImage.includes('radial-gradient')) {
-            this.canvas.style.backgroundImage = 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)';
-        }
-
-        // 🔧 DEBUG
-        if (window.DEBUG_WORKSPACE) {
-            console.log(`Zoom: ${this.zoomLevel.toFixed(2)} | DotSize: ${dotSize.toFixed(1)} | Pos: ${bgX}, ${bgY}` );
+        // 🔧 SOLUTION : Utiliser background-repeat au lieu de calculer modulo
+        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
+        this.canvas.style.backgroundPosition = `${this.canvasOffset.x}px ${this.canvasOffset.y}px`;
+        this.canvas.style.backgroundRepeat = 'repeat'; // ← C'EST ÇA QUI MANQUAIT !
+        this.canvas.style.backgroundImage = 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)';
+    }
+    
+    loadZoomLevel() {
+        const saved = localStorage.getItem('workspace-zoom-level');
+        if (saved) {
+            const zoomLevel = parseFloat(saved);
+            if (zoomLevel >= this.minZoom && zoomLevel <= this.maxZoom) {
+                this.setZoom(zoomLevel);
+            }
         }
     }
 
-    // ========== MÉTHODES ZOOM INCHANGÉES ==========
+    // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
 
-    initZoom() {
+    loadDefaultCards() {
+        console.log('🎯 Workspace vierge - prêt pour création manuelle');
         this.createZoomControls();
         this.setupZoomEvents();
     }
@@ -445,18 +437,18 @@ class WorkspaceManager {
 
     zoomIn() {
         this.setZoom(Math.min(this.maxZoom, this.zoomLevel + this.zoomStep));
-    }
+    };
 
     zoomOut() {
         this.setZoom(Math.max(this.minZoom, this.zoomLevel - this.zoomStep));
-    }
+    };
 
     resetZoom() {
         this.setZoom(1.0);
         this.canvasOffset = { x: 0, y: 0 };
         this.applyCanvasTransform();
         this.updateCanvasBackground(); // 🔧 REMETTRE
-    }
+    };
 
     setZoom(zoomValue) {
         this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
@@ -1018,10 +1010,16 @@ class WorkspaceManager {
             // Si pas de données, afficher le sélecteur
             this.showCardTypeSelector();
         }
+        return null;
     }
 
     // ========== MÉTHODES DEBUG ==========
 
+    debugLog(message, data = null) {
+        if (window.DEBUG_WORKSPACE) {
+            console.log(`[Workspace] ${message}`, data || '');
+        }
+    }
 }
 
 // ========== INITIALISATION GLOBALE ==========
