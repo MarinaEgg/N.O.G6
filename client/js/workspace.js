@@ -63,7 +63,7 @@ class WorkspaceManager {
         this.setupChatIntegration();
         this.initZoom();
         this.loadZoomLevel();
-        this.updateCanvasBackground();
+        this.updateCanvasBackground(); // Initial call still needed to set up the background layer
 
         console.log('WorkspaceManager initialized with modular card system');
     }
@@ -324,7 +324,7 @@ class WorkspaceManager {
             this.canvasOffset.y += deltaY;
 
             this.applyCanvasTransform();
-            this.updateCanvasBackground();
+            // Background update no longer needed here - handled by fixed background layer
 
             this.canvasStartPos = { x: e.clientX, y: e.clientY };
 
@@ -349,31 +349,49 @@ class WorkspaceManager {
 
         const scale = this.zoomLevel;
         this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x / scale}px, ${this.canvasOffset.y / scale}px)`;
+        this.canvas.style.zIndex = '1'; // Au-dessus du background layer
+        
+        // PLUS BESOIN d'appeler updateCanvasBackground ici !
     }
 
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        const baseDotSize = 30;
-        const dotSize = baseDotSize;
+        // SOLUTION 1: Supprimer complètement le background CSS du canvas
+        this.canvas.style.backgroundImage = 'none';
+        this.canvas.style.backgroundSize = 'auto';
+        this.canvas.style.backgroundPosition = '0 0';
+        
+        // SOLUTION 2: Utiliser un pseudo-élément qui ne bouge jamais
+        this.updateBackgroundLayer();
+    }
 
-        // Modulo sécurisé pour gérer les valeurs négatives
-        const mod = (n, m) => {
-            const remainder = n % m;
-            return remainder < 0 ? remainder + m : remainder;
-        };
-
-        // Positions avec arrondi pour éviter les sub-pixels
-        const bgX = Math.round(mod(this.canvasOffset.x, dotSize));
-        const bgY = Math.round(mod(this.canvasOffset.y, dotSize));
-
-        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px` ;
-        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px` ;
-
-        // DEBUG optionnel
-        if (window.DEBUG_WORKSPACE) {
-            console.log(`Offset: ${this.canvasOffset.x}, ${this.canvasOffset.y} | BG: ${bgX}, ${bgY}` );
+    updateBackgroundLayer() {
+        // Créer ou récupérer le layer de background
+        let bgLayer = document.getElementById('workspace-bg-layer');
+        
+        if (!bgLayer) {
+            bgLayer = document.createElement('div');
+            bgLayer.id = 'workspace-bg-layer';
+            bgLayer.style.cssText = `
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px) !important;
+                background-size: 30px 30px !important;
+                background-position: 0 0 !important;
+                pointer-events: none !important;
+                z-index: 0 !important;
+            `;
+            
+            // Insérer AVANT le canvas dans le container parent
+            this.canvas.parentElement.insertBefore(bgLayer, this.canvas);
         }
+        
+        // Le background layer reste fixe, seul le canvas bouge
+        // Cela crée l'illusion que les points bougent avec les cartes
     }
 
     // ========== MÉTHODES ZOOM INCHANGÉES ==========
@@ -427,13 +445,13 @@ class WorkspaceManager {
         this.setZoom(1.0);
         this.canvasOffset = { x: 0, y: 0 };
         this.applyCanvasTransform();
-        this.updateCanvasBackground();
+        // Background update no longer needed here - handled by fixed background layer
     }
 
     setZoom(zoomValue) {
         this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
         this.applyCanvasTransform();
-        this.updateCanvasBackground();
+        // Background update no longer needed here - handled by fixed background layer
         this.updateZoomDisplay();
         localStorage.setItem('workspace-zoom-level', this.zoomLevel.toString());
     }
