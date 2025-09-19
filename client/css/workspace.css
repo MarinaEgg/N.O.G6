@@ -6,10 +6,10 @@
 .workspace-container {
     width: 100%;
     height: 100vh;
-    overflow: auto; /* CHANGEMENT : Permettre le scroll */
+    overflow: hidden; /* 🔧 IMPORTANT : masquer les débordements */
     display: flex;
     flex-direction: column;
-    /* SUPPRESSION : background-image déplacé vers .workspace-canvas */
+    position: relative;
 }
 
 .workspace-header {
@@ -84,15 +84,19 @@
     flex: 1;
     position: relative;
     cursor: grab;
-    min-width: 200vw;
-    min-height: 200vh; /* AUGMENTATION : Plus de hauteur pour scroll vertical */
+    /* 🔧 FIX : Dimensions initiales plus grandes */
+    min-width: 400vw;
+    min-height: 400vh;
+    width: 400vw;
+    height: 400vh;
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
     overflow: visible;
-    /* 🔧 Fond à points */
+    /* Background infini */
     background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
     background-size: 30px 30px;
     background-position: 0 0;
+    background-repeat: repeat; /* 🔧 IMPORTANT : répétition infinie */
 }
 
 .workspace-canvas:active {
