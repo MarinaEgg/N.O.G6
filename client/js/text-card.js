@@ -1,5 +1,3 @@
-// ========== TEXTCARD - FIX DÉFINITIF TITRE HEADER ==========
-
 class TextCard extends BaseCard {
     constructor(cardData, workspaceManager) {
         // Données par défaut pour les cartes texte
@@ -120,16 +118,15 @@ class TextCard extends BaseCard {
             });
         }
 
-        // ⚡ CORRECTION : Event pour le titre éditable dans le header
+        // Event pour le titre éditable dans le header
         const mainTitle = this.element.querySelector('.card-title');
         if (mainTitle) {
             mainTitle.addEventListener('input', () => {
                 const newTitle = mainTitle.textContent.trim() || 'TITRE';
-                // ⚡ Mettre à jour les DEUX champs
+                // Mettre à jour les DEUX champs
                 this.data.title = newTitle;
                 this.data.mainTitle = newTitle;
                 this.saveData();
-                console.log(`📝 Titre modifié manuellement: ${newTitle}`);
             });
             
             mainTitle.addEventListener('keydown', (e) => {
@@ -156,7 +153,6 @@ class TextCard extends BaseCard {
                 const newFolder = e.target.value;
                 this.data.filingFolder = newFolder;
                 this.saveData();
-                console.log(`📁 Répertoire changé manuellement: ${newFolder}`);
             });
             
             // Empêcher le drag sur la dropdown
@@ -252,8 +248,6 @@ class TextCard extends BaseCard {
             this.data.documentContent = null;
             this.saveData();
             localStorage.removeItem(`workspace-doc-${this.data.id}`);
-            
-            console.log(`Document vidé pour la carte ${this.data.id}`);
         }
     }
 
@@ -264,14 +258,10 @@ class TextCard extends BaseCard {
         return docBody.textContent || docBody.innerText || '';
     }
 
-    // ========== MÉTHODES GPT - VERSION SIMPLIFIÉE ET DEBUGGÉE ==========
-
     addDocumentSection(sectionTitle, token) {
-        console.log(`🔧 [${this.data.id}] addDocumentSection appelée avec token: ${token}`);
-        
         const docBody = this.element.querySelector(`#doc-body-${this.data.id}`);
         if (!docBody) {
-            console.error(`❌ [${this.data.id}] docBody non trouvé !`);
+            console.error(`docBody non trouvé !`);
             return;
         }
         
@@ -279,7 +269,6 @@ class TextCard extends BaseCard {
         const placeholder = docBody.querySelector('.document-placeholder');
         if (placeholder) {
             placeholder.remove();
-            console.log(`🔧 [${this.data.id}] Placeholder supprimé`);
         }
         
         // Créer juste une div de contenu, SANS titre de section
@@ -293,16 +282,12 @@ class TextCard extends BaseCard {
         
         docBody.insertAdjacentHTML('beforeend', sectionHTML);
         docBody.scrollTop = docBody.scrollHeight;
-        
-        console.log(`✅ [${this.data.id}] Section créée pour token: ${token}`);
     }
 
     updateDocumentSection(token, content) {
-        console.log(`🔧 [${this.data.id}] updateDocumentSection - token: ${token}, content: ${content.substring(0, 50)}...`);
-        
         const sectionContent = this.element.querySelector(`#content-${token}`);
         if (!sectionContent) {
-            console.error(`❌ [${this.data.id}] Section content non trouvée pour token: ${token}`);
+            console.error(`Section content non trouvée pour token: ${token}`);
             return;
         }
         
@@ -316,12 +301,9 @@ class TextCard extends BaseCard {
     }
 
     finalizeDocumentSection(token, content) {
-        console.log(`🔧 [${this.data.id}] finalizeDocumentSection - token: ${token}`);
-        console.log(`🔧 [${this.data.id}] Contenu final (100 premiers caractères):`, content.substring(0, 100));
-        
         const sectionContent = this.element.querySelector(`#content-${token}`);
         if (!sectionContent) {
-            console.error(`❌ [${this.data.id}] Section content non trouvée pour finalisation !`);
+            console.error(`Section content non trouvée pour finalisation !`);
             return;
         }
         
@@ -341,14 +323,8 @@ class TextCard extends BaseCard {
         // Mettre à jour le résumé
         this.updateSummary();
     }
-    
-    /**
-     * Exécute les commandes JavaScript trouvées dans le contenu
-     * @param {string} content - Le contenu à analyser
-     */
+
     executeJavaScriptCommands(content) {
-        console.log(`🔧 [${this.data.id}] Recherche de commandes JavaScript...`);
-        
         // Détecter card.setTitle("...")
         const setTitleRegex = /card\.setTitle\s*\(\s*["']([^"']+)["']\s*\)/g;
         let titleMatch;
@@ -356,9 +332,8 @@ class TextCard extends BaseCard {
             const titleValue = titleMatch[1];
             try {
                 this.setTitle(titleValue);
-                console.log(`✅ [${this.data.id}] setTitle exécuté:`, titleValue);
             } catch (error) {
-                console.error(`❌ [${this.data.id}] Erreur setTitle:`, error);
+                console.error(`Erreur setTitle:`, error);
             }
         }
         
@@ -369,9 +344,8 @@ class TextCard extends BaseCard {
             const categoryValue = categoryMatch[1];
             try {
                 this.setCategory(categoryValue);
-                console.log(`✅ [${this.data.id}] setCategory exécuté:`, categoryValue);
             } catch (error) {
-                console.error(`❌ [${this.data.id}] Erreur setCategory:`, error);
+                console.error(`Erreur setCategory:`, error);
             }
         }
         
@@ -382,9 +356,8 @@ class TextCard extends BaseCard {
             const folderValue = folderMatch[1];
             try {
                 this.setFolder(folderValue);
-                console.log(`✅ [${this.data.id}] setFolder exécuté:`, folderValue);
             } catch (error) {
-                console.error(`❌ [${this.data.id}] Erreur setFolder:`, error);
+                console.error(`Erreur setFolder:`, error);
             }
         }
         
@@ -396,21 +369,13 @@ class TextCard extends BaseCard {
             try {
                 const contextualCode = jsCode.replace(/\bcard\./g, 'this.');
                 eval(contextualCode);
-                console.log(`✅ [${this.data.id}] Code JS exécuté:`, jsCode);
             } catch (error) {
-                console.error(`❌ [${this.data.id}] Erreur JS:`, error);
+                console.error(`Erreur JS:`, error);
             }
         }
     }
-    
-    /**
-     * Nettoie le contenu en supprimant les blocs JavaScript et les commandes isolées
-     * @param {string} content - Le contenu à nettoyer
-     * @returns {string} Le contenu nettoyé
-     */
+
     removeJavaScriptBlocks(content) {
-        console.log(`🔧 [${this.data.id}] Contenu AVANT nettoyage:` , content.substring(0, 200));
-        
         // Supprimer les blocs ```javascript ... ` ``
         let cleanContent = content.replace(/```javascript\s*\n[\s\S]*?\n` ``/gs, '');
         cleanContent = cleanContent.replace(/```javascript[\s\S]*?` ``/gs, '');
@@ -431,16 +396,12 @@ class TextCard extends BaseCard {
         cleanContent = cleanContent.replace(/^\s*$/gm, '');
         cleanContent = cleanContent.replace(/\n{3,}/g, '\n\n');
         
-        console.log(`✅ [${this.data.id}] Contenu APRÈS nettoyage:` , cleanContent.substring(0, 200));
-        
         return cleanContent.trim();
     }
 
     formatDocumentContent(content) {
         if (!content) return '';
         
-        // ⚡ IMPORTANT : Garder le contenu brut pour l'extraction de titre
-        // mais formater pour l'affichage
         return content
             .replace(/\n\n+/g, '</p><p>')
             .replace(/\n/g, '<br>')
@@ -449,19 +410,6 @@ class TextCard extends BaseCard {
             .replace(/#{1,3}\s*(.+?)(<br>|$)/g, '<strong>$1</strong>$2'); // Transformer ## en gras
     }
 
-
-    
-    cleanup() {
-        // Nettoyage spécifique aux cartes texte
-        if (this.workspaceManager.activeCardChat === this.data.id) {
-            this.workspaceManager.disconnectFromMainChat();
-        }
-    }
-    
-    /**
-     * Définit le titre de la carte et met à jour l'affichage
-     * @param {string} newTitle - Le nouveau titre à définir
-     */
     setTitle(newTitle) {
         if (newTitle && newTitle.trim().length > 0) {
             this.data.title = newTitle.trim();
@@ -473,11 +421,9 @@ class TextCard extends BaseCard {
             }
             
             this.saveData();
-            console.log(`✅ [${this.data.id}] Titre défini par GPT: "${newTitle.trim()}"`);
         }
     }
 
-    // Définit la catégorie de la carte et met à jour l'affichage
     setCategory(category) {
         if (category && category.trim().length > 0) {
             this.data.category = category.trim();
@@ -488,11 +434,9 @@ class TextCard extends BaseCard {
             }
             
             this.saveData();
-            console.log(`✅ [${this.data.id}] Catégorie définie par GPT: "${category.trim()}"`);
         }
     }
 
-    // Définit le répertoire de classement (folder) et met à jour l'affichage
     setFolder(folder) {
         if (folder && folder.trim().length > 0) {
             this.data.filingFolder = folder.trim();
@@ -504,11 +448,9 @@ class TextCard extends BaseCard {
             }
             
             this.saveData();
-            console.log(`✅ [${this.data.id}] Répertoire défini par GPT: "${folder.trim()}"`);
         }
     }
 
-    // Génère un résumé textuel du contenu du document
     generateSummary() {
         const content = this.getDocumentContent();
         
@@ -538,16 +480,13 @@ class TextCard extends BaseCard {
         return summary || "Contenu en cours de rédaction...";
     }
 
-    // Met à jour l'élément d'aperçu de résumé dans l'UI
     updateSummary() {
         const summaryElement = this.element.querySelector(`#summary-${this.data.id}`);
         if (summaryElement) {
             summaryElement.textContent = this.generateSummary();
-            console.log(`✅ [${this.data.id}] Résumé mis à jour`);
         }
     }
 
-    // Retourne les options HTML pour la liste de sélection du répertoire de classement
     getFilingOptionsHTML() {
         const allFolders = TextCard.getAllFolders();
         const currentFolder = this.data.filingFolder || 'Documents de travail';
@@ -557,7 +496,6 @@ class TextCard extends BaseCard {
         ).join('');
     }
 
-    // Méthodes statiques utilitaires pour les répertoires
     static getAllFolders() {
         return [
             "Contrats", "Correspondance", "Documents de travail", "Factures de fournisseurs",
@@ -579,14 +517,13 @@ class TextCard extends BaseCard {
         return folders[randomIndex];
     }
 
-    // Méthodes statiques pour la création de cartes texte
     static createDefaultTextCard(cardData = {}) {
         const position = cardData.position || { x: 200, y: 200 };
         return {
             id: CardSystem.generateCardId('text'),
             type: 'text',
-            title: 'TITRE',              // ⚡ Titre par défaut cohérent
-            mainTitle: 'TITRE',          // ⚡ MainTitle par défaut cohérent
+            title: 'TITRE',              // Titre par défaut cohérent
+            mainTitle: 'TITRE',          // MainTitle par défaut cohérent
             theme: 'Personnalisé',
             description: 'Nouvelle carte de collaboration',
             position,
@@ -598,7 +535,7 @@ class TextCard extends BaseCard {
             filingDepartment: 'AVOCAT',
             filingCategory: 'GÉNÉRAL (AVOCAT)',
             filingFolder: TextCard.getRandomFolder(),
-            // ⚡ Ajout des champs manquants
+            // Ajout des champs manquants
             client: 'Client',
             dossier: 'Nouveau dossier', 
             departement: 'Département',
