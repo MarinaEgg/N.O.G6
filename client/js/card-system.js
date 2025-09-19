@@ -1,6 +1,4 @@
-// ========== SYSTÈME DE CARTES MODULAIRE - VERSION CORRIGÉE ==========
-
-// ========== FONCTION UTILITAIRE INTÉGRÉE ==========
+// FONCTION UTILITAIRE INTÉGRÉE
 
 /**
  * Creates a new card data object with default values
@@ -11,7 +9,7 @@ function createCardData(overrides = {}) {
     const defaults = {
         id: CardSystem.generateCardId(),
         type: 'text',
-        title: 'TITRE',                    // ⚡ Cohérent avec TextCard
+        title: 'TITRE',                    
         position: { x: 100, y: 100 },
         pinned: false,
         folders: [],
@@ -26,7 +24,7 @@ function createCardData(overrides = {}) {
     return { ...defaults, ...overrides };
 }
 
-// ========== SYSTÈME DE CARTES PRINCIPAL ==========
+// SYSTÈME DE CARTES PRINCIPAL
 
 class CardSystem {
     constructor(workspaceManager) {
@@ -175,7 +173,7 @@ class CardSystem {
     }
 }
 
-// ========== CLASSE DE BASE POUR LES CARTES ==========
+// CLASSE DE BASE POUR LES CARTES
 
 /**
  * Base class for all card types
@@ -325,10 +323,10 @@ class BaseCard {
             localStorage.setItem(`workspace-card-${this.data.id}`, JSON.stringify(this.data));
         } catch (error) {
             if (error.name === 'QuotaExceededError') {
-                console.warn('⚠️ LocalStorage quota exceeded, saving in memory only');
+                console.warn('LocalStorage quota exceeded, saving in memory only');
                 // Les données restent en mémoire dans this.data
             } else {
-                console.error('❌ Error saving card data:', error);
+                console.error('Error saving card data:', error);
             }
         }
     }
@@ -351,7 +349,7 @@ class BaseCard {
     }
 }
 
-// ========== EXPORT GLOBAL ==========
+// EXPORT GLOBAL
 
 // Export pour utilisation dans d'autres fichiers
 if (typeof module !== 'undefined' && module.exports) {
