@@ -354,17 +354,26 @@ class WorkspaceManager {
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        // FIX 1: Taille minimale pour visibilité à tous les zooms
         const baseDotSize = 30;
-        const dotSize = Math.max(20, baseDotSize * this.zoomLevel);
+        const dotSize = baseDotSize;
 
-        // FIX 2: Modulo correct pour valeurs négatives (effet infini)
-        const mod = (n, m) => ((n % m) + m) % m;
-        const bgX = mod(this.canvasOffset.x, dotSize);
-        const bgY = mod(this.canvasOffset.y, dotSize);
+        // Modulo sécurisé pour gérer les valeurs négatives
+        const mod = (n, m) => {
+            const remainder = n % m;
+            return remainder < 0 ? remainder + m : remainder;
+        };
 
-        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
-        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        // Positions avec arrondi pour éviter les sub-pixels
+        const bgX = Math.round(mod(this.canvasOffset.x, dotSize));
+        const bgY = Math.round(mod(this.canvasOffset.y, dotSize));
+
+        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px` ;
+        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px` ;
+
+        // DEBUG optionnel
+        if (window.DEBUG_WORKSPACE) {
+            console.log(`Offset: ${this.canvasOffset.x}, ${this.canvasOffset.y} | BG: ${bgX}, ${bgY}` );
+        }
     }
 
     // ========== MÉTHODES ZOOM INCHANGÉES ==========
