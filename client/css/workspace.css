@@ -693,6 +693,8 @@ body.sidebar-open .chat-card-indicator {
 
 /* ========== ANIMATIONS FADE-IN ========== */
 
+/* ========== ANIMATIONS FADE-IN ========== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -708,6 +710,167 @@ body.sidebar-open .chat-card-indicator {
     animation: fadeInUp 0.4s ease;
 }
 
+/* ========== FIX DÉFINITIF WORKSPACE - AJOUTÉ LE 20/09/2024 ========== */
+
+/* CORRECTION 1 : Override des styles globaux pour le workspace */
+body:has(.workspace-container) {
+    overflow: auto !important; /* Restaurer le scroll */
+    height: auto !important;
+    padding: 0 !important; /* Supprimer le padding global */
+}
+
+/* CORRECTION 2 : Container workspace avec scroll naturel */
+.workspace-container {
+    width: 100%;
+    height: 100vh;
+    overflow: auto !important; /* Force le scroll */
+    display: flex;
+    flex-direction: column;
+    background: var(--colour-1) !important; /* Fond blanc pur */
+    /* IMPORTANT : Pas de background-image ici */
+}
+
+/* CORRECTION 3 : Canvas avec fond à pois correct et débordement contrôlé */
+.workspace-canvas {
+    flex: 1;
+    position: relative;
+    cursor: grab;
+    /* DIMENSIONS FIXES pour éviter les coupures */
+    width: 100%;
+    min-width: 100%;
+    min-height: 100%;
+    transform-origin: 0 0;
+    transition: transform 0.1s ease-out;
+    overflow: visible !important; /* Permettre le débordement des cartes */
+    
+    /* Fond à pois - SEUL endroit où il doit être */
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px) !important;
+    background-size: 30px 30px !important;
+    background-position: 0 0 !important;
+    background-color: transparent !important;
+}
+
+/* CORRECTION 4 : Annuler le background sur .conversation dans le workspace */
+.workspace-container .conversation {
+    background-image: none !important;
+    background: transparent !important;
+}
+
+/* CORRECTION 5 : Z-index hierarchy pour éviter les conflits */
+.workspace-container {
+    z-index: 1;
+}
+
+.workspace-canvas {
+    z-index: 2;
+}
+
+.workspace-card {
+    z-index: 5;
+}
+
+.workspace-card:hover {
+    z-index: 6;
+}
+
+.workspace-card.dragging {
+    z-index: 1000 !important;
+}
+
+/* Sidebar et contrôles au-dessus */
+.conversations {
+    z-index: 999 !important;
+}
+
+.zoom-controls {
+    z-index: 1002 !important;
+}
+
+/* CORRECTION 6 : Sidebar push effect clean */
+body.sidebar-open .workspace-container {
+    margin-left: 288px;
+    width: calc(100% - 288px);
+}
+
+/* CORRECTION 7 : Responsive - pas d'effet push sur mobile */
+@media (max-width: 990px) {
+    body.sidebar-open .workspace-container {
+        margin-left: 0 !important;
+        width: 100% !important;
+    }
+    
+    /* Masquer le workspace quand sidebar ouverte sur mobile */
+    body.sidebar-open .workspace-container {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+}
+
+/* CORRECTION 8 : Chat bar et contrôles repositionnés avec sidebar */
+body.sidebar-open .modern-chat-container {
+    left: 288px;
+    width: calc(100% - 288px);
+}
+
+body.sidebar-open .chat-card-indicator {
+    left: calc(50% + 144px);
+}
+
+/* CORRECTION 9 : Assurer que les cartes ne sortent pas du viewport */
+.workspace-card {
+    max-width: calc(100vw - 40px);
+    word-wrap: break-word;
+}
+
+/* CORRECTION 10 : Scroll smooth pour le container */
+.workspace-container {
+    scroll-behavior: smooth;
+}
+
+/* CORRECTION 11 : Corriger l'effet "coupure" au zoom */
+.workspace-canvas.zooming {
+    transition: transform 0.2s ease-out;
+    /* Assurer que le background suit le zoom */
+    background-attachment: local !important;
+}
+
+/* CORRECTION 12 : Header workspace avec bon z-index */
+.workspace-header {
+    z-index: 10;
+    position: sticky;
+    top: 0;
+    background: rgba(255, 255, 255, 0.98) !important;
+    backdrop-filter: blur(25px);
+}
+
+/* CORRECTION 13 : Éviter les débordements sur les côtés */
+.workspace-canvas::before {
+    content: '';
+    position: absolute;
+    top: -50vh;
+    left: -50vw;
+    right: -50vw;
+    bottom: -50vh;
+    background: inherit;
+    z-index: -1;
+    pointer-events: none;
+}
+
+/* CORRECTION 14 : Mode debug - à retirer après test */
+.workspace-container.debug {
+    border: 2px solid red !important;
+}
+
+.workspace-canvas.debug {
+    border: 2px solid blue !important;
+}
+
+/* Ajouter classe debug temporairement pour voir les limites */
+/* .workspace-container {
+    border: 1px dashed rgba(255, 0, 0, 0.3);
+} */
+
+/* ========== FIN DU FIX ========== */
 /* ========== ÉTATS DE FOCUS POUR L'ACCESSIBILITÉ ========== */
 
 .workspace-btn:focus,
