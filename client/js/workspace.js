@@ -354,17 +354,19 @@ class WorkspaceManager {
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        // FIX 1: Taille minimale pour visibilité à tous les zooms
+        // FIX : Forcer le recalcul du background
         const baseDotSize = 30;
         const dotSize = Math.max(20, baseDotSize * this.zoomLevel);
-
-        // FIX 2: Modulo correct pour valeurs négatives (effet infini)
+        
+        // Modulo correct pour valeurs négatives
         const mod = (n, m) => ((n % m) + m) % m;
         const bgX = mod(this.canvasOffset.x, dotSize);
         const bgY = mod(this.canvasOffset.y, dotSize);
 
-        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
-        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
+        // IMPORTANT : Forcer les styles même s'ils existent déjà
+        this.canvas.style.setProperty('background-size', `${dotSize}px ${dotSize}px`, 'important');
+        this.canvas.style.setProperty('background-position', `${bgX}px ${bgY}px`, 'important');
+        this.canvas.style.setProperty('background-image', 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)', 'important');
     }
 
     // ========== MÉTHODES ZOOM INCHANGÉES ==========
