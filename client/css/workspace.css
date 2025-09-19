@@ -89,10 +89,8 @@
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
     overflow: visible;
-    /* NOUVEAU : Fond à pois géré dynamiquement par JS */
-    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-    background-size: 30px 30px; /* Taille par défaut, sera modifiée par JS */
-    background-position: 0 0; /* Position par défaut, sera modifiée par JS */
+    /* Fond transparent - le fond à pois est maintenant géré par une couche séparée */
+    background: transparent !important;
 }
 
 .workspace-canvas:active {
