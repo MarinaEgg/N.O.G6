@@ -89,8 +89,10 @@
     transform-origin: 0 0;
     transition: transform 0.1s ease-out;
     overflow: visible;
-    /* Fond transparent - le fond à pois est maintenant géré par une couche séparée */
-    background: transparent !important;
+    /* 🔧 Fond à points */
+    background-image: radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-position: 0 0;
 }
 
 .workspace-canvas:active {
