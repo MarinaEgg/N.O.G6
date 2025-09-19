@@ -326,8 +326,9 @@ class WorkspaceManager {
             this.canvasOffset.x += deltaX;
             this.canvasOffset.y += deltaY;
 
+            this.updateCanvasSize(); // 🔧 NOUVEAU : Ajuster la taille
             this.applyCanvasTransform();
-            this.updateCanvasBackground(); // 🔧 REMETTRE pour l'effet parallaxe
+            this.updateCanvasBackground();
 
             this.canvasStartPos = { x: e.clientX, y: e.clientY };
 
@@ -354,31 +355,52 @@ class WorkspaceManager {
         this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x / scale}px, ${this.canvasOffset.y / scale}px)`;
     }
 
+    updateCanvasSize() {
+        if (!this.canvas) return;
+        
+        // Calculer les dimensions nécessaires basées sur l'offset et le zoom
+        const padding = 100; // Marge de sécurité
+        const minWidth = Math.max(300, Math.abs(this.canvasOffset.x) * 2 + window.innerWidth + padding);
+        const minHeight = Math.max(300, Math.abs(this.canvasOffset.y) * 2 + window.innerHeight + padding);
+        
+        // Convertir en vw/vh pour éviter les pixels fixes
+        const vwWidth = Math.max(200, (minWidth / window.innerWidth) * 100);
+        const vhHeight = Math.max(200, (minHeight / window.innerHeight) * 100);
+        
+        // Appliquer les nouvelles dimensions
+        this.canvas.style.minWidth = `${vwWidth}vw` ;
+        this.canvas.style.minHeight = `${vhHeight}vh` ;
+    }
+
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        // 🔧 FIX : Taille des points qui s'adapte au zoom (effet de profondeur)
+        // 🔧 FIX : Taille des points qui s'adapte au zoom
         const baseDotSize = 30;
-        const dotSize = baseDotSize * this.zoomLevel; // EFFET ZOOM : points plus gros/petits
+        const dotSize = baseDotSize * this.zoomLevel;
 
-        // 🔧 FIX : Modulo CORRECT pour valeurs négatives (pas de coupure)
-        const mod = (n, m) => {
-            const result = n % m;
-            return result < 0 ? result + m : result;
+        // 🔧 FIX : Modulo PARFAIT pour infini (compatible négatif)
+        const safeModulo = (value, modulus) => {
+            const result = value % modulus;
+            return result < 0 ? result + modulus : result;
         };
 
-        // 🔧 FIX : Position avec compensation zoom pour effet parallaxe
-        const bgX = mod(this.canvasOffset.x, dotSize);
-        const bgY = mod(this.canvasOffset.y, dotSize);
+        // 🔧 FIX : Positions avec arrondi pour éviter sub-pixels
+        const bgX = Math.round(safeModulo(this.canvasOffset.x, dotSize));
+        const bgY = Math.round(safeModulo(this.canvasOffset.y, dotSize));
 
-        // Appliquer le background sur le canvas (comme avant)
-        this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px` ;
+        // Appliquer avec des valeurs arrondies
+        this.canvas.style.backgroundSize = `${Math.round(dotSize)}px ${Math.round(dotSize)}px` ;
         this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px` ;
-        this.canvas.style.backgroundImage = 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)';
+        
+        // S'assurer que le background est présent
+        if (!this.canvas.style.backgroundImage.includes('radial-gradient')) {
+            this.canvas.style.backgroundImage = 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)';
+        }
 
-        // 🔧 DEBUG : Vérifier les valeurs
+        // 🔧 DEBUG
         if (window.DEBUG_WORKSPACE) {
-            console.log(`🔧 Zoom: ${this.zoomLevel} | DotSize: ${dotSize} | Offset: ${this.canvasOffset.x}, ${this.canvasOffset.y} | BG: ${bgX}, ${bgY}` );
+            console.log(`Zoom: ${this.zoomLevel.toFixed(2)} | DotSize: ${dotSize.toFixed(1)} | Pos: ${bgX}, ${bgY}` );
         }
     }
 
