@@ -55,9 +55,6 @@ class WorkspaceManager {
             return;
         }
 
-        // Activer le mode debug
-        window.DEBUG_WORKSPACE = true;
-
         // 🔧 FIX : Initialiser le système de cartes AVANT les event listeners
         this.cardSystem = new CardSystem(this);
 
@@ -66,7 +63,7 @@ class WorkspaceManager {
         this.setupChatIntegration();
         this.initZoom();
         this.loadZoomLevel();
-        this.updateCanvasBackground(); // Initial call still needed to set up the background layer
+        this.updateCanvasBackground();
 
         console.log('WorkspaceManager initialized with modular card system');
     }
@@ -326,7 +323,6 @@ class WorkspaceManager {
             this.canvasOffset.x += deltaX;
             this.canvasOffset.y += deltaY;
 
-            this.updateCanvasSize(); // 🔧 NOUVEAU : Ajuster la taille
             this.applyCanvasTransform();
             this.updateCanvasBackground();
 
@@ -355,50 +351,25 @@ class WorkspaceManager {
         this.canvas.style.transform = `scale(${scale}) translate(${this.canvasOffset.x / scale}px, ${this.canvasOffset.y / scale}px)`;
     }
 
-    updateCanvasSize() {
-        if (!this.canvas) return;
-        
-        // Calculer les dimensions nécessaires basées sur l'offset et le zoom
-        const padding = 100; // Marge de sécurité
-        const minWidth = Math.max(300, Math.abs(this.canvasOffset.x) * 2 + window.innerWidth + padding);
-        const minHeight = Math.max(300, Math.abs(this.canvasOffset.y) * 2 + window.innerHeight + padding);
-        
-        // Convertir en vw/vh pour éviter les pixels fixes
-        const vwWidth = Math.max(200, (minWidth / window.innerWidth) * 100);
-        const vhHeight = Math.max(200, (minHeight / window.innerHeight) * 100);
-        
-        // Appliquer les nouvelles dimensions
-        this.canvas.style.minWidth = `${vwWidth}vw`;
-        this.canvas.style.minHeight = `${vhHeight}vh`;
-    }
-    
     updateCanvasBackground() {
         if (!this.canvas) return;
 
+        // FIX 1: Taille minimale pour visibilité à tous les zooms
         const baseDotSize = 30;
-        const dotSize = baseDotSize * this.zoomLevel;
+        const dotSize = Math.max(20, baseDotSize * this.zoomLevel);
 
-        // 🔧 SOLUTION : Utiliser background-repeat au lieu de calculer modulo
+        // FIX 2: Modulo correct pour valeurs négatives (effet infini)
+        const mod = (n, m) => ((n % m) + m) % m;
+        const bgX = mod(this.canvasOffset.x, dotSize);
+        const bgY = mod(this.canvasOffset.y, dotSize);
+
         this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
-        this.canvas.style.backgroundPosition = `${this.canvasOffset.x}px ${this.canvasOffset.y}px`;
-        this.canvas.style.backgroundRepeat = 'repeat'; // ← C'EST ÇA QUI MANQUAIT !
-        this.canvas.style.backgroundImage = 'radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)';
-    }
-    
-    loadZoomLevel() {
-        const saved = localStorage.getItem('workspace-zoom-level');
-        if (saved) {
-            const zoomLevel = parseFloat(saved);
-            if (zoomLevel >= this.minZoom && zoomLevel <= this.maxZoom) {
-                this.setZoom(zoomLevel);
-            }
-        }
+        this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
     }
 
-    // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
+    // ========== MÉTHODES ZOOM INCHANGÉES ==========
 
-    loadDefaultCards() {
-        console.log('🎯 Workspace vierge - prêt pour création manuelle');
+    initZoom() {
         this.createZoomControls();
         this.setupZoomEvents();
     }
@@ -437,23 +408,23 @@ class WorkspaceManager {
 
     zoomIn() {
         this.setZoom(Math.min(this.maxZoom, this.zoomLevel + this.zoomStep));
-    };
+    }
 
     zoomOut() {
         this.setZoom(Math.max(this.minZoom, this.zoomLevel - this.zoomStep));
-    };
+    }
 
     resetZoom() {
         this.setZoom(1.0);
         this.canvasOffset = { x: 0, y: 0 };
         this.applyCanvasTransform();
-        this.updateCanvasBackground(); // 🔧 REMETTRE
-    };
+        this.updateCanvasBackground();
+    }
 
     setZoom(zoomValue) {
         this.zoomLevel = Math.max(this.minZoom, Math.min(this.maxZoom, zoomValue));
         this.applyCanvasTransform();
-        this.updateCanvasBackground(); // 🔧 REMETTRE pour l'effet zoom
+        this.updateCanvasBackground();
         this.updateZoomDisplay();
         localStorage.setItem('workspace-zoom-level', this.zoomLevel.toString());
     }
@@ -1010,16 +981,10 @@ class WorkspaceManager {
             // Si pas de données, afficher le sélecteur
             this.showCardTypeSelector();
         }
-        return null;
     }
 
     // ========== MÉTHODES DEBUG ==========
 
-    debugLog(message, data = null) {
-        if (window.DEBUG_WORKSPACE) {
-            console.log(`[Workspace] ${message}`, data || '');
-        }
-    }
 }
 
 // ========== INITIALISATION GLOBALE ==========
