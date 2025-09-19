@@ -84,6 +84,7 @@
     flex: 1;
     position: relative;
     cursor: grab;
+    background-repeat: repeat !important;
     /* 🔧 FIX : Dimensions initiales plus grandes */
     min-width: 400vw;
     min-height: 400vh;
