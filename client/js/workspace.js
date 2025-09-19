@@ -1,3 +1,5 @@
+// ========== WORKSPACE MANAGER AVEC SYSTÈME MODULAIRE - VERSION FIXÉE ==========
+
 class WorkspaceManager {
     constructor() {
         this.cards = [];
@@ -53,6 +55,7 @@ class WorkspaceManager {
             return;
         }
 
+        // 🔧 FIX : Initialiser le système de cartes AVANT les event listeners
         this.cardSystem = new CardSystem(this);
 
         this.setupEventListeners();
@@ -66,9 +69,11 @@ class WorkspaceManager {
     }
 
     setupEventListeners() {
+        // 🔧 FIX : Appeler la bonne méthode avec debug
         this.addCardBtn?.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
+            console.log('🎯 Bouton ajouter carte cliqué - addCardBtn trouvé:', !!this.addCardBtn);
             this.showCardTypeSelector();
         });
 
@@ -81,6 +86,7 @@ class WorkspaceManager {
         document.addEventListener('mousemove', (e) => this.handleGlobalMouseMove(e));
         document.addEventListener('mouseup', () => this.handleGlobalMouseUp());
 
+        // 🔧 FIX : Escape pour fermer les modals
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 this.hideCardTypeSelector();
@@ -88,7 +94,11 @@ class WorkspaceManager {
         });
     }
 
+    // ========== FIX : SÉLECTEUR DE TYPE DE CARTE - VERSION CORRIGÉE ==========
+
     showCardTypeSelector() {
+        console.log('🎯 showCardTypeSelector appelée');
+
         // Supprimer l'ancien overlay s'il existe
         const existingOverlay = document.querySelector('.modal-overlay');
         if (existingOverlay) {
@@ -131,6 +141,7 @@ class WorkspaceManager {
 
         // Events
         overlay.addEventListener('click', () => {
+            console.log('🎯 Overlay cliqué - fermeture');
             this.hideCardTypeSelector();
         });
 
@@ -139,6 +150,7 @@ class WorkspaceManager {
         // Bouton fermer
         const cancelBtn = selector.querySelector('.selector-cancel');
         cancelBtn.addEventListener('click', () => {
+            console.log('🎯 Bouton cancel cliqué');
             this.hideCardTypeSelector();
         });
 
@@ -146,6 +158,7 @@ class WorkspaceManager {
         selector.querySelectorAll('.card-type-option').forEach(option => {
             option.addEventListener('click', () => {
                 const cardType = option.getAttribute('data-type');
+                console.log('🎯 Type sélectionné:', cardType);
                 this.createCardOfType(cardType);
                 this.hideCardTypeSelector();
             });
@@ -154,17 +167,23 @@ class WorkspaceManager {
         // Ajouter au DOM
         document.body.appendChild(overlay);
         overlay.appendChild(selector);
+
+        console.log('🎯 Modal ajoutée au DOM');
     }
 
     hideCardTypeSelector() {
+        console.log('🎯 hideCardTypeSelector appelée');
         const overlay = document.querySelector('.modal-overlay');
         if (overlay) {
             overlay.remove();
+            console.log('🎯 Modal supprimée');
         }
     }
 
     createCardOfType(type) {
-        // Vérifier que le système de cartes est initialisé
+        console.log('🎯 Création carte type:', type);
+
+        // 🔧 FIX : Vérifier que le système de cartes est initialisé
         if (!this.cardSystem) {
             console.error('❌ Card system not initialized');
             return;
@@ -173,7 +192,7 @@ class WorkspaceManager {
         let cardData;
         const position = this.getNewCardPosition();
 
-        // Vérifier que les classes existent
+        // 🔧 FIX : Vérifier que les classes existent
         if (type === 'text') {
             if (typeof TextCard === 'undefined') {
                 console.error('❌ TextCard class not found - script pas chargé');
@@ -193,9 +212,12 @@ class WorkspaceManager {
             return;
         }
 
+        console.log('🎯 Données carte:', cardData);
+
         const card = this.cardSystem.createCard(cardData);
         if (card) {
             this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+            console.log('✅ Carte créée avec succès:', type);
         } else {
             console.error('❌ Échec création carte');
         }
@@ -213,6 +235,8 @@ class WorkspaceManager {
         };
     }
 
+    // ========== MÉTHODES DE DRAG ADAPTÉES AU SYSTÈME MODULAIRE ==========
+
     handleMouseDown(e, cardElement) {
         e.preventDefault();
 
@@ -222,6 +246,7 @@ class WorkspaceManager {
         this.isDragging = true;
 
         const rect = cardElement.getBoundingClientRect();
+        const canvasRect = this.canvas.getBoundingClientRect();
 
         // Compenser le zoom dans l'offset
         this.dragOffset = {
@@ -268,6 +293,8 @@ class WorkspaceManager {
 
         this.dragOffset = { x: 0, y: 0 };
     }
+
+    // ========== MÉTHODES CANVAS INCHANGÉES ==========
 
     handleCanvasMouseDown(e) {
         if (e.target.closest('.workspace-card')) {
@@ -327,11 +354,11 @@ class WorkspaceManager {
     updateCanvasBackground() {
         if (!this.canvas) return;
 
-        // Taille minimale pour visibilité à tous les zooms
+        // FIX 1: Taille minimale pour visibilité à tous les zooms
         const baseDotSize = 30;
         const dotSize = Math.max(20, baseDotSize * this.zoomLevel);
 
-        // Modulo correct pour valeurs négatives (effet infini)
+        // FIX 2: Modulo correct pour valeurs négatives (effet infini)
         const mod = (n, m) => ((n % m) + m) % m;
         const bgX = mod(this.canvasOffset.x, dotSize);
         const bgY = mod(this.canvasOffset.y, dotSize);
@@ -339,6 +366,8 @@ class WorkspaceManager {
         this.canvas.style.backgroundSize = `${dotSize}px ${dotSize}px`;
         this.canvas.style.backgroundPosition = `${bgX}px ${bgY}px`;
     }
+
+    // ========== MÉTHODES ZOOM INCHANGÉES ==========
 
     initZoom() {
         this.createZoomControls();
@@ -417,7 +446,11 @@ class WorkspaceManager {
         }
     }
 
+    // ========== CHARGEMENT DES CARTES PAR DÉFAUT ADAPTÉ ==========
+
     loadDefaultCards() {
+        console.log('🎯 Workspace vierge - prêt pour création manuelle');
+
         if (!this.cardSystem) {
             console.error('❌ Card system not ready');
             return;
@@ -430,7 +463,11 @@ class WorkspaceManager {
         // - Folders = Répertoires (tags sur cartes)
         // - Documents = Cartes individuelles
         // this.loadFromiManageWorkspace(workspaceId);
+
+        console.log('✅ Workspace prêt - 0 cartes chargées');
     }
+
+    // ========== IMANAGE INTEGRATION ==========
 
     /**
      * Loads documents from iManage workspace and creates corresponding cards
@@ -441,6 +478,8 @@ class WorkspaceManager {
      */
     async loadFromiManageWorkspace(workspaceId, customerId, libraryId) {
         try {
+            console.log(`🔄 Loading documents from iManage workspace ${workspaceId}...`);
+
             // Show loading state
             this.showLoadingState(true);
 
@@ -453,6 +492,9 @@ class WorkspaceManager {
 
             const workspaceData = await response.json();
 
+            // Clear existing cards if needed
+            // this.clearWorkspace();
+
             // Create cards for each document
             const createCardPromises = workspaceData.documents.map(async (doc) => {
                 const cardData = {
@@ -461,8 +503,8 @@ class WorkspaceManager {
                     title: doc.name || 'Sans titre',
                     iManageId: doc.id,
                     iManageVersion: doc.version,
-                    clientLevel: doc.custom1,
-                    workspaceLevel: doc.custom2,
+                    clientLevel: doc.custom1, // Custom1 = Client level
+                    workspaceLevel: doc.custom2, // Custom2 = Workspace level
                     documentType: doc.type,
                     author: doc.author,
                     lastModified: doc.modifiedDate,
@@ -474,6 +516,7 @@ class WorkspaceManager {
                         documentNumber: doc.documentNumber,
                         description: doc.description
                     },
+                    // Map iManage folders to our folders/tags
                     folders: doc.folders || []
                 };
 
@@ -481,6 +524,7 @@ class WorkspaceManager {
             });
 
             await Promise.all(createCardPromises);
+            console.log(`✅ Successfully loaded ${workspaceData.documents.length} documents from iManage`);
 
         } catch (error) {
             console.error('❌ Error loading from iManage:', error);
@@ -515,6 +559,7 @@ class WorkspaceManager {
      */
     async syncWithiManage() {
         try {
+            console.log('🔄 Syncing with iManage...');
             this.showLoadingState(true, 'Synchronisation avec iManage en cours...');
 
             // Get all modified or conflicted cards
@@ -525,6 +570,7 @@ class WorkspaceManager {
                 );
 
             if (cardsToSync.length === 0) {
+                console.log('✅ No changes to sync with iManage');
                 return;
             }
 
@@ -538,7 +584,7 @@ class WorkspaceManager {
                     const documentData = {
                         id: card.data.iManageId,
                         name: card.data.title,
-                        content: card.getContentForSync(),
+                        content: card.getContentForSync(), // Card class should implement this
                         metadata: {
                             ...card.data.metadata,
                             custom1: card.data.clientLevel,
@@ -569,6 +615,8 @@ class WorkspaceManager {
                 }
             }
 
+            console.log(`✅ Successfully synced ${cardsToSync.length} documents with iManage`);
+
         } catch (error) {
             console.error('❌ Error during iManage sync:', error);
             this.showError(`Erreur lors de la synchronisation avec iManage: ${error.message}`);
@@ -595,10 +643,12 @@ class WorkspaceManager {
 
             switch (resolution) {
                 case 'local':
+                    // Keep local version and force push to iManage
                     await this.syncWithiManage();
                     break;
 
                 case 'remote':
+                    // Discard local changes and reload from iManage
                     await this.loadFromiManageWorkspace(
                         card.data.workspaceId,
                         card.data.customerId,
@@ -607,6 +657,8 @@ class WorkspaceManager {
                     break;
 
                 case 'merge':
+                    // Advanced merge logic would go here
+                    // This is a placeholder for actual merge implementation
                     console.log('Merge resolution not yet implemented');
                     break;
 
@@ -719,6 +771,8 @@ class WorkspaceManager {
                 return window.original_ask_gpt(message);
             }
         };
+
+        console.log('Chat functions intercepted for workspace');
     }
 
     connectToMainChat(cardId, cardElement) {
@@ -790,6 +844,7 @@ class WorkspaceManager {
             const token = this.generateMessageId();
             card.addDocumentSection("", token);
 
+            // ⚡ VERSION SIMPLIFIÉE - pas d'enrichissement
             const documentPrompt = this.buildDocumentPrompt(message, cardId);
             await this.streamToDocument(documentPrompt, cardId, token, card);
 
@@ -802,7 +857,137 @@ class WorkspaceManager {
             }
         }
     }
+
+    async streamToDocument(prompt, cardId, token, card) {
+        try {
+            const response = await fetch(`/backend-api/v2/conversation`, {
+                method: 'POST',
+                headers: {
+                    'content-type': 'application/json',
+                    'accept': 'text/event-stream',
+                },
+                body: JSON.stringify({
+                    conversation_id: window.conversation_id || `workspace-doc-${cardId}`,
+                    action: '_ask',
+                    model: 'Eggon-V1',
+                    meta: {
+                        id: token,
+                        content: {
+                            conversation: [],
+                            content_type: 'text',
+                            parts: [{ content: prompt, role: 'user' }],
+                        },
+                    },
+                }),
+            });
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+            let generatedContent = '';
+
+            while (true) {
+                const { value, done } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const eventData = line.slice(6).trim();
+                        if (eventData === '[DONE]') {
+                            card.finalizeDocumentSection(token, generatedContent);
+                            return;
+                        }
+
+                        try {
+                            const dataObject = JSON.parse(eventData);
+                            if (dataObject.response) {
+                                generatedContent += dataObject.response;
+                                card.updateDocumentSection(token, generatedContent);
+                            }
+                        } catch (e) {
+                            console.error('Erreur parsing JSON:', e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Erreur streaming document:', error);
+            card.finalizeDocumentSection(token, 'Erreur de connexion.');
+        }
+    }
+
+    buildDocumentPrompt(userMessage, cardId) {
+        const card = this.cardSystem.getCard(cardId);
+        const cardTitle = card ? (card.data.mainTitle || 'Document') : 'Document';
+        const existingContent = card ? card.getDocumentContent() : '';
+
+        const availableFolders = [
+            'Contrats', 'Correspondance', 'Documents de travail', 'Factures de fournisseurs',
+            'Office', 'Arbitrage', 'Procès', 'Opinions', 'Livre Corporatif', 'Gouvernance',
+            'Incidents', 'Matériel publicitaire', 'Surveillance', 'Recherches'
+        ];
+
+        const prompt = "Tu es un assistant juridique spécialisé.\n\n" +
+            "Contexte : Document \"" + cardTitle + "\"\n" +
+            "Contenu existant : " + existingContent + "\n\n" +
+            "Instruction : " + userMessage + "\n\n" +
+            "⚡ COMMANDES JAVASCRIPT DISPONIBLES :\n\n" +
+            "1. Définir le titre :\n" +
+            "```javascript\n" +
+            "card.setTitle(\"Contrat de Vente Immobilière\");\n" +
+            "```\n\n" +
+            "2. Catégoriser le document :\n" +
+            "```javascript\n" +
+            "card.setCategory(\"Contrat commercial\");\n" +
+            "```\n" +
+            "Catégories : Contrat commercial, Document de litige, Propriété intellectuelle, Document corporatif, Avis juridique, Correspondance, Document réglementaire, Procédure judiciaire, Document transactionnel, Mémo interne, Recherche juridique, Document de conformité\n\n" +
+            "3. Classer dans un répertoire :\n" +
+            "```javascript\n" +
+            "card.setFolder(\"Contrats\");\n" +
+            "```\n" +
+            "Répertoires disponibles : " + availableFolders.join(', ') + "\n\n" +
+            "⚡ IMPORTANT : Analyse le contenu et assigne automatiquement :\n" +
+            "- Le bon titre descriptif\n" +
+            "- La catégorie business appropriée  \n" +
+            "- Le répertoire de classement approprié\n\n" +
+            "Pour le contenu :\n" +
+            "- Génère du contenu juridique professionnel\n" +
+            "- Structure avec ## et ###\n" +
+            "- Style formel et précis\n\n" +
+            "Si tu veux changer titre/catégorie/répertoire, mets les commandes JavaScript AU DÉBUT de ta réponse.";
+
+        return prompt;
+    }
+
+    generateMessageId() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // ========== MÉTHODES DE COMPATIBILITÉ AVEC L'ANCIEN SYSTÈME ==========
+
+    addCard(cardData = null) {
+        // Méthode de compatibilité - redirige vers le nouveau système
+        if (cardData) {
+            const card = this.cardSystem.createCard(cardData);
+            if (card) {
+                this.cards.push({ element: card.element, data: card.data, cardInstance: card });
+                return card;
+            }
+        } else {
+            // Si pas de données, afficher le sélecteur
+            this.showCardTypeSelector();
+        }
+    }
+
+    // ========== MÉTHODES DEBUG ==========
+
 }
+
+// ========== INITIALISATION GLOBALE ==========
 
 // Initialiser le workspace
 document.addEventListener('DOMContentLoaded', () => {
